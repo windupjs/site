@@ -1,0 +1,57 @@
+---
+const stats = [
+  { big: '60/60', label: 'cached replays passed', sub: '4 scenarios × 15 replays — zero flakes' },
+  { big: 'llm_calls=0', label: 'on every replay', sub: 'login · multi-step checkout · add/remove · a 2nd site', mono: true },
+  { big: '~$0.0025', label: 'per generation', sub: 'default model, gemini-3.1-flash-lite' },
+  { big: '106 routes', label: 'production dogfood', sub: 'run against a real production app' },
+];
+---
+
+<section class="section reliability">
+  <div class="wrap rel-grid">
+    <div class="rel-copy">
+      <p class="kicker">Reliability</p>
+      <h2 class="section-title">Deterministic means deterministic.</h2>
+      <p class="section-note">
+        Replays are measured, not promised. The cached plan produces the same result on every run —
+        no model, no flakes.
+      </p>
+
+      <div class="stat-grid">
+        {stats.map((s) => (
+          <div class="stat">
+            <div class={`stat-big${s.mono ? ' mono' : ''}`}>{s.big}</div>
+            <div class="stat-label">{s.label}</div>
+            <div class="stat-sub">{s.sub}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="rel-visual">
+      <img src="/brand/windup-pose-check-transparent.png"
+        alt="Windup mascot holding a green check mark" width="220" height="250" loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<style>
+  .rel-grid { display: grid; grid-template-columns: 1fr auto; gap: 32px; align-items: center; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    border-left: 3px solid var(--pass); padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .stat-big { font-size: 26px; font-weight: 800; color: var(--pass); letter-spacing: -.02em; }
+  .stat-big.mono { font-family: var(--font-mono); font-size: 20px; }
+  .stat-label { font-size: 14px; font-weight: 600; margin-top: 2px; }
+  .stat-sub { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+  .rel-visual img { width: 180px; height: auto; filter: drop-shadow(0 12px 22px rgba(0,0,0,.26)); }
+
+  @media (max-width: 860px) {
+    .rel-grid { grid-template-columns: 1fr; }
+    .rel-visual { order: -1; }
+    .rel-visual img { width: 130px; }
+  }
+  @media (max-width: 460px) { .stat-grid { grid-template-columns: 1fr; } }
+</style>

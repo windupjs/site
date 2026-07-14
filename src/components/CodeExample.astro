@@ -1,0 +1,43 @@
+---
+import CodeBlock from './CodeBlock.astro';
+
+const scenarioHtml = `<span class="tok-muted">{</span>
+  <span class="tok-accent">"scenario_id"</span>: <span class="tok-pass">"checkout"</span>,
+  <span class="tok-accent">"task"</span>: <span class="tok-pass">"Log in as the qa account, add 'Backpack' to the cart, check out and verify the order confirmation message appears."</span>
+<span class="tok-muted">}</span>`;
+
+const outputHtml = `<span class="tok-muted">$ windup run checkout</span>      <span class="tok-muted"># 1st run</span>
+<span class="tok-pass">PASS</span>  checkout  cache=<span class="tok-fail">miss</span> llm_calls=<span class="tok-accent">1</span> total=3003ms cost=<span class="tok-accent">$0.0024</span>
+
+<span class="tok-muted">$ windup run checkout</span>      <span class="tok-muted"># again — deterministic replay</span>
+<span class="tok-pass">PASS</span>  checkout  cache=<span class="tok-pass">hit</span>  llm_calls=<span class="tok-pass">0</span> total=671ms  cost=<span class="tok-pass">$0</span>`;
+---
+
+<section class="section example">
+  <div class="wrap">
+    <p class="kicker">Example</p>
+    <h2 class="section-title">A scenario is natural language in JSON. Two runs tell the whole story.</h2>
+    <p class="section-note">
+      You write the intent. The first run plans and pays a few tenths of a cent; every run after
+      that is a cached replay at <span class="mono">$0</span>.
+    </p>
+
+    <div class="example-grid">
+      <CodeBlock label="checkout.json" lang="scenario" html={scenarioHtml} />
+      <CodeBlock label="windup run checkout" lang="output" html={outputHtml} />
+    </div>
+
+    <p class="example-foot">
+      <span class="mono">cache=hit · llm_calls=0 · $0</span> — the second run never touches the model.
+    </p>
+  </div>
+</section>
+
+<style>
+  /* stacked so each block gets full width — long lines fit without a lateral scroll */
+  .example-grid { display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start; max-width: 780px; }
+  .example-foot {
+    margin: 16px 0 0; color: var(--muted); font-size: 13.5px;
+  }
+  .mono { font-family: var(--font-mono); }
+</style>

@@ -1,0 +1,94 @@
+---
+const features = [
+  {
+    title: 'Natural-language scenarios',
+    body: 'Describe the test in plain language. No selectors, no page objects, no test code to maintain.',
+  },
+  {
+    title: 'Plan once, replay free',
+    body: 'From the 2nd run on: llm_calls=0, ~1s, $0. The cached plan runs the same way every time.',
+  },
+  {
+    title: 'Deterministic execution',
+    body: 'Playwright with trusted input events (isTrusted) — reliable clicks, typing and navigation.',
+  },
+  {
+    title: 'Cheap verification',
+    body: 'DOM/URL post-conditions checked on every action, with no LLM in the loop.',
+  },
+  {
+    title: 'windup new',
+    cmd: true,
+    body: 'LLM-assisted authoring: writes the scenario from your app’s real screens (site map) + project manifest. --validate runs and refines until it passes.',
+  },
+  {
+    title: 'windup scan',
+    cmd: true,
+    body: 'Indexes your routes and elements straight from the source (Next.js, react-router).',
+  },
+  {
+    title: 'windup secret',
+    cmd: true,
+    body: 'Credentials never enter the scenario, cache, LLM prompt or git — only ENV:* references, resolved at runtime.',
+  },
+  {
+    title: 'depends_on',
+    cmd: true,
+    body: 'Dependencies between scenarios (e.g. "create invoice" depends on "login") — same session, cached per dependency.',
+  },
+  {
+    title: 'run --summary',
+    cmd: true,
+    body: 'The AI writes a post-run debrief quoting real observed values — prices, messages, confirmations.',
+  },
+  {
+    title: 'run --suggest',
+    cmd: true,
+    body: 'On failure, the AI reads the real page and suggests the fix to your scenario.',
+  },
+  {
+    title: 'CI reporters',
+    body: 'JUnit, JSON and self-contained HTML (--reporter). Non-zero exit code on any failure.',
+  },
+  {
+    title: 'Multi-provider',
+    body: 'Google Gemini and OpenAI, picked per run (--llm openai:gpt-5-mini). windup costs tracks spend by provider and model.',
+  },
+];
+---
+
+<section id="features" class="section features">
+  <div class="wrap">
+    <p class="kicker">Features</p>
+    <h2 class="section-title">Everything a QA workflow needs — minus the selectors.</h2>
+    <p class="section-note">A CLI built for real projects: authoring, secrets, dependencies, cost tracking and CI reporters.</p>
+
+    <div class="feat-grid">
+      {features.map((f) => (
+        <article class="feat">
+          <h3 class={f.cmd ? 'mono' : ''}>{f.title}</h3>
+          <p>{f.body}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .feat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+  }
+  .feat {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 18px 18px 20px; box-shadow: var(--shadow);
+    border-top: 2px solid var(--accent);
+  }
+  .feat h3 { margin: 0 0 8px; font-size: 15.5px; }
+  .feat h3.mono {
+    font-family: var(--font-mono); font-size: 14px; color: var(--accent); font-weight: 600;
+  }
+  .feat p { margin: 0; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+
+  @media (max-width: 900px) { .feat-grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 620px) { .feat-grid { grid-template-columns: 1fr; } }
+</style>

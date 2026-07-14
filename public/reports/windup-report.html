@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windup report — 9/10 passed</title>
+<style>
+:root { --bg:#faf8f3; --card:#fff; --ink:#262218; --muted:#6e6653; --line:#e6dfce; --accent:#a87710; --pass:#2f7d4f; --pass-bg:#e3f0e7; --fail:#b5432e; --fail-bg:#f7e5e0; }
+@media (prefers-color-scheme: dark) { :root { --bg:#16130e; --card:#1f1b14; --ink:#eae3d2; --muted:#9c9480; --line:#332c20; --accent:#d9a441; --pass:#63c08d; --pass-bg:#1c2f24; --fail:#e0745f; --fail-bg:#34201b; } }
+* { box-sizing:border-box; }
+body { margin:0; padding:32px 20px 60px; background:var(--bg); color:var(--ink); font:14px/1.5 "Avenir Next","Segoe UI",system-ui,sans-serif; }
+main { max-width:960px; margin:0 auto; }
+h1 { font-size:22px; margin:0; letter-spacing:-.01em; }
+.sub { color:var(--muted); font-size:12.5px; margin:4px 0 20px; }
+.summary { display:flex; flex-wrap:wrap; gap:10px; margin:0 0 22px; }
+.stat { background:var(--card); border:1px solid var(--line); border-radius:4px; padding:10px 16px; min-width:104px; }
+.stat b { display:block; font-size:20px; font-variant-numeric:tabular-nums; }
+.stat span { font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); }
+.stat.p b { color:var(--pass); } .stat.f b { color:var(--fail); }
+.table-wrap { background:var(--card); border:1px solid var(--line); border-radius:4px; overflow-x:auto; }
+table { border-collapse:collapse; width:100%; }
+th { text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted); padding:9px 12px; border-bottom:1px solid var(--line); white-space:nowrap; }
+td { padding:9px 12px; border-bottom:1px solid var(--line); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.badge { font:600 11px/1 ui-monospace,Menlo,monospace; padding:4px 8px; border-radius:3px; }
+.badge.pass { color:var(--pass); background:var(--pass-bg); }
+.badge.fail { color:var(--fail); background:var(--fail-bg); }
+.scenario { font-family:ui-monospace,Menlo,monospace; font-size:13px; }
+.model { font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--muted); white-space:nowrap; }
+.row-failed td { background:color-mix(in srgb, var(--fail-bg) 35%, transparent); }
+.failure { margin-top:6px; font-size:12.5px; color:var(--fail); font-family:ui-monospace,Menlo,monospace; white-space:pre-wrap; }
+.failure .kind { font-weight:700; }
+details { margin-top:6px; font-family:"Avenir Next","Segoe UI",system-ui,sans-serif; }
+summary { cursor:pointer; font-size:12px; color:var(--muted); }
+table.actions { margin-top:6px; font-size:12px; }
+table.actions th, table.actions td { padding:4px 10px; }
+td.ok { color:var(--pass); } td.bad { color:var(--fail); }
+footer { color:var(--muted); font-size:11.5px; margin-top:18px; }
+</style>
+</head>
+<body>
+<main>
+<h1>Windup — test report</h1>
+<p class="sub">generated 2026-07-13 15:09 UTC · deterministic replay, LLM only on cache miss</p>
+<div class="summary">
+<div class="stat"><b>10</b><span>scenarios</span></div>
+<div class="stat p"><b>9</b><span>passed</span></div>
+<div class="stat f"><b>1</b><span>failed</span></div>
+<div class="stat"><b>1</b><span>zero-LLM runs</span></div>
+<div class="stat"><b>9</b><span>llm calls</span></div>
+<div class="stat"><b>$0.0169</b><span>est. cost</span></div>
+<div class="stat"><b>47.1s</b><span>duration</span></div>
+</div>
+<div class="table-wrap">
+<table>
+<tr><th></th><th>Scenario</th><th>Cache</th><th class="n">LLM calls</th><th>Model</th><th class="n">Duration</th><th class="n">Cost</th></tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">duelo-compra-tripla<details><summary>14 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">70 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">38 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">89 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="ok">passed</td><td class="n">31 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a5</td><td class="ok">passed</td><td class="n">28 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a6</td><td class="ok">passed</td><td class="n">30 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a7</td><td class="ok">passed</td><td class="n">35 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a8</td><td class="ok">passed</td><td class="n">26 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a9</td><td class="ok">passed</td><td class="n">3 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a10</td><td class="ok">passed</td><td class="n">3 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a11</td><td class="ok">passed</td><td class="n">3 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a12</td><td class="ok">passed</td><td class="n">36 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a13</td><td class="ok">passed</td><td class="n">31 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a14</td><td class="ok">passed</td><td class="n">0 ms</td><td class="n">1 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">4735 ms</td>
+<td class="n">$0.002428</td>
+</tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">duelo-login-bloqueado<details><summary>5 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">23 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">35 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">39 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="ok">passed</td><td class="n">0 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a5</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">1 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">2302 ms</td>
+<td class="n">$0.001759</td>
+</tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">duelo-remover-carrinho<details><summary>7 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">12 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">35 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">52 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="ok">passed</td><td class="n">32 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a5</td><td class="ok">passed</td><td class="n">34 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a6</td><td class="ok">passed</td><td class="n">32 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a7</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">1 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">2453 ms</td>
+<td class="n">$0.001814</td>
+</tr>
+<tr class="row-failed">
+<td><span class="badge fail">FAIL</span></td>
+<td class="scenario">orangehrm-login<div class="failure"><span class="kind">[verification]</span> action=a4: element .oxd-dashboard-grid did not become visible within 10000ms</div><details><summary>4 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">12 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">33 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">43 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="bad">failed</td><td class="n">10012 ms</td><td class="n">0 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">20807 ms</td>
+<td class="n">$0.001225</td>
+</tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">saucedemo-carrinho-vazio<details><summary>10 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">13 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">31 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">40 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="ok">passed</td><td class="n">33 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a5</td><td class="ok">passed</td><td class="n">0 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a6</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a7</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a8</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a9</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a10</td><td class="ok">passed</td><td class="n">0 ms</td><td class="n">1 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">2907 ms</td>
+<td class="n">$0.002116</td>
+</tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">saucedemo-checkout<details><summary>12 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">10 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">24 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">45 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="ok">passed</td><td class="n">31 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a5</td><td class="ok">passed</td><td class="n">32 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a6</td><td class="ok">passed</td><td class="n">31 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a7</td><td class="ok">passed</td><td class="n">3 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a8</td><td class="ok">passed</td><td class="n">4 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a9</td><td class="ok">passed</td><td class="n">6 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a10</td><td class="ok">passed</td><td class="n">32 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a11</td><td class="ok">passed</td><td class="n">31 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a12</td><td class="ok">passed</td><td class="n">0 ms</td><td class="n">1 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">3007 ms</td>
+<td class="n">$0.002194</td>
+</tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">saucedemo-compra-dupla<details><summary>14 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">14 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">31 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">59 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="ok">passed</td><td class="n">38 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a5</td><td class="ok">passed</td><td class="n">30 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a6</td><td class="ok">passed</td><td class="n">32 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a7</td><td class="ok">passed</td><td class="n">30 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a8</td><td class="ok">passed</td><td class="n">34 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a9</td><td class="ok">passed</td><td class="n">4 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a10</td><td class="ok">passed</td><td class="n">4 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a11</td><td class="ok">passed</td><td class="n">5 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a12</td><td class="ok">passed</td><td class="n">33 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a13</td><td class="ok">passed</td><td class="n">30 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a14</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">1 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">3447 ms</td>
+<td class="n">$0.002427</td>
+</tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">saucedemo-conta-qa<details><summary>4 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">14 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">32 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">48 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">1 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">2001 ms</td>
+<td class="n">$0.001571</td>
+</tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">saucedemo-login<details><summary>3 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">12 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">29 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">43 ms</td><td class="n">3 ms</td></tr>
+</table></details></td>
+<td>hit</td>
+<td class="n">0</td>
+<td class="model">—</td>
+<td class="n">356 ms</td>
+<td class="n">$0</td>
+</tr>
+<tr class="">
+<td><span class="badge pass">PASS</span></td>
+<td class="scenario">the-internet-login<details><summary>7 action(s)</summary><table class="actions">
+<tr><th>id</th><th>status</th><th class="n">action</th><th class="n">verify</th></tr>
+<tr><td>a1</td><td class="ok">passed</td><td class="n">12 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a2</td><td class="ok">passed</td><td class="n">32 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a3</td><td class="ok">passed</td><td class="n">336 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a4</td><td class="ok">passed</td><td class="n">8 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a5</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a6</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">0 ms</td></tr>
+<tr><td>a7</td><td class="ok">passed</td><td class="n">1 ms</td><td class="n">1 ms</td></tr>
+</table></details></td>
+<td>miss</td>
+<td class="n">1</td>
+<td class="model">google/gemini-3.1-flash-lite</td>
+<td class="n">5083 ms</td>
+<td class="n">$0.001409</td>
+</tr>
+</table>
+</div>
+<footer>windup · plans are data, replays are LLM-free · raw ledger: .windup/runs/</footer>
+</main>
+</body>
+</html>

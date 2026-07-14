@@ -1,0 +1,20 @@
+---
+interface Props {
+  label?: string;
+  lang?: string;
+  /** Pre-formatted HTML (with real newlines + token spans). Bypasses JSX
+      whitespace collapsing that would otherwise flatten multi-line code. */
+  html?: string;
+}
+const { label, lang, html } = Astro.props;
+---
+
+<div class="code">
+  {label && (
+    <div class="code-head">
+      <span>{label}</span>
+      {lang && <span>{lang}</span>}
+    </div>
+  )}
+  <pre>{html ? <code set:html={html} /> : <code><slot /></code>}</pre>
+</div>

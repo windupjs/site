@@ -1,0 +1,68 @@
+---
+import CopyCommand from './CopyCommand.astro';
+
+const promptText = 'Read https://windup.run/llms.txt and set up Windup E2E tests for my app, then write scenarios for these flows: ...';
+---
+
+<section id="ai" class="section ai">
+  <div class="wrap">
+    <p class="kicker">For the AI era</p>
+    <h2 class="section-title">Let your AI wire up the tests.</h2>
+    <p class="section-note">
+      Nobody reads docs anymore — they hand them to an assistant. So Windup ships an
+      <a href="/llms.txt"><code>llms.txt</code></a>: the whole documentation, structured for machines.
+      Point your coding agent at it, describe the flows in plain words, and it authors and runs the
+      scenarios for you.
+    </p>
+
+    <div class="ai-cards">
+      <div class="ai-card">
+        <span class="ai-step">1</span>
+        <h3>Give your AI the docs</h3>
+        <p>Paste this URL into your assistant (Claude, Cursor, Copilot, …).</p>
+        <CopyCommand command="https://windup.run/llms.txt" prompt="" />
+      </div>
+      <div class="ai-card">
+        <span class="ai-step">2</span>
+        <h3>Describe what to test</h3>
+        <p>A ready-to-paste starting prompt — fill in your flows.</p>
+        <CopyCommand command={promptText} prompt="" />
+      </div>
+    </div>
+
+    <p class="ai-links">
+      <a href="/llms-full.txt">llms-full.txt</a> — the entire docs in one file ·
+      per-page markdown at <code>/docs/&lt;page&gt;.md</code> ·
+      <a href="https://llmstxt.org" target="_blank" rel="noopener">the llms.txt standard</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .ai-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 860px; }
+  .ai-card {
+    position: relative;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    padding: 20px; box-shadow: var(--shadow); border-top: 2px solid var(--accent);
+  }
+  .ai-step {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 8px; background: var(--accent-soft);
+    color: var(--accent); font-family: var(--font-mono); font-weight: 700; font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .ai-card h3 { margin: 0 0 4px; font-size: 15.5px; }
+  .ai-card > p { margin: 0 0 12px; font-size: 13.5px; color: var(--muted); }
+  .ai-links { margin: 20px 0 0; font-size: 13px; color: var(--muted); }
+  .ai-links code {
+    font-family: var(--font-mono); font-size: .92em;
+    background: var(--accent-soft); border: 1px solid var(--line);
+    padding: 1px 6px; border-radius: 5px;
+  }
+  .ai .section-note code {
+    font-family: var(--font-mono); font-size: .9em;
+    background: var(--accent-soft); border: 1px solid var(--line);
+    padding: 1px 6px; border-radius: 5px; color: var(--ink);
+  }
+  @media (max-width: 720px) { .ai-cards { grid-template-columns: 1fr; } }
+</style>

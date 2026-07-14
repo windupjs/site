@@ -1,0 +1,59 @@
+---
+import CopyCommand from './CopyCommand.astro';
+
+const commands = [
+  { cmd: 'npm i -D windupjs', note: 'Chromium is provisioned automatically' },
+  { cmd: 'npx windup init', note: '3 questions → windup.config.ts' },
+  { cmd: 'npx windup scan', note: 'indexes your app’s routes from the source' },
+  { cmd: 'npx windup new "log in and create an invoice for ACME"', note: 'LLM-assisted authoring' },
+  { cmd: 'npx windup run checkout', note: '1st run plans · then replay ~1s, $0' },
+];
+---
+
+<section id="start" class="section start">
+  <div class="wrap">
+    <div class="start-head">
+      <div>
+        <p class="kicker">Get started</p>
+        <h2 class="section-title">Five commands from zero to a replaying test.</h2>
+        <p class="section-note">
+          Node ≥ 20 and one API key — <span class="mono">GOOGLE_GENERATIVE_AI_API_KEY</span> (Google, default)
+          or <span class="mono">OPENAI_API_KEY</span> (OpenAI) — in <span class="mono">.env.local</span>.
+          Keys are used only for planning; cached replays never call an LLM.
+        </p>
+      </div>
+      <img class="runner" src="/brand/windup-pose-run-transparent.png"
+        alt="Windup mascot running" width="180" height="210" loading="lazy" />
+    </div>
+
+    <div class="cmd-list">
+      {commands.map((c) => (
+        <div class="cmd-row">
+          <CopyCommand command={c.cmd} />
+          <span class="cmd-note">{c.note}</span>
+        </div>
+      ))}
+    </div>
+
+    <div class="req">
+      <span class="chip">Node <strong>≥ 20</strong></span>
+      <span class="chip">Google Gemini <strong>or</strong> OpenAI</span>
+      <span class="chip">Playwright <strong>bundled</strong></span>
+      <span class="chip pass">MIT</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .start-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; }
+  .runner { width: 132px; height: auto; flex: none; filter: drop-shadow(0 12px 22px rgba(0,0,0,.26)); }
+  .mono { font-family: var(--font-mono); font-size: .92em; color: var(--ink); }
+
+  .cmd-list { display: grid; gap: 12px; max-width: 760px; }
+  .cmd-row { display: grid; gap: 4px; min-width: 0; }
+  .cmd-note { font-size: 12.5px; color: var(--muted); padding-left: 4px; }
+
+  .req { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+
+  @media (max-width: 640px) { .runner { display: none; } }
+</style>

@@ -1,0 +1,21 @@
+# build output
+dist/
+# generated types
+.astro/
+# dependencies
+node_modules/
+# logs
+npm-debug.log*
+# environment variables
+.env
+.env.production
+# macOS
+.DS_Store
+# local tooling / editor config
+.claude/
+# original artifact drop — site assets live in public/; brief is internal
+/brand/
+/reports/
+/llm-benchmark.html
+/windup-demo.gif
+/landing-page-brief.md
