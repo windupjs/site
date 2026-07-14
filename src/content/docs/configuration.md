@@ -18,6 +18,7 @@ export default defineConfig({
   },
   scenarios: "e2e/scenarios",
   framework: "react-router",          // detected by init; used by scan
+  // browser: "chromium",             // or "firefox" / "webkit" (need: npx playwright install <name>)
   scan: {
     llmAssist: { enabled: true, maxCalls: 20 },   // hard cost cap per scan
   },
