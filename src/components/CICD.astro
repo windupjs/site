@@ -26,6 +26,7 @@ const ciHtml = `<span class="tok-muted">$</span> npx windup run --all --reporter
         <CodeBlock label="ci — one line" lang="bash" html={ciHtml} />
         <ul class="cicd-points">
           <li><span class="mono">--all</span> runs every scenario in a single warm browser for the whole suite.</li>
+          <li><span class="mono">--concurrency &lt;n&gt;</span> runs scenarios in parallel (~2× faster on a mixed suite); <span class="mono">--browser firefox|webkit</span> to run cross-browser.</li>
           <li>Non-zero exit code when any scenario fails.</li>
           <li><span class="mono">--reporter junit|json|html</span>; <span class="mono">windup costs --json</span> tracks AI spend in the pipeline.</li>
         </ul>

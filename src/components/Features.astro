@@ -54,6 +54,15 @@ const features = [
     title: 'Multi-provider',
     body: 'Google Gemini and OpenAI, picked per run (--llm openai:gpt-5-mini). windup costs tracks spend by provider and model.',
   },
+  {
+    title: 'run --concurrency',
+    cmd: true,
+    body: 'Run scenarios in parallel over one shared warm browser with isolated contexts — ~2× faster on a mixed suite, more with planning or long flows. Sequential by default.',
+  },
+  {
+    title: 'Cross-browser',
+    body: 'Run the same scenarios on Chromium (default), Firefox or WebKit with --browser. A single plan replays across all three — author once, run everywhere.',
+  },
 ];
 ---
 
