@@ -1,0 +1,83 @@
+---
+interface Props {
+  command: string;
+  /** shown as the leading prompt char; default "$" */
+  prompt?: string;
+}
+const { command, prompt = '$' } = Astro.props;
+---
+
+<div class="copy-cmd" data-command={command}>
+  <code>{prompt && <span class="prompt">{prompt} </span>}{command}</code>
+  <button type="button" class="copy-btn" aria-label="Copy command to clipboard">
+    <svg class="ico-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+    </svg>
+    <svg class="ico-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
+      <path d="M20 6 9 17l-5-5"></path>
+    </svg>
+    <span class="copy-label">Copy</span>
+  </button>
+</div>
+
+<style>
+  .copy-cmd {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px 12px 12px 16px; font-family: var(--font-mono); min-width: 0;
+  }
+  .copy-cmd code {
+    flex: 1 1 auto; min-width: 0;
+    font-size: 14px; color: var(--ink);
+    white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .copy-cmd code::-webkit-scrollbar { display: none; }
+  .prompt { color: var(--accent); user-select: none; margin-right: 4px; }
+  .copy-btn {
+    display: inline-flex; align-items: center; gap: 6px; flex: none;
+    font-family: var(--font-sans); font-size: 12.5px; font-weight: 600;
+    padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .copy-btn:hover { border-color: var(--accent); color: var(--ink); }
+  .copy-btn.copied { color: var(--pass); border-color: var(--pass); }
+  .copy-btn svg { width: 15px; height: 15px; }
+</style>
+
+<script>
+  function initCopyButtons() {
+    document.querySelectorAll<HTMLElement>('.copy-cmd').forEach((el) => {
+      const btn = el.querySelector<HTMLButtonElement>('.copy-btn');
+      if (!btn || btn.dataset.bound) return;
+      btn.dataset.bound = '1';
+      const cmd = el.dataset.command ?? '';
+      const copyIco = btn.querySelector<SVGElement>('.ico-copy');
+      const checkIco = btn.querySelector<SVGElement>('.ico-check');
+      const label = btn.querySelector<HTMLElement>('.copy-label');
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(cmd);
+        } catch {
+          const ta = document.createElement('textarea');
+          ta.value = cmd; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); } catch {}
+          ta.remove();
+        }
+        btn.classList.add('copied');
+        copyIco?.setAttribute('hidden', '');
+        checkIco?.removeAttribute('hidden');
+        if (label) label.textContent = 'Copied';
+        setTimeout(() => {
+          btn.classList.remove('copied');
+          checkIco?.setAttribute('hidden', '');
+          copyIco?.removeAttribute('hidden');
+          if (label) label.textContent = 'Copy';
+        }, 1600);
+      });
+    });
+  }
+  initCopyButtons();
+  document.addEventListener('astro:page-load', initCopyButtons);
+</script>

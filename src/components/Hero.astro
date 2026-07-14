@@ -1,0 +1,112 @@
+---
+import CopyCommand from './CopyCommand.astro';
+const github = 'https://github.com/windupjs/windup';
+const npm = 'https://www.npmjs.com/package/windupjs';
+---
+
+<section id="top" class="hero">
+  <div class="wrap hero-top">
+    <div class="hero-copy">
+      <h1>
+        Write E2E tests in <span class="hl">plain language</span>.
+        Replay them for <span class="hl">$0</span>.
+      </h1>
+      <p class="lede">
+        The LLM plans the browser actions <strong>once</strong>. From the second run on, Windup
+        does a <strong>deterministic replay</strong> with <strong>zero LLM calls</strong> —
+        <span class="mono">~1&nbsp;second, $0</span>, stable results. You edit scenarios, not selectors.
+      </p>
+
+      <div class="hero-cta">
+        <CopyCommand command="npm i -D windupjs" />
+        <div class="cta-row">
+          <a class="btn primary" href={github} target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.575.106.785-.25.785-.556 0-.274-.01-1-.015-1.965-3.196.695-3.87-1.54-3.87-1.54-.523-1.33-1.276-1.684-1.276-1.684-1.043-.713.08-.698.08-.698 1.153.08 1.76 1.184 1.76 1.184 1.025 1.756 2.69 1.25 3.345.955.104-.743.4-1.25.727-1.538-2.552-.29-5.235-1.276-5.235-5.677 0-1.254.448-2.28 1.183-3.084-.119-.29-.513-1.46.112-3.043 0 0 .965-.31 3.163 1.178a10.98 10.98 0 0 1 2.88-.388c.977.004 1.96.132 2.88.388 2.196-1.488 3.16-1.178 3.16-1.178.626 1.583.232 2.753.114 3.043.737.804 1.182 1.83 1.182 3.084 0 4.412-2.688 5.383-5.248 5.668.413.355.78 1.057.78 2.13 0 1.538-.014 2.778-.014 3.156 0 .309.207.668.79.555A11.503 11.503 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"></path></svg>
+            GitHub
+          </a>
+          <a class="btn" href={npm} target="_blank" rel="noopener">View on npm</a>
+        </div>
+      </div>
+
+      <ul class="hero-badges">
+        <li><span class="dot"></span> No selectors, no test code</li>
+        <li><span class="dot"></span> <span class="mono">llm_calls=0</span> on replay</li>
+        <li><span class="dot"></span> Playwright under the hood</li>
+      </ul>
+    </div>
+
+    <div class="hero-mascot">
+      <img src="/brand/windup-pose-wave-transparent.png"
+        alt="Windup mascot, a brass wind-up robot, waving" width="260" height="300" fetchpriority="high" />
+    </div>
+  </div>
+
+  <div class="wrap">
+    <figure class="demo">
+      <div class="demo-bar">
+        <span class="demo-dots"><i></i><i></i><i></i></span>
+        <span class="demo-title">windup run checkout</span>
+      </div>
+      <img src="/windup-demo.gif"
+        alt="Terminal recording: a natural-language scenario runs; first run plans with llm_calls=1, the second run replays from cache with llm_calls=0 and $0"
+        width="1260" height="430" loading="eager" />
+      <figcaption>Real terminal — first run plans (<span class="mono">llm_calls=1</span>), the second run replays from cache at <span class="mono">$0</span>.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hero { padding: 52px 0 64px; }
+  .hero-top {
+    display: grid; grid-template-columns: 1.12fr .88fr; gap: 40px; align-items: center;
+  }
+  .hero-copy h1 {
+    font-size: clamp(32px, 5.2vw, 52px); line-height: 1.05; font-weight: 800;
+    margin: 0 0 18px; letter-spacing: -.02em;
+  }
+  .hl { color: var(--accent); }
+  .lede { color: var(--muted); font-size: 18px; max-width: 54ch; margin: 0 0 26px; }
+  .lede strong { color: var(--ink); font-weight: 600; }
+  .mono { font-family: var(--font-mono); font-size: .95em; }
+  .hero-cta { display: grid; gap: 12px; max-width: 440px; }
+  .cta-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hero-badges {
+    list-style: none; margin: 26px 0 0; padding: 0;
+    display: flex; flex-wrap: wrap; gap: 8px 22px; color: var(--muted); font-size: 13.5px;
+  }
+  .hero-badges li { display: flex; align-items: center; gap: 8px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex: none; }
+
+  .hero-mascot { display: flex; justify-content: center; }
+  .hero-mascot img {
+    width: 260px; height: auto; filter: drop-shadow(0 14px 26px rgba(0,0,0,.28));
+    pointer-events: none;
+  }
+
+  /* Big, readable terminal demo — full hero width */
+  .demo {
+    margin: 46px auto 0; max-width: 980px;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow); overflow: hidden;
+  }
+  .demo-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-bottom: 1px solid var(--line); background: var(--code-bg);
+  }
+  .demo-dots { display: flex; gap: 6px; }
+  .demo-dots i { width: 11px; height: 11px; border-radius: 50%; background: var(--line); display: block; }
+  .demo-title { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+  .demo img { width: 100%; height: auto; display: block; }
+  .demo figcaption {
+    color: var(--muted); font-size: 13px; padding: 12px 14px; text-align: center;
+    border-top: 1px solid var(--line);
+  }
+
+  @media (max-width: 900px) {
+    .hero-top { grid-template-columns: 1fr; gap: 28px; }
+    .hero-mascot { order: -1; justify-content: flex-start; }
+    .hero-mascot img { width: 140px; }
+    .hero-cta { max-width: none; }
+    .demo { margin-top: 34px; }
+  }
+</style>

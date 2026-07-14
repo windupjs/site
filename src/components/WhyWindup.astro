@@ -1,0 +1,48 @@
+---
+const rows = [
+  ['Authoring', 'Code + selectors', 'Natural language', 'Natural language'],
+  ['Cost per run', '$0', 'LLM on every run', 'LLM on the 1st run only'],
+  ['Speed', 'Fast', 'Slow (model in the loop)', '~1s replay'],
+  ['Determinism', 'High', 'Low (improvises)', 'High (same plan every time)'],
+  ['App changed', 'You fix the script', 'May do the wrong thing silently', 'Check fails → re-plans'],
+];
+---
+
+<section class="section why">
+  <div class="wrap">
+    <p class="kicker">Why Windup</p>
+    <h2 class="section-title">The reliability of scripts, the ergonomics of natural language.</h2>
+    <p class="section-note">
+      Hand-written scripts are cheap to run but expensive to maintain. Per-run AI agents are easy to
+      write but slow and non-deterministic. Windup takes the good half of each.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col"><span class="visually-hidden">Dimension</span></th>
+            <th scope="col">Hand-written scripts</th>
+            <th scope="col">AI agent every run</th>
+            <th scope="col" class="col-windup">Windup</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(([dim, a, b, c]) => (
+            <tr>
+              <th scope="row">{dim}</th>
+              <td>{a}</td>
+              <td>{b}</td>
+              <td class="col-windup"><strong>{c}</strong></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<style>
+  .why td strong { color: var(--accent); font-weight: 600; }
+  .why tbody th { color: var(--ink); }
+</style>

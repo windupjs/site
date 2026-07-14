@@ -1,0 +1,27 @@
+---
+---
+
+<section class="section pitch">
+  <div class="wrap">
+    <p class="kicker">The problem</p>
+    <p class="pitch-lede">
+      Hand-written E2E tests break every time a selector moves. AI agents that drive the browser
+      on <em>every</em> run are slow, non-deterministic, and bill you an LLM call per test.
+    </p>
+    <p class="pitch-lede accent">
+      Windup plans <strong>once</strong> and caches a validated action plan. Replays are
+      deterministic and free. When the app changes and a check fails, the plan is invalidated and
+      re-planned automatically — self-healing, not silently wrong.
+    </p>
+  </div>
+</section>
+
+<style>
+  .pitch-lede {
+    font-size: clamp(19px, 2.6vw, 24px); line-height: 1.5; font-weight: 500;
+    max-width: 58ch; margin: 0 0 16px; color: var(--muted);
+  }
+  .pitch-lede strong { color: var(--ink); font-weight: 700; }
+  .pitch-lede.accent { color: var(--ink); }
+  .pitch-lede em { color: var(--accent); font-style: normal; }
+</style>

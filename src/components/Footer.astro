@@ -1,0 +1,47 @@
+---
+const github = 'https://github.com/windupjs/windup';
+const npm = 'https://www.npmjs.com/package/windupjs';
+const spec = 'https://github.com/windupjs/windup/blob/main/docs/specs/SPEC.md';
+const license = 'https://github.com/windupjs/windup/blob/main/LICENSE';
+---
+
+<footer class="site-footer">
+  <div class="wrap foot">
+    <div class="foot-brand">
+      <img src="/brand/windup-icon.png" alt="" width="34" height="34" />
+      <div>
+        <div class="foot-name">Windup</div>
+        <div class="foot-tag">Natural-language E2E tests with deterministic replay.</div>
+      </div>
+    </div>
+
+    <nav class="foot-links" aria-label="Footer">
+      <a href={npm} target="_blank" rel="noopener">npm</a>
+      <a href={github} target="_blank" rel="noopener">GitHub</a>
+      <a href={spec} target="_blank" rel="noopener">Spec</a>
+      <a href="/llms.txt">llms.txt</a>
+      <a href={license} target="_blank" rel="noopener">MIT License</a>
+    </nav>
+  </div>
+  <div class="wrap foot-note">
+    <span class="chip">beta</span>
+    <span>Usable and tested. Open-source under the MIT license.</span>
+  </div>
+</footer>
+
+<style>
+  .site-footer { border-top: 1px solid var(--line); padding: 44px 0 56px; background: var(--card); }
+  .foot { display: flex; align-items: flex-start; justify-content: space-between; gap: 28px; flex-wrap: wrap; }
+  .foot-brand { display: flex; align-items: center; gap: 12px; }
+  .foot-brand img { border-radius: 8px; }
+  .foot-name { font-weight: 700; font-size: 16px; }
+  .foot-tag { color: var(--muted); font-size: 13.5px; max-width: 42ch; }
+  .foot-links { display: flex; flex-wrap: wrap; gap: 20px; }
+  .foot-links a { color: var(--muted); font-size: 14px; }
+  .foot-links a:hover { color: var(--ink); }
+  .foot-note {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    margin-top: 26px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 13px;
+  }
+</style>

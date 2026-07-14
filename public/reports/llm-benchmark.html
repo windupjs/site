@@ -1,0 +1,351 @@
+<title>Windup — Bancada de LLMs</title>
+<style>
+  :root {
+    --bg: #FAF8F3; --card: #FFFFFF; --ink: #262218; --muted: #6E6653; --line: #E6DFCE;
+    --accent: #A87710; --accent-soft: #F3EAD3;
+    --pass: #2F7D4F; --pass-soft: #E3F0E7; --fail: #B5432E; --fail-soft: #F7E5E0;
+    --bar-track: #EFEADD;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16130E; --card: #1F1B14; --ink: #EAE3D2; --muted: #9C9480; --line: #332C20;
+      --accent: #D9A441; --accent-soft: #2E2717;
+      --pass: #63C08D; --pass-soft: #1C2F24; --fail: #E0745F; --fail-soft: #34201B;
+      --bar-track: #2A251B;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16130E; --card: #1F1B14; --ink: #EAE3D2; --muted: #9C9480; --line: #332C20;
+    --accent: #D9A441; --accent-soft: #2E2717;
+    --pass: #63C08D; --pass-soft: #1C2F24; --fail: #E0745F; --fail-soft: #34201B;
+    --bar-track: #2A251B;
+  }
+  :root[data-theme="light"] {
+    --bg: #FAF8F3; --card: #FFFFFF; --ink: #262218; --muted: #6E6653; --line: #E6DFCE;
+    --accent: #A87710; --accent-soft: #F3EAD3;
+    --pass: #2F7D4F; --pass-soft: #E3F0E7; --fail: #B5432E; --fail-soft: #F7E5E0;
+    --bar-track: #EFEADD;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Avenir Next", "Segoe UI", system-ui, sans-serif;
+    line-height: 1.55; margin: 0; padding: 0 20px 80px;
+  }
+  main { max-width: 920px; margin: 0 auto; }
+  code, .mono, td.num, .chip, .bar-label {
+    font-family: ui-monospace, "SF Mono", "Cascadia Code", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+
+  header { padding: 52px 0 12px; border-bottom: 3px solid var(--accent); margin-bottom: 8px; }
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    text-transform: uppercase; letter-spacing: .18em; font-size: 12px; color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; margin: 0 0 8px; text-wrap: balance; letter-spacing: -.01em; }
+  .lede { color: var(--muted); max-width: 62ch; margin: 0 0 22px; font-size: 16.5px; }
+  .meta-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 14px 0 22px; }
+  .chip {
+    font-size: 12.5px; padding: 4px 12px; border: 1px solid var(--line); border-radius: 3px;
+    background: var(--card); color: var(--muted);
+  }
+  .chip strong { color: var(--ink); font-weight: 600; }
+
+  h2 { font-size: 21px; margin: 0 0 4px; letter-spacing: -.005em; text-wrap: balance; }
+  h3 { font-size: 15.5px; margin: 22px 0 8px; }
+  section { margin-top: 44px; }
+  .round {
+    font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; text-transform: uppercase;
+    letter-spacing: .16em; color: var(--accent); margin: 0 0 6px;
+  }
+  .section-note { color: var(--muted); font-size: 14.5px; max-width: 68ch; margin: 4px 0 16px; }
+
+  /* veredito */
+  .verdict-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin-top: 16px; }
+  .verdict {
+    background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 16px 16px 14px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .verdict.champ { border-top: 3px solid var(--accent); }
+  .verdict .label { font-size: 11.5px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); }
+  .verdict .model { font-family: ui-monospace, Menlo, monospace; font-size: 14.5px; font-weight: 600; margin: 2px 0; }
+  .verdict .why { font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+  /* tabelas */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; background: var(--card); }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  th {
+    text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .1em;
+    color: var(--muted); font-weight: 600; padding: 10px 14px; border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; white-space: nowrap; }
+  th.num { text-align: right; }
+  td .model-name { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; white-space: nowrap; }
+  .provider { font-size: 10.5px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); display: block; }
+
+  .score { font-family: ui-monospace, Menlo, monospace; font-weight: 700; white-space: nowrap; }
+  .score.good { color: var(--pass); }
+  .score.bad { color: var(--fail); }
+  .score.mid { color: var(--accent); }
+
+  .pf { display: inline-flex; gap: 3px; }
+  .pf i {
+    width: 13px; height: 13px; border-radius: 2px; display: inline-block;
+    background: var(--pass-soft); border: 1px solid var(--pass);
+  }
+  .pf i.f { background: var(--fail-soft); border-color: var(--fail); }
+
+  /* barras */
+  .bars { display: grid; gap: 9px; margin: 14px 0 4px; }
+  .bar-row { display: grid; grid-template-columns: 200px 1fr 90px; gap: 12px; align-items: center; }
+  .bar-label { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { background: var(--bar-track); border-radius: 2px; height: 16px; position: relative; }
+  .bar-fill { position: absolute; inset: 0 auto 0 0; border-radius: 2px; background: var(--accent); min-width: 2px; }
+  .bar-fill.pass { background: var(--pass); }
+  .bar-fill.fail { background: var(--fail); }
+  .bar-val { font-family: ui-monospace, Menlo, monospace; font-size: 12px; text-align: right; color: var(--muted); }
+  @media (max-width: 640px) { .bar-row { grid-template-columns: 130px 1fr 78px; } }
+
+  /* timeline de tuning */
+  .timeline { display: grid; gap: 0; margin-top: 14px; border-left: 2px solid var(--line); }
+  .step { padding: 4px 0 20px 22px; position: relative; }
+  .step::before {
+    content: ""; position: absolute; left: -7px; top: 9px; width: 12px; height: 12px;
+    border-radius: 50%; background: var(--card); border: 3px solid var(--accent);
+  }
+  .step.regress::before { border-color: var(--fail); }
+  .step.final::before { background: var(--accent); }
+  .step h3 { margin: 0 0 3px; font-size: 15px; }
+  .step p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: 66ch; }
+  .step .result { font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; margin-top: 5px; display: block; }
+
+  /* anatomia de falha */
+  .fail-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 14px; }
+  .fail-card { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--fail); border-radius: 4px; padding: 14px 16px; }
+  .fail-card h3 { margin: 0 0 6px; font-size: 14px; }
+  .fail-card p { margin: 0; font-size: 13px; color: var(--muted); }
+  .fail-card .fix { margin-top: 8px; font-size: 12.5px; color: var(--pass); }
+  .fail-card .fix::before { content: "→ "; }
+
+  .callout {
+    background: var(--accent-soft); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius: 4px; padding: 14px 18px; font-size: 14px; margin-top: 18px; max-width: 100%;
+  }
+  .callout strong { color: var(--ink); }
+
+  footer { margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; }
+  a { color: var(--accent); }
+</style>
+
+<main>
+<header>
+  <p class="eyebrow">Windup · Relatório de bancada · 13 jul 2026</p>
+  <h1>Qual LLM planeja melhor os seus testes?</h1>
+  <p class="lede">77 gerações de plano ao vivo contra o saucedemo.com, 6 modelos de 2 empresas, medindo assertividade (o plano executa e verifica?), custo por geração e latência — tudo sem cache, do ledger real do <code>windup costs</code>.</p>
+  <div class="meta-chips">
+    <span class="chip"><strong>77</strong> gerações ao vivo</span>
+    <span class="chip"><strong>6</strong> modelos testados</span>
+    <span class="chip"><strong>6</strong> cenários (3 complexos novos)</span>
+    <span class="chip"><strong>3</strong> releases publicados (0.11.1 → 0.11.3)</span>
+  </div>
+</header>
+
+<section>
+  <h2>Veredito</h2>
+  <div class="verdict-grid">
+    <div class="verdict champ">
+      <span class="label">Campeão geral</span>
+      <span class="model">gemini-3.1-flash-lite</span>
+      <span class="why">100% de acerto em todas as rodadas finais, inclusive nos cenários complexos. ~2s por plano, $0.0014–0.0025. Zero degeneração. Continua o default.</span>
+    </div>
+    <div class="verdict">
+      <span class="label">Melhor da OpenAI</span>
+      <span class="model">gpt-5-mini</span>
+      <span class="why">Depois do tuning: 5/5 no simples, 3/4 nos difíceis. ~$0.0011–0.0016 por plano. Só tropeça em fluxo negativo.</span>
+    </div>
+    <div class="verdict">
+      <span class="label">Economia extrema</span>
+      <span class="model">gpt-5-nano</span>
+      <span class="why">$0.0003 por plano (6× mais barato que o campeão) e 5/5 no cenário simples — mas 0/4 nos complexos. Só para suítes triviais.</span>
+    </div>
+    <div class="verdict">
+      <span class="label">Reprovados</span>
+      <span class="model">gemini-3.5-flash · gpt-4o-mini</span>
+      <span class="why">O Flash acerta (8/9) mas degenera: até 170s e $0.25 num único plano. O 4o-mini é baratíssimo, mas erra sistematicamente fora do caminho feliz (3/9).</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="round">Rodada 1 — A/B inicial</p>
+  <h2>5 gerações por modelo, cenário de login</h2>
+  <p class="section-note">Primeiro contato do Windup com a API real da OpenAI (client REST próprio, json mode, <code>reasoning_effort: minimal</code>). Funcionou de primeira — as falhas abaixo são de qualidade de plano, não de infraestrutura.</p>
+  <div class="table-wrap"><table>
+    <tr><th>Modelo</th><th>Acerto</th><th></th><th class="num">Plano (mediana)</th><th class="num">Custo/geração</th></tr>
+    <tr>
+      <td><span class="provider">google</span><span class="model-name">gemini-3.1-flash-lite</span></td>
+      <td class="score good">5/5</td>
+      <td><span class="pf"><i></i><i></i><i></i><i></i><i></i></span></td>
+      <td class="num">2,7 s</td><td class="num">$0.00192</td>
+    </tr>
+    <tr>
+      <td><span class="provider">openai</span><span class="model-name">gpt-4o-mini</span></td>
+      <td class="score good">5/5</td>
+      <td><span class="pf"><i></i><i></i><i></i><i></i><i></i></span></td>
+      <td class="num">4,1 s</td><td class="num">$0.00068</td>
+    </tr>
+    <tr>
+      <td><span class="provider">openai</span><span class="model-name">gpt-5-mini</span></td>
+      <td class="score mid">4/5</td>
+      <td><span class="pf"><i></i><i></i><i></i><i class="f"></i><i></i></span></td>
+      <td class="num">3,1 s</td><td class="num">$0.00119</td>
+    </tr>
+    <tr>
+      <td><span class="provider">openai</span><span class="model-name">gpt-5-nano</span></td>
+      <td class="score mid">4/5</td>
+      <td><span class="pf"><i></i><i></i><i></i><i class="f"></i><i></i></span></td>
+      <td class="num">3,4 s</td><td class="num">$0.00032</td>
+    </tr>
+  </table></div>
+</section>
+
+<section>
+  <p class="round">Rodada 2 — Tuning cross-provider</p>
+  <h2>As falhas dos gpt-5 viraram melhorias no produto</h2>
+  <p class="section-note">As duas falhas da rodada 1 eram <em>overplanning</em>: passos inventados além da tarefa. Cada correção foi revalidada nos dois providers — e uma delas quebrou o Gemini no caminho, provando que só prompt não basta.</p>
+  <div class="timeline">
+    <div class="step">
+      <h3>Regra do plano mínimo no prompt</h3>
+      <p>"Gere o MENOR plano que cumpre a tarefa" — os gpt-5 visitavam páginas extras "para conferir" e inventavam seletores de menu.</p>
+      <span class="result mono"><span class="score good">nano 5/5</span> · <span class="score mid">mini 3/5</span> (sobrou o eco de fragmento)</span>
+    </div>
+    <div class="step regress">
+      <h3>Exemplo JSON no prompt — regressão!</h3>
+      <p>Um exemplo literal de plano-com-fragmento consertou o mini, mas fez o flash-lite repetir a cauda do fragmento (re-preencher senha, re-clicar login). Lição antiga confirmada: prompt longo degrada o flash.</p>
+      <span class="result mono"><span class="score good">mini 5/5</span> · <span class="score bad">flash-lite 0/3</span></span>
+    </div>
+    <div class="step final">
+      <h3>Dedupe mecânico de eco de fragmento</h3>
+      <p><code>dropFragmentEchoes()</code>: ações logo após um <code>use</code> que duplicam o próprio fragmento são descartadas deterministicamente — vale para qualquer provider, sem depender de obediência ao prompt. Exemplo JSON removido.</p>
+      <span class="result mono"><span class="score good">9/9</span> — flash-lite, gpt-5-mini e gpt-5-nano, 3× cada · flash-lite ficou até mais barato ($0.0014 vs $0.0019)</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <p class="round">Rodada 3 — O duelo pedido</p>
+  <h2>gemini-3.5-flash vs gpt-4o-mini em 3 cenários complexos</h2>
+  <p class="section-note">O gemini-1.5-flash foi aposentado pela Google (404 para contas novas), então o duelo justo foi com o Flash atual. Cenários novos: checkout com 3 produtos (~12 ações), adicionar/remover do carrinho, e o caminho negativo do usuário bloqueado. 3 gerações cada, sem cache.</p>
+
+  <div class="table-wrap"><table>
+    <tr><th>Cenário</th><th>gemini-3.5-flash</th><th>gpt-4o-mini</th></tr>
+    <tr>
+      <td>Checkout triplo <span class="provider">fluxo longo, 12 ações</span></td>
+      <td><span class="pf"><i></i><i></i><i class="f"></i></span> <span class="score mid">2/3</span> — 2 a 3 chamadas por plano, 18 s a 90 s</td>
+      <td><span class="pf"><i></i><i></i><i></i></span> <span class="score good">3/3</span> — 1 chamada, ~10 s, ~$0.001</td>
+    </tr>
+    <tr>
+      <td>Remover do carrinho <span class="provider">verificar botão de volta</span></td>
+      <td><span class="pf"><i></i><i></i><i></i></span> <span class="score good">3/3</span> — limpo, $0.0104 cada</td>
+      <td><span class="pf"><i class="f"></i><i class="f"></i><i class="f"></i></span> <span class="score bad">0/3</span> — re-adicionou o produto que devia só observar</td>
+    </tr>
+    <tr>
+      <td>Login bloqueado <span class="provider">caminho negativo</span></td>
+      <td><span class="pf"><i></i><i></i><i></i></span> <span class="score good">3/3</span> — mas degenerou: 2–4 chamadas, até 170 s e $0.25</td>
+      <td><span class="pf"><i class="f"></i><i class="f"></i><i class="f"></i></span> <span class="score bad">0/3</span> — credencial errada + expect contraditório</td>
+    </tr>
+    <tr>
+      <td><strong>Total</strong></td>
+      <td><span class="score mid">8/9 (89%)</span> · <strong>$0.568</strong></td>
+      <td><span class="score bad">3/9 (33%)</span> · <strong>$0.007</strong></td>
+    </tr>
+  </table></div>
+
+  <h3>Custo médio por geração (escala real)</h3>
+  <div class="bars">
+    <div class="bar-row"><span class="bar-label">gemini-3.5-flash</span><div class="bar-track"><div class="bar-fill fail" style="width:100%"></div></div><span class="bar-val">$0.0631</span></div>
+    <div class="bar-row"><span class="bar-label">gemini-3.1-flash-lite ★</span><div class="bar-track"><div class="bar-fill pass" style="width:3.9%"></div></div><span class="bar-val">$0.0025</span></div>
+    <div class="bar-row"><span class="bar-label">gpt-5-mini</span><div class="bar-track"><div class="bar-fill" style="width:2.4%"></div></div><span class="bar-val">$0.0015</span></div>
+    <div class="bar-row"><span class="bar-label">gpt-4o-mini</span><div class="bar-track"><div class="bar-fill" style="width:1.3%"></div></div><span class="bar-val">$0.0008</span></div>
+    <div class="bar-row"><span class="bar-label">gpt-5-nano</span><div class="bar-track"><div class="bar-fill" style="width:0.5%"></div></div><span class="bar-val">$0.0003</span></div>
+  </div>
+  <p class="section-note">★ referência: o default rodou os mesmos cenários complexos fora do duelo — 1 chamada, 3,4 s, $0.0024 no checkout triplo.</p>
+
+  <h3>Anatomia das falhas do gpt-4o-mini</h3>
+  <div class="fail-cards">
+    <div class="fail-card">
+      <h3>Credencial do manifesto onde não devia</h3>
+      <p>A tarefa dizia <code>locked_out_user</code> literal; o modelo usou os ENVs da conta "qa" do manifesto — logou com o usuário errado e a mensagem de erro nunca apareceu.</p>
+      <p class="fix">Virou regra de prompt no produto (v0.11.2): credencial literal vence quando nenhuma conta é citada. Pós-fix: preenchimento correto.</p>
+    </div>
+    <div class="fail-card">
+      <h3>Expect contraditório no fluxo negativo</h3>
+      <p>No mesmo <code>expect</code>: navegação para o inventário (sucesso) <em>e</em> a mensagem de erro. O modelo não concebe um login que falha. Limitação do modelo — sem patch nosso.</p>
+      <p class="fix">gpt-5-mini e os Gemini acertam esse caso.</p>
+    </div>
+    <div class="fail-card">
+      <h3>Verificação transformada em ação</h3>
+      <p>"Verificar que o botão voltou a aparecer" virou um clique no botão — re-adicionando o produto e quebrando a própria verificação.</p>
+      <p class="fix">Coberto pela regra do plano mínimo para os gpt-5; o 4o-mini persiste.</p>
+    </div>
+  </div>
+
+  <div class="callout"><strong>O verificador funcionou perfeitamente:</strong> todos os FAIL acima são o Windup barrando planos errados antes de virarem testes verdes mentirosos — exatamente o que a verificação barata existe para fazer.</div>
+</section>
+
+<section>
+  <p class="round">Rodada 4 — Extra</p>
+  <h2>Os gpt-5 afinados nos cenários que derrubaram o 4o-mini</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Modelo</th><th>Login bloqueado</th><th>Remover do carrinho</th><th>Total</th></tr>
+    <tr>
+      <td><span class="model-name">gpt-5-mini</span></td>
+      <td><span class="pf"><i></i><i class="f"></i></span> 1/2</td>
+      <td><span class="pf"><i></i><i></i></span> 2/2</td>
+      <td class="score mid">3/4</td>
+    </tr>
+    <tr>
+      <td><span class="model-name">gpt-5-nano</span></td>
+      <td><span class="pf"><i class="f"></i><i class="f"></i></span> 0/2</td>
+      <td><span class="pf"><i class="f"></i><i class="f"></i></span> 0/2</td>
+      <td class="score bad">0/4</td>
+    </tr>
+  </table></div>
+  <p class="section-note">O nano, que brilhou no cenário simples, desaba na complexidade (planos inválidos mesmo após retry). O mini só tropeça no mesmo expect contraditório de fluxo negativo do 4o-mini.</p>
+</section>
+
+<section>
+  <p class="round">Rodada 5 — "flash-lite-latest"</p>
+  <h2>O alias <code>-latest</code> é o próprio 3.1</h2>
+  <p class="section-note">A Google não revela para onde o alias aponta, então a prova foi por fingerprint: mesmos cenários, mesmas contagens de tokens — idênticas até no output, o que é praticamente impossível entre modelos diferentes. Não existe Flash-Lite mais novo que o 3.1 (o 3.5 só saiu na linha Flash cheia).</p>
+  <div class="table-wrap"><table>
+    <tr><th>Cenário</th><th class="num">tokens in</th><th class="num">tokens out</th><th class="num">ações</th><th>lite-latest</th><th>3.1-flash-lite</th></tr>
+    <tr><td>Login</td><td class="num">4 078</td><td class="num">199</td><td class="num">2</td><td class="score good">3/3 PASS</td><td class="score good">idêntico</td></tr>
+    <tr><td>Checkout triplo</td><td class="num">4 324</td><td class="num">898</td><td class="num">12</td><td class="score good">2/2 PASS</td><td class="score good">idêntico</td></tr>
+    <tr><td>Login bloqueado</td><td class="num">4 098</td><td class="num">490</td><td class="num">5</td><td class="score good">1/1 PASS</td><td class="score good">idêntico</td></tr>
+  </table></div>
+  <div class="callout"><strong>Recomendação:</strong> prefira o nome fixo <code>gemini-3.1-flash-lite</code>. O alias flutua — quando a Google reapontar, o comportamento do planejador muda sem você mudar nada. Upgrade de modelo deve ser decisão sua, validada com <code>windup bench</code> antes.</div>
+</section>
+
+<section>
+  <p class="round">Saldo</p>
+  <h2>O que os testes deixaram no produto</h2>
+  <div class="table-wrap"><table>
+    <tr><th>Release</th><th>Mudança</th></tr>
+    <tr><td class="mono">0.11.1</td><td>Regra do plano mínimo no prompt + <code>dropFragmentEchoes()</code> (dedupe mecânico de eco de fragmento, com testes unitários)</td></tr>
+    <tr><td class="mono">0.11.2</td><td>Regra de credenciais literais vs manifesto + os 3 cenários <code>duelo-*</code> commitados como fixtures de fluxo complexo</td></tr>
+    <tr><td class="mono">0.11.3</td><td>Preço dos aliases flutuantes da Google na tabela (o ledger estimava $0.0035 em vez dos $0.0024 reais)</td></tr>
+  </table></div>
+  <p class="section-note">Custo total de toda a bancada de hoje: ≈ $0.85 — sendo $0.57 só do gemini-3.5-flash degenerando. O <code>windup costs</code> guarda a conta completa por provider e modelo.</p>
+</section>
+
+<footer>
+  Windup · windupjs@0.11.3 · dados brutos em <code>.windup/runs/</code> (ledger) · protocolo: gerações sem cache (<code>run --no-cache --llm provider:modelo</code>), verificação determinística de pós-condições em cada ação
+</footer>
+</main>
