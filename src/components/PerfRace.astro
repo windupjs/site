@@ -1,0 +1,150 @@
+---
+// Illustrative speed comparison: a per-run AI agent (LLM every step) vs Windup's
+// cached deterministic replay. Numbers anchored on real measurements —
+// replay ~671ms/$0, model-in-the-loop ~3003ms/$0.0024 (Windup's own first run).
+---
+
+<section id="speed" class="section race">
+  <div class="wrap">
+    <p class="kicker">The speed difference</p>
+    <h2 class="section-title">The model runs once — not on every test.</h2>
+    <p class="section-note">
+      Same 5-step test, two ways to run it. A per-run agent re-plans with the LLM at every step;
+      Windup plans once, then replays the cached plan with no model in the loop.
+    </p>
+
+    <div class="race-box" data-race>
+      <p class="race-caption">
+        Same test — <span class="mono">goto · click · type · wait · verify</span>
+      </p>
+
+      <div class="lane agent">
+        <div class="lane-head">
+          <span class="lane-name">AI agent — LLM on every run</span>
+          <span class="lane-metric mono"><span data-a-ms>0</span> ms · <span data-a-cost>$0.0000</span></span>
+        </div>
+        <div class="track">
+          <div class="fill" data-a-fill></div>
+          <span class="finish"></span>
+          <span class="runner agent-runner" data-a-run>
+            <svg class="spinner" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9"></path></svg>
+          </span>
+        </div>
+      </div>
+
+      <div class="lane windup">
+        <div class="lane-head">
+          <span class="lane-name">Windup — cached deterministic replay</span>
+          <span class="lane-metric mono"><span data-w-ms>0</span> ms · <span class="free">$0</span></span>
+        </div>
+        <div class="track">
+          <div class="fill" data-w-fill></div>
+          <span class="finish"></span>
+          <img class="runner mascot" data-w-run src="/brand/windup-pose-run-transparent.png" alt="" width="40" height="46" />
+        </div>
+      </div>
+    </div>
+
+    <div class="race-summary">
+      <div class="stat">
+        <div class="s-label">Same suite × 10 runs — time</div>
+        <div class="s-val"><span class="bad">~30s</span> <span class="arrow">→</span> <span class="good">~9s</span></div>
+      </div>
+      <div class="stat">
+        <div class="s-label">Same suite × 10 runs — LLM cost</div>
+        <div class="s-val"><span class="bad">$0.024</span> <span class="arrow">→</span> <span class="good">$0.0024</span></div>
+      </div>
+    </div>
+
+    <p class="race-foot">
+      Windup pays the model only on the first run (~$0.0024); every replay after is $0. Times are our
+      measured first-run (model in the loop) vs cached replay — and a warm suite replays in parallel,
+      widening the gap further.
+    </p>
+  </div>
+</section>
+
+<style>
+  .race-box {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 22px 22px 24px; box-shadow: var(--shadow); max-width: 840px; margin-bottom: 16px;
+  }
+  .race-caption { margin: 0 0 18px; font-size: 13px; color: var(--muted); }
+  .race-caption .mono { font-family: var(--font-mono); }
+
+  .lane { margin-bottom: 18px; }
+  .lane:last-child { margin-bottom: 0; }
+  .lane-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 0 0 8px; }
+  .lane-name { font-size: 14.5px; font-weight: 600; }
+  .agent .lane-name { color: var(--fail); }
+  .windup .lane-name { color: var(--pass); }
+  .lane-metric { font-family: var(--font-mono); font-size: 13px; color: var(--muted); white-space: nowrap; }
+  .free { color: var(--pass); font-weight: 600; }
+
+  .track {
+    position: relative; height: 48px; background: var(--code-bg);
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden;
+  }
+  .fill { position: absolute; inset: 0 auto 0 0; width: 0; }
+  .agent .fill { background: var(--fail-soft); }
+  .windup .fill { background: var(--pass-soft); }
+  .finish { position: absolute; top: 8px; bottom: 8px; right: 10px; border-left: 2px dashed var(--line); }
+
+  .runner { position: absolute; top: 50%; left: 0; transform: translateY(-50%); }
+  .agent-runner { color: var(--fail); display: inline-flex; }
+  .mascot { height: 46px; width: auto; filter: drop-shadow(0 5px 9px rgba(0,0,0,.28)); }
+  .spinner { animation: race-spin .8s linear infinite; }
+  @keyframes race-spin { to { transform: rotate(360deg); } }
+
+  .race-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 840px; }
+  .stat {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; box-shadow: var(--shadow);
+  }
+  .s-label { font-size: 13px; color: var(--muted); }
+  .s-val { font-size: 22px; font-weight: 800; margin-top: 4px; letter-spacing: -.01em; }
+  .s-val .arrow { color: var(--muted); font-weight: 400; margin: 0 2px; }
+  .bad { color: var(--fail); }
+  .good { color: var(--pass); }
+
+  .race-foot { font-size: 12.5px; color: var(--muted); margin: 16px 0 0; max-width: 72ch; line-height: 1.5; }
+
+  @media (max-width: 640px) {
+    .race-summary { grid-template-columns: 1fr; }
+    .lane-head { flex-direction: column; gap: 2px; align-items: flex-start; }
+  }
+</style>
+
+<script>
+  function initRace() {
+    const box = document.querySelector<HTMLElement>('[data-race]');
+    if (!box || box.dataset.bound) return;
+    box.dataset.bound = '1';
+    const q = (s: string) => box.querySelector<HTMLElement>(s);
+    const aFill = q('[data-a-fill]'), aRun = q('[data-a-run]'), aMs = q('[data-a-ms]'), aCost = q('[data-a-cost]');
+    const wFill = q('[data-w-fill]'), wRun = q('[data-w-run]'), wMs = q('[data-w-ms]');
+    if (!aFill || !aRun || !aMs || !aCost || !wFill || !wRun || !wMs) return;
+
+    const A = 3000, W = 700, HOLD = 1500, CYCLE = A + HOLD;
+    function render(t: number) {
+      const aP = Math.min(1, t / A), wP = Math.min(1, t / W);
+      aFill!.style.width = (aP * 100) + '%';
+      aRun!.style.left = 'calc(' + (aP * 100) + '% - ' + (aP * 22) + 'px)';
+      wFill!.style.width = (wP * 100) + '%';
+      wRun!.style.left = 'calc(' + (wP * 100) + '% - ' + (wP * 40) + 'px)';
+      aMs!.textContent = String(Math.round(Math.min(t, A)));
+      aCost!.textContent = '$' + ((Math.min(t, A) / A) * 0.0024).toFixed(4);
+      wMs!.textContent = String(Math.round(Math.min(t, W)));
+    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { render(A); return; }
+    let start: number | null = null;
+    function frame(ts: number) {
+      if (start === null) start = ts;
+      render((ts - start) % CYCLE);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  initRace();
+  document.addEventListener('astro:page-load', initRace);
+</script>

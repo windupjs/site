@@ -19,3 +19,6 @@ npm-debug.log*
 /llm-benchmark.html
 /windup-demo.gif
 /landing-page-brief.md
+# playwright mcp artifacts
+.playwright-mcp/
+*.playwright-screenshot.png
