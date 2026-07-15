@@ -21,7 +21,24 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `windup bench <scenario>` | Full validation protocol (generation, replay determinism, failure recovery) |
 | `windup cache clear` | Drop the trajectory cache (next runs re-plan) |
 
-**`run` flags:** `--all` · `--concurrency <n>` (parallel) · `--no-cache` · `--no-map` · `--repeat <n>` · `--headed` (show the browser) · `--slowmo <ms>` (demo pace) · `--base-url <url>` · `--browser chromium|firefox|webkit` · `--llm <provider[:model]>` · `--summary` (AI debrief) · `--suggest` (fix hint on failure) · `--reporter junit|json|html` · `--report-file <path>`
+### `run` flags
+
+| Flag | What it does |
+|---|---|
+| `--all` | Run every scenario in the directory — CI mode, one warm browser for the whole suite. Non-zero exit code if any scenario fails. |
+| `--concurrency <n>` | Run up to `n` scenarios in parallel over one shared warm browser with isolated contexts — ~2× faster on a mixed suite. Sequential by default. |
+| `--no-cache` | Ignore the cached plan and re-plan from scratch (forces one LLM call), even when a valid trajectory exists. Use to regenerate a plan on purpose. |
+| `--no-map` | Plan without the site-map graph — skip the indexed routes and selectors. Useful for debugging the planner or a brand-new environment. |
+| `--repeat <n>` | Run the scenario `n` times back-to-back over the same warm browser — stability and flake checks. |
+| `--headed` | Show the browser window instead of running headless. |
+| `--slowmo <ms>` | Add a delay between actions so you can watch each step — demo and debugging pace. |
+| `--base-url <url>` | Override the start-URL origin for this run (dev / staging / CI). Rebases even absolute scenario URLs, preserving path and query. |
+| `--browser chromium\|firefox\|webkit` | Run on the chosen engine (default Chromium). The same plan replays across all three — author once, run everywhere. |
+| `--llm <provider[:model]>` | Pick the planner LLM for this run (e.g. `openai:gpt-5-mini`). Only affects planning; cached replays never call an LLM. |
+| `--summary` | After the run, one extra LLM call writes a human-readable debrief quoting real values observed on the final page. Off by default so replays stay $0. |
+| `--suggest` | On a **failed** run, one extra LLM call proposes a concrete fix to the scenario. Fires only on failure. |
+| `--reporter junit\|json\|html` | Emit a CI report — JUnit XML, a machine-readable JSON summary, or a self-contained HTML page. |
+| `--report-file <path>` | Write the report to a specific path (default `.windup/reports/`). |
 
 ## AI debrief (`--summary`)
 
