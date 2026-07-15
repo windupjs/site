@@ -117,7 +117,9 @@
       const ph = t >= A_TOTAL ? -1 : within < 0.2 ? 0 : within < 0.6 ? 1 : within < 0.8 ? 2 : 3;
       phases.forEach((p, i) => p.classList.toggle('on', i === ph));
       aAct!.textContent = String(actionIdx + 1);
-      aClock!.textContent = fmt(at / 1000);
+      // Phases dwell in real time, but the shown clock is accelerated to ~3min
+      // to reflect what a real vision-agent run actually costs in wall-clock.
+      aClock!.textContent = fmt((at / A_TOTAL) * 184);
       flash!.style.opacity = ph === 0 ? String(Math.max(0, 0.45 * (1 - msInto / 400))) : '0';
 
       const wt = Math.min(t, W_TOTAL);
