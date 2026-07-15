@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# AI-facing documentation (llmstxt.org)
+# See https://windup.run/llms.txt and https://windup.run/llms-full.txt
+
+Sitemap: https://windup.run/sitemap-index.xml

@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { getUi, getLangFromUrl, htmlLang, switchLocalePath, LOCALES } from '../i18n';
+import { getUi, getLangFromUrl, htmlLang, switchLocalePath, stripLocale, LOCALES } from '../i18n';
 
 const lang = getLangFromUrl(Astro.url);
 const c = getUi(lang);
@@ -15,14 +15,52 @@ const {
   description = c.meta.description,
 } = Astro.props;
 
-const canonical = new URL(Astro.url.pathname, Astro.site);
-const ogImage = new URL('/brand/windup-icon.png', Astro.site);
+const site = Astro.site!;
+const canonical = new URL(Astro.url.pathname, site);
+const ogImage = new URL('/og.png', site);
+const ogImageAlt = 'Windup — natural-language E2E tests with deterministic replay';
+
 const OG_LOCALE: Record<string, string> = { en: 'en_US', pt: 'pt_BR', es: 'es_ES', zh: 'zh_CN' };
 const alternates = LOCALES.map((l) => ({
+  code: l,
   hreflang: htmlLang(l),
-  href: new URL(switchLocalePath(Astro.url, l), Astro.site).href,
+  href: new URL(switchLocalePath(Astro.url, l), site).href,
 }));
-const xDefault = new URL(switchLocalePath(Astro.url, 'en'), Astro.site).href;
+const xDefault = new URL(switchLocalePath(Astro.url, 'en'), site).href;
+const ogLocaleAlternate = LOCALES.filter((l) => l !== lang).map((l) => OG_LOCALE[l]);
+
+// Structured data (schema.org) — Organization + WebSite on every page,
+// plus SoftwareApplication on the landing page, for search & AI engines.
+const isHome = stripLocale(Astro.url.pathname).replace(/\/$/, '') === '';
+const org = {
+  '@type': 'Organization',
+  name: 'Windup',
+  url: site.origin,
+  logo: new URL('/brand/windup-icon.png', site).href,
+  sameAs: ['https://github.com/windupjs/windup', 'https://www.npmjs.com/package/windupjs'],
+};
+const graph: Record<string, unknown>[] = [
+  org,
+  { '@type': 'WebSite', name: 'Windup', url: site.origin, inLanguage: htmlLang(lang) },
+];
+if (isHome) {
+  graph.push({
+    '@type': 'SoftwareApplication',
+    name: 'Windup',
+    applicationCategory: 'DeveloperApplication',
+    operatingSystem: 'Node.js 20+',
+    description,
+    url: canonical.href,
+    image: ogImage.href,
+    inLanguage: htmlLang(lang),
+    softwareVersion: '0.x',
+    license: 'https://opensource.org/licenses/MIT',
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+    author: org,
+    sameAs: org.sameAs,
+  });
+}
+const jsonLd = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph });
 ---
 
 <!doctype html>
@@ -32,8 +70,11 @@ const xDefault = new URL(switchLocalePath(Astro.url, 'en'), Astro.site).href;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/brand/windup-icon.png" />
+    <link rel="sitemap" type="application/xml" href="/sitemap-index.xml" />
 
     <!-- Locale alternates -->
     {alternates.map((a) => (
@@ -41,17 +82,29 @@ const xDefault = new URL(switchLocalePath(Astro.url, 'en'), Astro.site).href;
     ))}
     <link rel="alternate" hreflang="x-default" href={xDefault} />
 
-    <!-- Open Graph / Twitter -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Windup" />
     <meta property="og:locale" content={OG_LOCALE[lang]} />
+    {ogLocaleAlternate.map((l) => <meta property="og:locale:alternate" content={l} />)}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    <!-- Structured data -->
+    <script type="application/ld+json" is:inline set:html={jsonLd} />
 
     <meta name="theme-color" content="#16130E" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#FAF8F3" media="(prefers-color-scheme: light)" />
