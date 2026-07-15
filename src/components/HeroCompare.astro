@@ -78,7 +78,7 @@
 
   .flash {
     position: absolute; inset: 0; background: #fff; opacity: 0;
-    pointer-events: none; transition: opacity .18s ease; border-radius: inherit;
+    pointer-events: none; border-radius: inherit;
   }
 
   @media (max-width: 420px) {
@@ -101,7 +101,9 @@
     const wDone = box.querySelector<HTMLElement>('[data-w-done]');
     if (!aClock || !wClock || !aAct || !flash || !wDone) return;
 
-    const ACT = 2400, A_TOTAL = ACT * 5, W_TOTAL = 700, HOLD = 2600, CYCLE = A_TOTAL + HOLD;
+    // Real-time dwells so the loop actually feels slow: screenshot 2s,
+    // analyze 4s, think 2s, act 2s = 10s per action, ~50s for the run.
+    const ACT = 10000, A_TOTAL = ACT * 5, W_TOTAL = 700, HOLD = 3000, CYCLE = A_TOTAL + HOLD;
     const fmt = (s: number) => {
       if (s < 60) return s.toFixed(1) + 's';
       const m = Math.floor(s / 60), r = Math.round(s - m * 60);
@@ -110,12 +112,13 @@
     function render(t: number) {
       const at = Math.min(t, A_TOTAL);
       const actionIdx = Math.min(4, Math.floor(at / ACT));
-      const within = (at - actionIdx * ACT) / ACT;
-      const ph = t >= A_TOTAL ? -1 : within < 0.104 ? 0 : within < 0.52 ? 1 : within < 0.916 ? 2 : 3;
+      const msInto = at - actionIdx * ACT;
+      const within = msInto / ACT;
+      const ph = t >= A_TOTAL ? -1 : within < 0.2 ? 0 : within < 0.6 ? 1 : within < 0.8 ? 2 : 3;
       phases.forEach((p, i) => p.classList.toggle('on', i === ph));
       aAct!.textContent = String(actionIdx + 1);
-      aClock!.textContent = fmt((at / A_TOTAL) * 68);
-      flash!.style.opacity = ph === 0 ? '0.4' : '0';
+      aClock!.textContent = fmt(at / 1000);
+      flash!.style.opacity = ph === 0 ? String(Math.max(0, 0.45 * (1 - msInto / 400))) : '0';
 
       const wt = Math.min(t, W_TOTAL);
       const wn = wt >= W_TOTAL ? 5 : Math.floor(wt / (W_TOTAL / 5));
