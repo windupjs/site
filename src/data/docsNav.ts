@@ -1,44 +1,16 @@
-// Single source of truth for docs order + sidebar grouping.
-// Page content lives in src/content/docs/<slug>.md; this controls navigation.
+// Docs structure — slugs + order + grouping. Labels/group titles are resolved
+// per-locale from the i18n dictionary (src/i18n/ui/*.ts → docs.groups / docs.labels).
 
-export interface DocLink {
-  slug: string;
-  label: string;
-}
 export interface DocGroup {
-  title: string;
-  items: DocLink[];
+  key: 'start' | 'guides' | 'reference';
+  items: string[];
 }
 
 export const docsNav: DocGroup[] = [
-  {
-    title: 'Getting started',
-    items: [
-      { slug: 'getting-started', label: 'Getting started' },
-      { slug: 'how-it-works', label: 'How it works' },
-    ],
-  },
-  {
-    title: 'Guides',
-    items: [
-      { slug: 'scenarios', label: 'Scenarios' },
-      { slug: 'credentials', label: 'Test credentials' },
-      { slug: 'environments', label: 'Environments' },
-      { slug: 'llm-providers', label: 'LLM providers' },
-      { slug: 'ci-cd', label: 'CI / CD' },
-      { slug: 'configuration', label: 'Configuration' },
-      { slug: 'api', label: 'Programmatic API' },
-    ],
-  },
-  {
-    title: 'Reference',
-    items: [
-      { slug: 'commands', label: 'Commands' },
-      { slug: 'architecture', label: 'Architecture & spec' },
-      { slug: 'techniques', label: 'Engineering notes' },
-    ],
-  },
+  { key: 'start', items: ['getting-started', 'how-it-works'] },
+  { key: 'guides', items: ['scenarios', 'credentials', 'environments', 'llm-providers', 'ci-cd', 'configuration', 'api'] },
+  { key: 'reference', items: ['commands', 'architecture', 'techniques'] },
 ];
 
-// Flattened order for prev/next navigation.
-export const docsOrder: DocLink[] = docsNav.flatMap((g) => g.items);
+/** Flattened slug order for prev/next navigation. */
+export const docsOrder: string[] = docsNav.flatMap((g) => g.items);

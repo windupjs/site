@@ -1,12 +1,13 @@
 ---
 import CopyCommand from './CopyCommand.astro';
-
-const commands = [
-  { cmd: 'npm i -D windupjs', note: 'Chromium is provisioned automatically' },
-  { cmd: 'npx windup init', note: '3 questions → windup.config.ts' },
-  { cmd: 'npx windup scan', note: 'indexes your app’s routes from the source' },
-  { cmd: 'npx windup new "log in and create an invoice for ACME"', note: 'LLM-assisted authoring' },
-  { cmd: 'npx windup run checkout', note: '1st run plans · then replay ~1s, $0' },
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url)).getStarted;
+const cmds = [
+  'npm i -D windupjs',
+  'npx windup init',
+  'npx windup scan',
+  'npx windup new "log in and create an invoice for ACME"',
+  'npx windup run checkout',
 ];
 ---
 
@@ -14,32 +15,27 @@ const commands = [
   <div class="wrap">
     <div class="start-head">
       <div>
-        <p class="kicker">Get started</p>
-        <h2 class="section-title">Five commands from zero to a replaying test.</h2>
-        <p class="section-note">
-          Node ≥ 20 and one API key — <span class="mono">GOOGLE_GENERATIVE_AI_API_KEY</span> (Google, default)
-          or <span class="mono">OPENAI_API_KEY</span> (OpenAI) — in <span class="mono">.env.local</span>.
-          Keys are used only for planning; cached replays never call an LLM.
-        </p>
+        <p class="kicker">{c.kicker}</p>
+        <h2 class="section-title">{c.title}</h2>
+        <p class="section-note" set:html={c.noteHtml}></p>
       </div>
       <img class="runner" src="/brand/windup-pose-run-transparent.png"
-        alt="Windup mascot running" width="180" height="210" loading="lazy" />
+        alt={c.runnerAlt} width="180" height="210" loading="lazy" />
     </div>
 
     <div class="cmd-list">
-      {commands.map((c) => (
+      {cmds.map((cmd, i) => (
         <div class="cmd-row">
-          <CopyCommand command={c.cmd} />
-          <span class="cmd-note">{c.note}</span>
+          <CopyCommand command={cmd} />
+          <span class="cmd-note">{c.notes[i]}</span>
         </div>
       ))}
     </div>
 
     <div class="req">
-      <span class="chip">Node <strong>≥ 20</strong></span>
-      <span class="chip">Google Gemini <strong>or</strong> OpenAI</span>
-      <span class="chip">Playwright <strong>bundled</strong></span>
-      <span class="chip pass">MIT</span>
+      {c.reqChipsHtml.map((chip, i) => (
+        <span class={i === 3 ? 'chip pass' : 'chip'} set:html={chip}></span>
+      ))}
     </div>
   </div>
 </section>

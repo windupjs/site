@@ -2,31 +2,32 @@
 // Hero visual: why a vision LLM agent is slow (perceive → think → act loop,
 // seconds per step) vs Windup replaying a cached plan directly (~0.7s).
 // Sits in place of the mascot in the hero.
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url)).heroCompare;
 ---
 
 <div class="hero-compare" data-compare aria-hidden="true">
   <div class="cmp agent">
     <span class="flash" data-a-flash></span>
     <div class="cmp-head">
-      <span class="cmp-name">LLM agent</span>
+      <span class="cmp-name">{c.agentName}</span>
       <span class="cmp-clock mono" data-a-clock>0.0s</span>
     </div>
-    <p class="cmp-sub">sees &amp; thinks every step · <span data-a-act>1</span>/5</p>
+    <p class="cmp-sub" set:html={c.agentSubHtml}></p>
     <ul class="phases">
-      <li data-ph><span class="marker"></span> screenshot</li>
-      <li data-ph><span class="marker"></span> analyze image</li>
-      <li data-ph><span class="marker"></span> think</li>
-      <li data-ph><span class="marker"></span> click / type</li>
+      {c.phases.map((p) => (
+        <li data-ph><span class="marker"></span> {p}</li>
+      ))}
     </ul>
-    <p class="cmp-foot">↻ repeats every action</p>
+    <p class="cmp-foot">{c.agentFoot}</p>
   </div>
 
   <div class="cmp windup">
     <div class="cmp-head">
-      <span class="cmp-name">Windup</span>
+      <span class="cmp-name">{c.windupName}</span>
       <span class="cmp-clock mono" data-w-clock>0.0s</span>
     </div>
-    <p class="cmp-sub">cached plan · no model</p>
+    <p class="cmp-sub">{c.windupSub}</p>
     <ul class="wacts">
       <li data-wa><span class="marker"></span> click #login</li>
       <li data-wa><span class="marker"></span> fill #user</li>
@@ -34,7 +35,7 @@
       <li data-wa><span class="marker"></span> click #submit</li>
       <li data-wa><span class="marker"></span> verify</li>
     </ul>
-    <p class="cmp-foot done" data-w-done>done — while the agent still thinks</p>
+    <p class="cmp-foot done" data-w-done>{c.windupDone}</p>
   </div>
 </div>
 

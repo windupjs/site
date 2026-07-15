@@ -1,4 +1,7 @@
 ---
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url)).copyCommand;
+
 interface Props {
   command: string;
   /** shown as the leading prompt char; default "$" */
@@ -7,9 +10,9 @@ interface Props {
 const { command, prompt = '$' } = Astro.props;
 ---
 
-<div class="copy-cmd" data-command={command}>
+<div class="copy-cmd" data-command={command} data-copy={c.copy} data-copied={c.copied}>
   <code>{prompt && <span class="prompt">{prompt} </span>}{command}</code>
-  <button type="button" class="copy-btn" aria-label="Copy command to clipboard">
+  <button type="button" class="copy-btn" aria-label={c.aria}>
     <svg class="ico-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
       <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -17,7 +20,7 @@ const { command, prompt = '$' } = Astro.props;
     <svg class="ico-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden>
       <path d="M20 6 9 17l-5-5"></path>
     </svg>
-    <span class="copy-label">Copy</span>
+    <span class="copy-label">{c.copy}</span>
   </button>
 </div>
 
@@ -53,6 +56,8 @@ const { command, prompt = '$' } = Astro.props;
       if (!btn || btn.dataset.bound) return;
       btn.dataset.bound = '1';
       const cmd = el.dataset.command ?? '';
+      const copyTxt = el.dataset.copy ?? 'Copy';
+      const copiedTxt = el.dataset.copied ?? 'Copied';
       const copyIco = btn.querySelector<SVGElement>('.ico-copy');
       const checkIco = btn.querySelector<SVGElement>('.ico-check');
       const label = btn.querySelector<HTMLElement>('.copy-label');
@@ -68,12 +73,12 @@ const { command, prompt = '$' } = Astro.props;
         btn.classList.add('copied');
         copyIco?.setAttribute('hidden', '');
         checkIco?.removeAttribute('hidden');
-        if (label) label.textContent = 'Copied';
+        if (label) label.textContent = copiedTxt;
         setTimeout(() => {
           btn.classList.remove('copied');
           checkIco?.setAttribute('hidden', '');
           copyIco?.removeAttribute('hidden');
-          if (label) label.textContent = 'Copy';
+          if (label) label.textContent = copyTxt;
         }, 1600);
       });
     });

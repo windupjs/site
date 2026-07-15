@@ -3,6 +3,7 @@ import Layout from './Layout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { docsNav, docsOrder } from '../data/docsNav';
+import { getUi, getLangFromUrl, localizedPath } from '../i18n';
 import type { CollectionEntry } from 'astro:content';
 import type { MarkdownHeading } from 'astro';
 
@@ -12,17 +13,22 @@ interface Props {
 }
 
 const { entry, headings } = Astro.props;
-const currentSlug = entry.slug;
+const lang = getLangFromUrl(Astro.url);
+const c = getUi(lang);
+const t = c.docs;
+
+// entry.slug is like "en/getting-started" — the bare slug drives nav/labels
+const currentSlug = entry.slug.split('/').slice(1).join('/');
+const label = (slug: string) => t.labels[slug as keyof typeof t.labels] ?? slug;
+const href = (slug: string) =>
+  slug === 'getting-started' ? localizedPath(lang, '/docs') : localizedPath(lang, `/docs/${slug}`);
 
 const toc = headings.filter((h) => h.depth === 2);
-
-const idx = docsOrder.findIndex((d) => d.slug === currentSlug);
+const idx = docsOrder.indexOf(currentSlug);
 const prev = idx > 0 ? docsOrder[idx - 1] : null;
 const next = idx >= 0 && idx < docsOrder.length - 1 ? docsOrder[idx + 1] : null;
 
-const href = (slug: string) => (slug === 'getting-started' ? '/docs' : `/docs/${slug}`);
-
-const title = `${entry.data.title} · Windup docs`;
+const title = `${entry.data.title}${c.meta.docsTitleSuffix}`;
 ---
 
 <Layout title={title} description={entry.data.description}>
@@ -30,17 +36,17 @@ const title = `${entry.data.title} · Windup docs`;
 
   <div class="docs-shell">
     <!-- Sidebar (desktop) -->
-    <aside class="docs-sidebar" aria-label="Documentation">
+    <aside class="docs-sidebar" aria-label={t.ariaSidebar}>
       {docsNav.map((group) => (
         <div class="group">
-          <p class="group-title">{group.title}</p>
+          <p class="group-title">{t.groups[group.key]}</p>
           <ul>
-            {group.items.map((item) => (
+            {group.items.map((slug) => (
               <li>
-                <a href={href(item.slug)} aria-current={item.slug === currentSlug ? 'page' : undefined}>
-                  {item.label}
+                <a href={href(slug)} aria-current={slug === currentSlug ? 'page' : undefined}>
+                  {label(slug)}
                 </a>
-                {item.slug === currentSlug && toc.length > 0 && (
+                {slug === currentSlug && toc.length > 0 && (
                   <ul class="toc-sub">
                     {toc.map((h) => (
                       <li><a href={`#${h.slug}`}>{h.text}</a></li>
@@ -57,12 +63,12 @@ const title = `${entry.data.title} · Windup docs`;
     <main class="docs-main">
       <!-- Mobile page picker -->
       <div class="docs-mobile-nav">
-        <label class="visually-hidden" for="docs-jump">Jump to a docs page</label>
+        <label class="visually-hidden" for="docs-jump">{t.mobileJump}</label>
         <select id="docs-jump" onchange="if(this.value)location.href=this.value">
           {docsNav.map((group) => (
-            <optgroup label={group.title}>
-              {group.items.map((item) => (
-                <option value={href(item.slug)} selected={item.slug === currentSlug}>{item.label}</option>
+            <optgroup label={t.groups[group.key]}>
+              {group.items.map((slug) => (
+                <option value={href(slug)} selected={slug === currentSlug}>{label(slug)}</option>
               ))}
             </optgroup>
           ))}
@@ -70,29 +76,24 @@ const title = `${entry.data.title} · Windup docs`;
       </div>
 
       {currentSlug === 'getting-started' && (
-        <aside class="docs-ai-note">
-          <strong>Using an AI assistant?</strong> Point it at
-          <a href="/llms.txt"><code>/llms.txt</code></a> — or
-          <a href="/llms-full.txt"><code>/llms-full.txt</code></a> for the whole thing in one file —
-          then describe your flows. It can author and run the scenarios for you.
-        </aside>
+        <aside class="docs-ai-note" set:html={t.aiNoteHtml}></aside>
       )}
 
       <article class="prose">
         <slot />
       </article>
 
-      <nav class="docs-pager" aria-label="Pagination">
+      <nav class="docs-pager" aria-label={t.ariaPager}>
         {prev ? (
-          <a class="prev" href={href(prev.slug)}>
-            <span class="dir">← Previous</span>
-            <span class="pg-label">{prev.label}</span>
+          <a class="prev" href={href(prev)}>
+            <span class="dir">← {t.prev}</span>
+            <span class="pg-label">{label(prev)}</span>
           </a>
         ) : <span></span>}
         {next ? (
-          <a class="next" href={href(next.slug)}>
-            <span class="dir">Next →</span>
-            <span class="pg-label">{next.label}</span>
+          <a class="next" href={href(next)}>
+            <span class="dir">{t.next} →</span>
+            <span class="pg-label">{label(next)}</span>
           </a>
         ) : <span></span>}
       </nav>

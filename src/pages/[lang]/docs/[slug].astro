@@ -1,0 +1,21 @@
+---
+import { getCollection } from 'astro:content';
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('docs');
+  return entries
+    .filter((e) => !e.slug.startsWith('en/') && !e.slug.endsWith('/getting-started'))
+    .map((e) => {
+      const [lang, ...rest] = e.slug.split('/');
+      return { params: { lang, slug: rest.join('/') }, props: { entry: e } };
+    });
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await entry.render();
+---
+
+<DocsLayout entry={entry} headings={headings}>
+  <Content />
+</DocsLayout>

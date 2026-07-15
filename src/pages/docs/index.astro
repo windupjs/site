@@ -2,7 +2,7 @@
 import { getEntry } from 'astro:content';
 import DocsLayout from '../../layouts/DocsLayout.astro';
 
-const entry = await getEntry('docs', 'getting-started');
+const entry = await getEntry('docs', 'en/getting-started');
 const { Content, headings } = await entry.render();
 ---
 

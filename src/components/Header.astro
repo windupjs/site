@@ -1,29 +1,47 @@
 ---
+import { getUi, getLangFromUrl, localizedPath, switchLocalePath, LANGUAGES } from '../i18n';
+const lang = getLangFromUrl(Astro.url);
+const c = getUi(lang);
+const home = localizedPath(lang, '/');
+const current = LANGUAGES.find((l) => l.code === lang);
 const github = 'https://github.com/windupjs/windup';
 const npm = 'https://www.npmjs.com/package/windupjs';
 ---
 
 <header class="site-header">
   <div class="wrap bar">
-    <a class="brand" href="/" aria-label="Windup home">
+    <a class="brand" href={home} aria-label={c.header.home}>
       <img src="/brand/windup-logo-lockup-transparent.png" alt="Windup" width="133" height="32" />
     </a>
 
-    <nav class="nav" aria-label="Primary">
-      <a href="/#how">How it works</a>
-      <a href="/#features">Features</a>
-      <a href="/docs">Docs</a>
-      <a href="/#start">Get started</a>
+    <nav class="nav" aria-label={c.header.primaryNav}>
+      <a href={`${home}#how`}>{c.header.nav.how}</a>
+      <a href={`${home}#features`}>{c.header.nav.features}</a>
+      <a href={localizedPath(lang, '/docs')}>{c.header.nav.docs}</a>
+      <a href={`${home}#start`}>{c.header.nav.start}</a>
     </nav>
 
     <div class="actions">
-      <a class="icon-link" href={npm} target="_blank" rel="noopener" aria-label="Windup on npm">
+      <details class="lang">
+        <summary class="icon-link lang-summary" aria-label={c.header.language}>
+          <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"></path></svg>
+          <span class="lang-short">{current?.short}</span>
+        </summary>
+        <ul class="lang-menu">
+          {LANGUAGES.map((l) => (
+            <li>
+              <a href={switchLocalePath(Astro.url, l.code)} aria-current={l.code === lang ? 'true' : undefined}>{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </details>
+      <a class="icon-link" href={npm} target="_blank" rel="noopener" aria-label={c.header.npm}>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M1.763 0C.786 0 0 .786 0 1.763v20.474C0 23.214.786 24 1.763 24h20.474c.977 0 1.763-.786 1.763-1.763V1.763C24 .786 23.214 0 22.237 0zM5.13 5.323l13.837.019-.009 13.836h-3.464l.01-10.382h-3.456L12.04 19.17H5.113z"></path></svg>
       </a>
-      <a class="icon-link" href={github} target="_blank" rel="noopener" aria-label="Windup on GitHub">
+      <a class="icon-link" href={github} target="_blank" rel="noopener" aria-label={c.header.github}>
         <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 0 0 7.86 10.92c.575.106.785-.25.785-.556 0-.274-.01-1-.015-1.965-3.196.695-3.87-1.54-3.87-1.54-.523-1.33-1.276-1.684-1.276-1.684-1.043-.713.08-.698.08-.698 1.153.08 1.76 1.184 1.76 1.184 1.025 1.756 2.69 1.25 3.345.955.104-.743.4-1.25.727-1.538-2.552-.29-5.235-1.276-5.235-5.677 0-1.254.448-2.28 1.183-3.084-.119-.29-.513-1.46.112-3.043 0 0 .965-.31 3.163 1.178a10.98 10.98 0 0 1 2.88-.388c.977.004 1.96.132 2.88.388 2.196-1.488 3.16-1.178 3.16-1.178.626 1.583.232 2.753.114 3.043.737.804 1.182 1.83 1.182 3.084 0 4.412-2.688 5.383-5.248 5.668.413.355.78 1.057.78 2.13 0 1.538-.014 2.778-.014 3.156 0 .309.207.668.79.555A11.503 11.503 0 0 0 23.5 12C23.5 5.73 18.27.5 12 .5z"></path></svg>
       </a>
-      <button type="button" class="icon-link theme-toggle" aria-label="Toggle color theme">
+      <button type="button" class="icon-link theme-toggle" aria-label={c.header.toggleTheme}>
         <svg class="ico-sun" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
         <svg class="ico-moon" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" hidden><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg>
       </button>
@@ -52,6 +70,25 @@ const npm = 'https://www.npmjs.com/package/windupjs';
     transition: color .15s, border-color .15s, background .15s;
   }
   .icon-link:hover { color: var(--ink); border-color: var(--line); background: var(--card); text-decoration: none; }
+
+  /* language switcher */
+  .lang { position: relative; }
+  .lang summary { list-style: none; width: auto; gap: 5px; padding: 0 8px; }
+  .lang summary::-webkit-details-marker { display: none; }
+  .lang-short { font-size: 12.5px; font-weight: 600; }
+  .lang[open] .lang-summary { color: var(--ink); border-color: var(--line); background: var(--card); }
+  .lang-menu {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 30;
+    list-style: none; margin: 0; padding: 6px; min-width: 148px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: var(--shadow);
+  }
+  .lang-menu a {
+    display: block; padding: 7px 10px; border-radius: 7px;
+    font-size: 14px; color: var(--muted); text-decoration: none;
+  }
+  .lang-menu a:hover { color: var(--ink); background: var(--bg); }
+  .lang-menu a[aria-current="true"] { color: var(--accent); font-weight: 600; }
 
   @media (max-width: 760px) {
     .nav { display: none; }

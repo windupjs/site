@@ -1,4 +1,6 @@
 ---
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url));
 const github = 'https://github.com/windupjs/windup';
 const npm = 'https://www.npmjs.com/package/windupjs';
 const spec = 'https://github.com/windupjs/windup/blob/main/docs/specs/SPEC.md';
@@ -12,22 +14,22 @@ const license = 'https://github.com/windupjs/windup/blob/main/LICENSE';
       <img src="/brand/windup-icon.png" alt="" width="34" height="34" />
       <div>
         <div class="foot-name">Windup</div>
-        <div class="foot-tag">Natural-language E2E tests with deterministic replay.</div>
+        <div class="foot-tag">{c.footer.tagline}</div>
       </div>
     </div>
 
-    <nav class="foot-links" aria-label="Footer">
-      <a href={npm} target="_blank" rel="noopener">npm</a>
-      <a href={github} target="_blank" rel="noopener">GitHub</a>
-      <a href={spec} target="_blank" rel="noopener">Spec</a>
-      <a href={changelog} target="_blank" rel="noopener">Changelog</a>
-      <a href="/llms.txt">llms.txt</a>
-      <a href={license} target="_blank" rel="noopener">MIT License</a>
+    <nav class="foot-links" aria-label={c.footer.nav}>
+      <a href={npm} target="_blank" rel="noopener">{c.footer.links.npm}</a>
+      <a href={github} target="_blank" rel="noopener">{c.footer.links.github}</a>
+      <a href={spec} target="_blank" rel="noopener">{c.footer.links.spec}</a>
+      <a href={changelog} target="_blank" rel="noopener">{c.footer.links.changelog}</a>
+      <a href="/llms.txt">{c.footer.links.llms}</a>
+      <a href={license} target="_blank" rel="noopener">{c.footer.links.license}</a>
     </nav>
   </div>
   <div class="wrap foot-note">
-    <span class="chip">beta</span>
-    <span>Usable and tested. Open-source under the MIT license.</span>
+    <span class="chip">{c.footer.beta}</span>
+    <span>{c.footer.note}</span>
   </div>
 </footer>
 

@@ -1,26 +1,25 @@
 ---
-const stats = [
-  { big: '60/60', label: 'cached replays passed', sub: '4 scenarios × 15 replays — zero flakes' },
-  { big: 'llm_calls=0', label: 'on every replay', sub: 'login · multi-step checkout · add/remove · a 2nd site', mono: true },
-  { big: '~$0.0025', label: 'per generation', sub: 'default model, gemini-3.1-flash-lite' },
-  { big: '106 routes', label: 'production dogfood', sub: 'run against a real production app' },
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url)).reliability;
+const bigs = [
+  { big: '60/60', mono: false },
+  { big: 'llm_calls=0', mono: true },
+  { big: '~$0.0025', mono: false },
+  { big: '106 routes', mono: false },
 ];
 ---
 
 <section class="section reliability">
   <div class="wrap rel-grid">
     <div class="rel-copy">
-      <p class="kicker">Reliability</p>
-      <h2 class="section-title">Deterministic means deterministic.</h2>
-      <p class="section-note">
-        Replays are measured, not promised. The cached plan produces the same result on every run —
-        no model, no flakes.
-      </p>
+      <p class="kicker">{c.kicker}</p>
+      <h2 class="section-title">{c.title}</h2>
+      <p class="section-note">{c.note}</p>
 
       <div class="stat-grid">
-        {stats.map((s) => (
+        {c.stats.map((s, i) => (
           <div class="stat">
-            <div class={`stat-big${s.mono ? ' mono' : ''}`}>{s.big}</div>
+            <div class={`stat-big${bigs[i].mono ? ' mono' : ''}`}>{bigs[i].big}</div>
             <div class="stat-label">{s.label}</div>
             <div class="stat-sub">{s.sub}</div>
           </div>
@@ -30,7 +29,7 @@ const stats = [
 
     <div class="rel-visual">
       <img src="/brand/windup-pose-check-transparent.png"
-        alt="Windup mascot holding a green check mark" width="220" height="250" loading="lazy" />
+        alt={c.checkAlt} width="220" height="250" loading="lazy" />
     </div>
   </div>
 </section>

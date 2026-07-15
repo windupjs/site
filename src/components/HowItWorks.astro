@@ -1,61 +1,34 @@
 ---
-const steps = [
-  {
-    n: '1',
-    title: 'Plan (once)',
-    body: 'A natural-language task goes to the planner. The LLM emits a JSON action plan — one call, on the first run only.',
-    meta: 'llm_calls=1 · ~$0.0025',
-  },
-  {
-    n: '2',
-    title: 'Execute + verify',
-    body: 'A deterministic executor (Playwright) runs the plan. Cheap DOM/URL post-conditions verify each action — no LLM.',
-    meta: 'trusted input events',
-  },
-  {
-    n: '3',
-    title: 'Replay (free)',
-    body: 'The trajectory is cached. Every later run replays it: zero LLM calls, ~1 second, $0, same plan every time.',
-    meta: 'llm_calls=0 · $0',
-  },
-];
-
-const principles = [
-  ['Plans are data, not code', 'Schema-validated JSON — no runtime improvisation.'],
-  ['Verification without LLM', 'Post-conditions check DOM/URL on every action.'],
-  ['Self-healing cache', 'A failed check invalidates the plan → re-plan.'],
-  ['Zero hardcoded site knowledge', 'The engine knows nothing about your app up front.'],
-];
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url)).howItWorks;
+const { flow } = c;
 ---
 
 <section id="how" class="section how">
   <div class="wrap">
-    <p class="kicker">How it works</p>
-    <h2 class="section-title">Plan once with the LLM, then replay without it.</h2>
-    <p class="section-note">
-      The expensive part — figuring out the browser actions — happens a single time and is turned
-      into cached, verifiable data.
-    </p>
+    <p class="kicker">{c.kicker}</p>
+    <h2 class="section-title">{c.title}</h2>
+    <p class="section-note">{c.note}</p>
 
     <!-- Flow diagram -->
-    <div class="flow" role="img" aria-label="Flow: a natural-language task goes to the LLM planner, which emits a JSON action plan; a deterministic executor with cheap verification runs it and writes a trajectory cache; later runs replay from the cache with zero LLM, about one second, at zero cost.">
-      <div class="node in">Natural-language task</div>
+    <div class="flow" role="img" aria-label={c.flowAria}>
+      <div class="node in">{flow.task}</div>
       <div class="arrow">→</div>
-      <div class="node accent">Planner<span>LLM · 1 call</span></div>
+      <div class="node accent">{flow.planner}<span>{flow.plannerSub}</span></div>
       <div class="arrow">→</div>
-      <div class="node">JSON action plan</div>
+      <div class="node">{flow.plan}</div>
       <div class="arrow">→</div>
-      <div class="node">Deterministic executor<span>+ cheap verify</span></div>
+      <div class="node">{flow.executor}<span>{flow.executorSub}</span></div>
       <div class="arrow down">↓</div>
-      <div class="node cache">Trajectory cache</div>
+      <div class="node cache">{flow.cache}</div>
       <div class="arrow tail">→</div>
-      <div class="node pass">Next runs: 0 LLM · ~1s · $0</div>
+      <div class="node pass">{flow.next}</div>
     </div>
 
     <ol class="steps">
-      {steps.map((s) => (
+      {c.steps.map((s, i) => (
         <li class="step-card">
-          <span class="step-n">{s.n}</span>
+          <span class="step-n">{i + 1}</span>
           <h3>{s.title}</h3>
           <p>{s.body}</p>
           <span class="step-meta">{s.meta}</span>
@@ -64,7 +37,7 @@ const principles = [
     </ol>
 
     <ul class="principles">
-      {principles.map(([t, d]) => (
+      {c.principles.map(([t, d]) => (
         <li><strong>{t}</strong> — {d}</li>
       ))}
     </ul>

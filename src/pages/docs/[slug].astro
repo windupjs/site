@@ -5,9 +5,8 @@ import DocsLayout from '../../layouts/DocsLayout.astro';
 export async function getStaticPaths() {
   const entries = await getCollection('docs');
   return entries
-    // getting-started is served at /docs (see index.astro)
-    .filter((e) => e.slug !== 'getting-started')
-    .map((e) => ({ params: { slug: e.slug }, props: { entry: e } }));
+    .filter((e) => e.slug.startsWith('en/') && e.slug !== 'en/getting-started')
+    .map((e) => ({ params: { slug: e.slug.replace('en/', '') }, props: { entry: e } }));
 }
 
 const { entry } = Astro.props;

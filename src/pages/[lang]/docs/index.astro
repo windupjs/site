@@ -1,0 +1,19 @@
+---
+import { getCollection } from 'astro:content';
+import DocsLayout from '../../../layouts/DocsLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('docs');
+  return ['pt', 'es', 'zh'].map((lang) => ({
+    params: { lang },
+    props: { entry: entries.find((e) => e.slug === `${lang}/getting-started`) },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content, headings } = await entry.render();
+---
+
+<DocsLayout entry={entry} headings={headings}>
+  <Content />
+</DocsLayout>

@@ -1,0 +1,21 @@
+---
+title: Notas de engenharia
+description: As técnicas que tornam testes em linguagem natural determinísticos e baratos — replay planejado uma vez, cache autorreparável, assinaturas estruturais e mais.
+---
+
+# Notas de engenharia — as técnicas por trás do Windup
+
+Um resumo das abordagens que tornam testes em linguagem natural determinísticos e baratos:
+
+- **Planeje uma vez, replay grátis.** O LLM é usado exatamente uma vez por cenário (mais o replanejamento automático quando o app muda). Sua saída é um **plano de ações em JSON validado por schema — dados, não código**: sem scripts gerados, sem condicionais, sem improviso em tempo de execução. Os replays executam o plano em cache com zero chamadas ao modelo.
+- **Execução determinística.** Os planos rodam no Playwright com checagens nativas de actionability e eventos de entrada confiáveis. Cada ação carrega uma pós-condição explícita (`expect`: elemento visível / glob de URL / valor de input) verificada **sem LLM** — a verificação custa uma query no DOM, não tokens.
+- **Cache autorreparável.** As trajetórias ficam em cache indexadas por cenário + *caminho* da URL inicial (portável entre hosts de dev/staging/CI). Uma verificação que falha invalida o plano, preserva a entrada obsoleta como evidência e dispara um replanejamento com a falha como contexto.
+- **Assinaturas estruturais de página.** As páginas são identificadas por um SHA-256 dos seus elementos interativos normalizados — sem texto, sem dados — para que ruído de ambiente não divida identidades, e desvios na página inicial são detectados (de forma tolerante) no replay.
+- **Conhecimento do site em camadas.** Um grafo de mapa do site alimenta o planejador com rotas e seletores reais, construído a partir de três fontes com precedência estrita — observação em tempo de execução > scan estático do código > LLM-assist limitado. Conhecimento é cache, não verdade: qualquer coisa obsoleta degrada para descoberta em tempo de execução.
+- **Disciplina de orçamento do prompt.** O prompt de planejamento mantém tamanho ≈ constante (~32k caracteres): árvore da página, fatia do mapa, catálogo de fragmentos e manifesto têm cada um orçamentos rígidos de caracteres. Prompts longos degradam mensuravelmente modelos pequenos — os orçamentos são um recurso de correção, não uma otimização.
+- **Normalização mecânica em vez de esperança no prompt.** A saída do modelo é sanitizada de forma determinística: campos vazios descartados, ids renumerados, `wait_for`⇄`expect` normalizados, ações de eco de fragmento deduplicadas, credenciais removidas de cenários autorados. Testes A/B entre provedores mostraram que instruções de prompt sozinhas não se sustentam entre modelos — o código tem a palavra final.
+- **Retry em dois níveis.** Falhas semânticas (plano inválido) recebem um retry curto carregando os erros de validação; patologias transitórias de API (degeneração por loop de tokens, rede) recebem novas chamadas com seeds variados. Retries de prompt completo são evitados — eles reativam a degeneração de forma confiável.
+- **Blocos de construção componíveis.** Fragmentos são subtrajetórias selecionadas e versionadas (ex.: login) que os planos referenciam por id — atualizados uma vez, propagados em todo lugar, expandidos em tempo de execução. O manifesto do projeto injeta conhecimento da equipe (convenções, contas, vocabulário) em cada plano.
+- **Segredos por referência.** Valores de credenciais ficam em `.env.local`/secrets de CI; arquivos versionados carregam apenas mapeamentos conta → nome de ENV. Os planos usam `value_ref`, resolvido em tempo de execução — os segredos nunca chegam ao LLM, ao cache ou ao git.
+- **Fronteira de LLM agnóstica de provedor.** Uma interface, implementações de Google e OpenAI (o cliente OpenAI é REST puro — sem o peso de um SDK), selecionável por execução. Trocar o motor do navegador e adicionar um provedor foram cada um uma mudança em um único arquivo — as fronteiras são a arquitetura.
+- **Custo que você pode auditar.** Cada ponto de contato com o LLM tem um limite explícito e entra em um livro-razão por execução com tokens, modelo e provedor; `windup costs` recalcula a partir de uma tabela de preços datada, para que o histórico permaneça correto conforme os preços mudam.

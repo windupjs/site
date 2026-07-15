@@ -1,0 +1,36 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Hero from '../../components/Hero.astro';
+import Pitch from '../../components/Pitch.astro';
+import HowItWorks from '../../components/HowItWorks.astro';
+import WhyWindup from '../../components/WhyWindup.astro';
+import Features from '../../components/Features.astro';
+import CodeExample from '../../components/CodeExample.astro';
+import CICD from '../../components/CICD.astro';
+import Reliability from '../../components/Reliability.astro';
+import GetStarted from '../../components/GetStarted.astro';
+import AiReady from '../../components/AiReady.astro';
+import Footer from '../../components/Footer.astro';
+
+export function getStaticPaths() {
+  return [{ params: { lang: 'pt' } }, { params: { lang: 'es' } }, { params: { lang: 'zh' } }];
+}
+---
+
+<Layout>
+  <Header />
+  <main>
+    <Hero />
+    <Pitch />
+    <HowItWorks />
+    <WhyWindup />
+    <Features />
+    <CodeExample />
+    <CICD />
+    <Reliability />
+    <GetStarted />
+    <AiReady />
+  </main>
+  <Footer />
+</Layout>

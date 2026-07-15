@@ -1,11 +1,13 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 
-// Exposes each doc page as raw markdown at /docs/<slug>.md — the clean,
+// Exposes each en doc page as raw markdown at /docs/<slug>.md — the clean,
 // HTML-free version that llms.txt links to and that AI agents can ingest.
 export async function getStaticPaths() {
   const entries = await getCollection('docs');
-  return entries.map((e) => ({ params: { slug: e.slug }, props: { entry: e } }));
+  return entries
+    .filter((e) => e.slug.startsWith('en/'))
+    .map((e) => ({ params: { slug: e.slug.replace('en/', '') }, props: { entry: e } }));
 }
 
 export const GET: APIRoute = ({ props }) => {

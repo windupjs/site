@@ -1,0 +1,48 @@
+---
+title: Configuración
+description: La referencia de windup.config.ts — base URL, proveedores de LLM, ajustes de scan y el manifiesto del proyecto que inyecta el conocimiento del equipo en el planificador.
+---
+
+# Configuración (`windup.config.ts`)
+
+```ts
+import { defineConfig } from "windupjs";
+
+export default defineConfig({
+  baseUrl: "http://localhost:3000",
+  llm: {
+    provider: "google",
+    model: "gemini-3.1-flash-lite",
+    // Several providers at once — pick per run with --llm (see "LLM providers"):
+    providers: { openai: { model: "gpt-5-mini" } },
+  },
+  scenarios: "e2e/scenarios",
+  framework: "react-router",          // detected by init; used by scan
+  // browser: "chromium",             // or "firefox" / "webkit" (need: npx playwright install <name>)
+  scan: {
+    llmAssist: { enabled: true, maxCalls: 20 },   // hard cost cap per scan
+  },
+  // Project manifest: team-provided knowledge injected into the planner prompt.
+  context: {
+    conventions: ["every interactive element has a data-testid"],
+    credentials: {
+      qa: { user: "ENV:QA_USER", password: "ENV:QA_PASSWORD" },
+    },
+    vocabulary: { "order": "the Order entity, screen /orders" },
+  },
+});
+```
+
+- **`context.credentials`** mapea nombres de cuenta a referencias ENV. Cuando una tarea menciona la cuenta, el plan usa `value_ref` — las credenciales del manifiesto tienen precedencia aunque la página muestre valores, y al planificador se le prohíbe inventar nombres ENV.
+- **Asistencia LLM** (capa 3 de scan) lee archivos que las capas estáticas no pudieron resolver (rutas construidas dinámicamente, componentes indirectos), limitada por `maxCalls`. Los resultados se recuerdan por hash de archivo — los archivos sin cambios nunca vuelven a costar. Los costes se registran en el libro mayor y se muestran con `windup costs`.
+
+## Qué vive dónde
+
+| Ruta | Contenido | ¿Versionar? |
+|---|---|---|
+| `windup.config.ts` | Configuración | ✅ |
+| `e2e/scenarios/*.json` | Tus pruebas, en lenguaje natural | ✅ |
+| `e2e/fragments/*.json` | Bloques reutilizables curados | ✅ |
+| `windup.credentials.json` | Mapeo cuenta → nombre ENV (sin valores) | ✅ |
+| `.env.local` | Valores de credenciales | ❌ (auto-gitignored; CI usa secretos con los mismos nombres) |
+| `.windup/` | Estado derivado: caché de planes, libro mayor de ejecuciones, mapa del sitio, informes | ❌ (init lo añade a `.gitignore`) |

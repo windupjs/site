@@ -1,11 +1,12 @@
 ---
 import CodeBlock from './CodeBlock.astro';
-
-const reports = [
-  { href: '/reports/windup-report.html', label: 'Full HTML report', note: 'suite run, 9/10 (one external demo site down)' },
-  { href: '/reports/windup-report-replay.html', label: 'Replay report', note: 'same suite from cache — llm_calls=0, $0' },
-  { href: '/reports/windup-report-summary.html', label: '--summary run', note: 'AI debrief quoting real page values' },
-  { href: '/reports/windup-report-suggest.html', label: '--suggest run', note: 'a failure, with an AI-suggested fix' },
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url)).cicd;
+const reportHrefs = [
+  '/reports/windup-report.html',
+  '/reports/windup-report-replay.html',
+  '/reports/windup-report-summary.html',
+  '/reports/windup-report-suggest.html',
 ];
 
 const ciHtml = `<span class="tok-muted">$</span> npx windup run --all --reporter junit \\
@@ -14,36 +15,32 @@ const ciHtml = `<span class="tok-muted">$</span> npx windup run --all --reporter
 
 <section class="section cicd">
   <div class="wrap">
-    <p class="kicker">CI / CD</p>
-    <h2 class="section-title">Drop it into your pipeline. Exit codes and reports included.</h2>
-    <p class="section-note">
-      Run the whole suite in one warm browser, fail the build on any failing scenario, and emit
-      machine- or human-readable reports.
-    </p>
+    <p class="kicker">{c.kicker}</p>
+    <h2 class="section-title">{c.title}</h2>
+    <p class="section-note">{c.note}</p>
 
     <div class="cicd-grid">
       <div>
-        <CodeBlock label="ci — one line" lang="bash" html={ciHtml} />
+        <CodeBlock label={c.ciLabel} lang="bash" html={ciHtml} />
         <ul class="cicd-points">
-          <li><span class="mono">--all</span> runs every scenario in a single warm browser for the whole suite.</li>
-          <li><span class="mono">--concurrency &lt;n&gt;</span> runs scenarios in parallel (~2× faster on a mixed suite); <span class="mono">--browser firefox|webkit</span> to run cross-browser.</li>
-          <li>Non-zero exit code when any scenario fails.</li>
-          <li><span class="mono">--reporter junit|json|html</span>; <span class="mono">windup costs --json</span> tracks AI spend in the pipeline.</li>
+          {c.pointsHtml.map((p) => (
+            <li set:html={p}></li>
+          ))}
         </ul>
       </div>
 
       <aside class="reports">
-        <h3>Real reports (static HTML, no JS)</h3>
+        <h3>{c.reportsHeading}</h3>
         <ul>
-          {reports.map((r) => (
+          {c.reports.map((r, i) => (
             <li>
-              <a href={r.href} target="_blank" rel="noopener">{r.label} <span aria-hidden="true">↗</span></a>
+              <a href={reportHrefs[i]} target="_blank" rel="noopener">{r.label} <span aria-hidden="true">↗</span></a>
               <span class="rnote">{r.note}</span>
             </li>
           ))}
           <li class="bench">
-            <a href="/reports/llm-benchmark.html" target="_blank" rel="noopener">LLM planner benchmark <span aria-hidden="true">↗</span></a>
-            <span class="rnote">Gemini vs OpenAI on the planner — accuracy, cost, latency.</span>
+            <a href="/reports/llm-benchmark.html" target="_blank" rel="noopener">{c.bench.label} <span aria-hidden="true">↗</span></a>
+            <span class="rnote">{c.bench.note}</span>
           </li>
         </ul>
       </aside>

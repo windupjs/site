@@ -1,40 +1,31 @@
 ---
 import CopyCommand from './CopyCommand.astro';
-
-const promptText = 'Read https://windup.run/llms.txt and set up Windup E2E tests for my app, then write scenarios for these flows: ...';
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url)).aiReady;
 ---
 
 <section id="ai" class="section ai">
   <div class="wrap">
-    <p class="kicker">For the AI era</p>
-    <h2 class="section-title">Let your AI wire up the tests.</h2>
-    <p class="section-note">
-      Nobody reads docs anymore — they hand them to an assistant. So Windup ships an
-      <a href="/llms.txt"><code>llms.txt</code></a>: the whole documentation, structured for machines.
-      Point your coding agent at it, describe the flows in plain words, and it authors and runs the
-      scenarios for you.
-    </p>
+    <p class="kicker">{c.kicker}</p>
+    <h2 class="section-title">{c.title}</h2>
+    <p class="section-note" set:html={c.noteHtml}></p>
 
     <div class="ai-cards">
       <div class="ai-card">
         <span class="ai-step">1</span>
-        <h3>Give your AI the docs</h3>
-        <p>Paste this URL into your assistant (Claude, Cursor, Copilot, …).</p>
-        <CopyCommand command="https://windup.run/llms.txt" prompt="" />
+        <h3>{c.card1.title}</h3>
+        <p>{c.card1.body}</p>
+        <CopyCommand command={c.llmsUrl} prompt="" />
       </div>
       <div class="ai-card">
         <span class="ai-step">2</span>
-        <h3>Describe what to test</h3>
-        <p>A ready-to-paste starting prompt — fill in your flows.</p>
-        <CopyCommand command={promptText} prompt="" />
+        <h3>{c.card2.title}</h3>
+        <p>{c.card2.body}</p>
+        <CopyCommand command={c.promptText} prompt="" />
       </div>
     </div>
 
-    <p class="ai-links">
-      <a href="/llms-full.txt">llms-full.txt</a> — the entire docs in one file ·
-      per-page markdown at <code>/docs/&lt;page&gt;.md</code> ·
-      <a href="https://llmstxt.org" target="_blank" rel="noopener">the llms.txt standard</a>
-    </p>
+    <p class="ai-links" set:html={c.linksHtml}></p>
   </div>
 </section>
 

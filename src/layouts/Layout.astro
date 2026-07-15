@@ -1,5 +1,9 @@
 ---
 import '../styles/global.css';
+import { getUi, getLangFromUrl, htmlLang, switchLocalePath, LOCALES } from '../i18n';
+
+const lang = getLangFromUrl(Astro.url);
+const c = getUi(lang);
 
 interface Props {
   title?: string;
@@ -7,16 +11,22 @@ interface Props {
 }
 
 const {
-  title = 'Windup — Natural-language E2E tests with deterministic replay',
-  description = 'Natural-language E2E tests with deterministic replay — the LLM plans once, replays run without it. ~1s, $0 per replay.',
+  title = c.meta.title,
+  description = c.meta.description,
 } = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const ogImage = new URL('/brand/windup-icon.png', Astro.site);
+const OG_LOCALE: Record<string, string> = { en: 'en_US', pt: 'pt_BR', es: 'es_ES', zh: 'zh_CN' };
+const alternates = LOCALES.map((l) => ({
+  hreflang: htmlLang(l),
+  href: new URL(switchLocalePath(Astro.url, l), Astro.site).href,
+}));
+const xDefault = new URL(switchLocalePath(Astro.url, 'en'), Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={htmlLang(lang)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -25,8 +35,15 @@ const ogImage = new URL('/brand/windup-icon.png', Astro.site);
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/png" href="/favicon.png" />
 
+    <!-- Locale alternates -->
+    {alternates.map((a) => (
+      <link rel="alternate" hreflang={a.hreflang} href={a.href} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={xDefault} />
+
     <!-- Open Graph / Twitter -->
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />

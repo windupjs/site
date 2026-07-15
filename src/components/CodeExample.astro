@@ -1,5 +1,7 @@
 ---
 import CodeBlock from './CodeBlock.astro';
+import { getUi, getLangFromUrl } from '../i18n';
+const c = getUi(getLangFromUrl(Astro.url)).codeExample;
 
 const scenarioHtml = `<span class="tok-muted">{</span>
   <span class="tok-accent">"scenario_id"</span>: <span class="tok-pass">"checkout"</span>,
@@ -15,21 +17,16 @@ const outputHtml = `<span class="tok-muted">$ windup run checkout</span>      <s
 
 <section class="section example">
   <div class="wrap">
-    <p class="kicker">Example</p>
-    <h2 class="section-title">A scenario is natural language in JSON. Two runs tell the whole story.</h2>
-    <p class="section-note">
-      You write the intent. The first run plans and pays a few tenths of a cent; every run after
-      that is a cached replay at <span class="mono">$0</span>.
-    </p>
+    <p class="kicker">{c.kicker}</p>
+    <h2 class="section-title">{c.title}</h2>
+    <p class="section-note" set:html={c.noteHtml}></p>
 
     <div class="example-grid">
-      <CodeBlock label="checkout.json" lang="scenario" html={scenarioHtml} />
-      <CodeBlock label="windup run checkout" lang="output" html={outputHtml} />
+      <CodeBlock label={c.scenarioLabel} lang={c.scenarioLang} html={scenarioHtml} />
+      <CodeBlock label={c.outputLabel} lang={c.outputLang} html={outputHtml} />
     </div>
 
-    <p class="example-foot">
-      <span class="mono">cache=hit · llm_calls=0 · $0</span> — the second run never touches the model.
-    </p>
+    <p class="example-foot" set:html={c.footHtml}></p>
   </div>
 </section>
 
