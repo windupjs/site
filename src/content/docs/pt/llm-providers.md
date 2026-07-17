@@ -38,18 +38,14 @@ Se você já paga um plano Claude (Pro/Max), pode planejar com ele em vez de com
 
 > **Opt-in, nunca default.** Usar uma assinatura para planejar programaticamente é uma zona cinzenta não endossada pela Anthropic, e o Windup não a opera. Para trabalho sensível a confiabilidade (CI, suítes compartilhadas), prefira `--llm google` ou `--llm openai`. Replays em cache nunca chamam nenhum LLM, então um plano feito assim continua replayando a $0 sem nada rodando.
 
-### Configuração — conecte o CLI uma vez
-
-O único pré-requisito é o Claude Code CLI, logado com o seu plano. O **app desktop e o CLI logam separado**; ter o app desktop não basta.
+### Configuração — um comando
 
 ```bash
-# Instale o CLI se não tiver:
-npm install -g @anthropic-ai/claude-code
-# Faça login com seu plano Claude Pro/Max (abre o navegador; escolha "assinatura", não uma chave de API):
-claude
-#   → rode /login dentro do CLI e siga o fluxo no navegador
-# Já está logado? Se `claude` inicia uma sessão sem pedir login, você está conectado.
+npx windup claude login    # instala o claude CLI se faltar, depois loga na sua assinatura
+npx windup claude status   # a qualquer momento: "claude CLI: ready — voce@exemplo.com (max plan)"
 ```
+
+O `windup claude login` instala o Claude Code CLI (com a sua confirmação — nunca um install global calado, nunca em CI) e abre o próprio login de navegador da Anthropic; você clica *autorizar* na sua conta. O **app desktop e o CLI logam separado**, então ter o app desktop não basta. Na mão, se preferir: `npm install -g @anthropic-ai/claude-code`, depois `claude` → `/login` (escolha "assinatura", não uma chave de API).
 
 É só isso — sem wrapper, sem Python, sem servidor local. O Windup faz `spawn` do `claude` em modo não-interativo a cada plano (a partir de um diretório temporário isolado, então nunca pega o `CLAUDE.md` de um projeto).
 

@@ -38,18 +38,14 @@ WINDUP_LLM=openai:gpt-5-mini npx windup run --all   # same thing via env (CI)
 
 > **可选、绝非默认。** 用订阅进行程序化规划属于 Anthropic 未背书的灰色地带，Windup 也不运营它。对可靠性敏感的工作（CI、共享套件），请优先使用 `--llm google` 或 `--llm openai`。缓存回放从不调用任何 LLM，所以这样生成的计划在没有任何服务运行时仍以 $0 回放。
 
-### 配置 —— 只需连接一次 CLI
-
-唯一的前提是已用你的套餐登录的 Claude Code CLI。**桌面应用和 CLI 是分开登录的**；仅有桌面应用还不够。
+### 配置 —— 一条命令
 
 ```bash
-# 如果还没有 CLI，先安装：
-npm install -g @anthropic-ai/claude-code
-# 用你的 Claude Pro/Max 套餐登录（会打开浏览器；选择"订阅"，而不是 API 密钥）：
-claude
-#   → 在 CLI 中运行 /login，然后按浏览器流程操作
-# 已经登录了？如果 `claude` 不要求登录就开启会话，说明你已连接。
+npx windup claude login    # 缺少时先安装 claude CLI，然后登录你的订阅
+npx windup claude status   # 随时查看："claude CLI: ready — you@example.com (max plan)"
 ```
+
+`windup claude login` 会安装 Claude Code CLI（需要你确认 —— 绝不静默进行全局安装，也绝不在 CI 中安装），并启动 Anthropic 自己的浏览器登录流程；你在自己的账户上点击*授权*。**桌面应用和 CLI 是分开登录的**，所以仅有桌面应用还不够。若想手动操作：`npm install -g @anthropic-ai/claude-code`，然后 `claude` → `/login`（选择"订阅"，而不是 API 密钥）。
 
 就这些 —— 没有 wrapper，没有 Python，没有本地服务器。Windup 会为每次规划以非交互模式 `spawn` 一个 `claude`（在隔离的临时目录中运行，因此绝不会读取某个项目的 `CLAUDE.md`）。
 
