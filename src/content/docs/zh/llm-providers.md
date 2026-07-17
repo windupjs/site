@@ -34,41 +34,24 @@ WINDUP_LLM=openai:gpt-5-mini npx windup run --all   # same thing via env (CI)
 
 ## 用你的 Claude 订阅进行规划（`--llm claude-code`）
 
-如果你已经在付费使用 Claude 套餐（Pro/Max），就可以用它来规划，而不必购买 API 令牌。Windup 通过 [claude-code-openai-wrapper](https://github.com/RichardAtCT/claude-code-openai-wrapper) 通信 —— 这是一个由你在本地运行的**第三方**服务器，它为你自己的 Claude Code 会话套上了一层兼容 OpenAI 的外壳。
+如果你已经在付费使用 Claude 套餐（Pro/Max），就可以用它来规划，而不必购买 API 令牌 —— Windup 直接驱动**你已经装好的 `claude` CLI**，无需 API 密钥，无需额外服务器。
 
-> **可选、由社区维护。** 该 wrapper 不是由 Windup 或 Anthropic 构建或支持的；它驱动 Claude Code CLI，任一端发生变化时都可能失效。对可靠性敏感的工作（CI、共享套件），请优先使用 `--llm google` 或 `--llm openai`。缓存回放从不调用任何 LLM，所以这样生成的计划在没有任何服务运行时仍以 $0 回放。
+> **可选、绝非默认。** 用订阅进行程序化规划属于 Anthropic 未背书的灰色地带，Windup 也不运营它。对可靠性敏感的工作（CI、共享套件），请优先使用 `--llm google` 或 `--llm openai`。缓存回放从不调用任何 LLM，所以这样生成的计划在没有任何服务运行时仍以 $0 回放。
 
-### 首次配置
+### 配置 —— 只需连接一次 CLI
 
-**1. 把 Claude Code CLI 连接到你的订阅**（仅一次）。wrapper 以 *你的身份* 通过 Claude Code CLI 进行认证 —— 因此 CLI 必须已用你的 Claude 套餐登录。**桌面应用和 CLI 是分开登录的**；仅有桌面应用还不够。
+唯一的前提是已用你的套餐登录的 Claude Code CLI。**桌面应用和 CLI 是分开登录的**；仅有桌面应用还不够。
 
 ```bash
 # 如果还没有 CLI，先安装：
 npm install -g @anthropic-ai/claude-code
-# 用你的 Claude Pro/Max 套餐登录（选择"订阅"，而不是 API 密钥）：
+# 用你的 Claude Pro/Max 套餐登录（会打开浏览器；选择"订阅"，而不是 API 密钥）：
 claude
 #   → 在 CLI 中运行 /login，然后按浏览器流程操作
 # 已经登录了？如果 `claude` 不要求登录就开启会话，说明你已连接。
 ```
 
-**2. 安装并启动 wrapper**（一个独立的 Python 项目 —— 需要 Python 3.11+ 和 [Poetry](https://python-poetry.org)）：
-
-```bash
-git clone https://github.com/RichardAtCT/claude-code-openai-wrapper
-cd claude-code-openai-wrapper
-poetry install
-cp .env.example .env          # 默认值即可；订阅认证不需要 ANTHROPIC_API_KEY
-poetry run uvicorn src.main:app --port 8000
-```
-
-**3. 确认它已运行**（另开一个终端）：
-
-```bash
-curl http://localhost:8000/health     # → {"status":"healthy",...}
-curl http://localhost:8000/v1/models  # → claude-sonnet-4-6、claude-opus-4-6 ……
-```
-
-**4. 让 Windup 指向它** 并进行规划：
+就这些 —— 没有 wrapper，没有 Python，没有本地服务器。Windup 会为每次规划以非交互模式 `spawn` 一个 `claude`（在隔离的临时目录中运行，因此绝不会读取某个项目的 `CLAUDE.md`）。
 
 ```bash
 npx windup run checkout --llm claude-code                 # 默认模型：claude-sonnet-4-6
@@ -80,18 +63,26 @@ WINDUP_LLM=claude-code npx windup run --all               # 通过环境变量
 
 ```ts
 // windup.config.ts
-llm: {
-  provider: "claude-code",
-  model: "claude-sonnet-4-6",
-  providers: {
-    "claude-code": { baseUrl: "http://localhost:8000/v1" },  // 仅当 wrapper 不在 :8000 时才需修改
-  },
-},
+llm: { provider: "claude-code", model: "claude-sonnet-4-6" },
 ```
 
-### 说明与取舍
-
-- **无需 API 密钥。** wrapper 自身的客户端认证默认关闭；仅在你启用了它时才设置 `CLAUDE_CODE_API_KEY`。用 `baseUrl`（配置）或 `WINDUP_CLAUDE_CODE_URL`（环境变量）改变端点。
 - **费用在 `windup costs` 中报告为 $0** —— 令牌是真实的并保留在账本中，但它们由你的订阅覆盖，因此 Windup 不会为其虚构按令牌计价。
-- **如果 wrapper 未运行**，`windup run --llm claude-code` 会立即失败并给出指明该 URL 的消息（不会卡在重试上）。启动 wrapper 后再重新运行。
-- **底层原理**：wrapper 只实现了 `model`/`messages`/`stream`，所以 Windup 把计划 schema 放进 prompt 并以机械方式去除响应的代码围栏（Ajv 仍会校验每个计划），且不发送 `temperature`/`seed`。在 wrapper 一侧没有 `ANTHROPIC_API_KEY` 时，其模型列表是静态的，最高到 `claude-sonnet-4-6` / `claude-opus-4-6`。
+- **如果 `claude` 未安装或未登录**，运行会立即失败并给出可操作的消息（安装 / `/login`），而不是堆栈跟踪。
+- **规划比托管 API 慢**（每次规划都会启动 CLI 的智能体 —— 约 8–12 秒，而非约 2–4 秒），但规划只发生一次并被缓存；无论如何回放都是 $0 且即时。
+- **底层原理**：没有 JSON 模式，所以 Windup 把计划 schema 放进 prompt 并以机械方式去除响应的代码围栏（Ajv 仍会校验每个计划）；`temperature`/`seed` 在 CLI 中没有对应项，因此不发送。
+
+### 备选：通过 claude-code-openai-wrapper 路由（HTTP）
+
+除了 CLI，你也可以把 Windup 指向 [claude-code-openai-wrapper](https://github.com/RichardAtCT/claude-code-openai-wrapper) —— 一个由社区维护的**第三方**本地代理，在你的 Claude Code 会话之上暴露一个兼容 OpenAI 的端点。适用于：你已经在运行它、想要一个 HTTP 边界，或在其后经由 Bedrock/Vertex 访问 Claude。**只要配置了 URL**，Windup 就会使用 wrapper（而不是 `spawn` CLI）：
+
+```bash
+# 启动 wrapper（需要 Python 3.11+ 和 Poetry），然后：
+WINDUP_CLAUDE_CODE_URL=http://localhost:8000/v1 npx windup run checkout --llm claude-code
+```
+
+```ts
+// windup.config.ts —— 同样效果，持久化
+llm: { provider: "claude-code", providers: { "claude-code": { baseUrl: "http://localhost:8000/v1" } } },
+```
+
+它自身的客户端认证默认关闭；仅在你启用了它时才设置 `CLAUDE_CODE_API_KEY`。同样的 $0 费用，同样的去围栏。wrapper 掉线时会立即失败并给出指明该 URL 的消息。
