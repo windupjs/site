@@ -19,6 +19,7 @@ Un escenario es un archivo JSON en tu directorio de escenarios (por defecto `e2e
 - `start_url` es **opcional** (por defecto `/`) y debería mantenerse libre de entorno: una ruta, resuelta contra la base URL efectiva.
 - Termina la tarea con **qué verificar** — eso se convierte en la postcondición final del plan.
 - Nunca pongas secretos en las tareas. Referencia las cuentas desde el manifiesto del proyecto (consulta [Credenciales de prueba](/es/docs/credentials)); el plan usará `value_ref: "ENV:VAR"` y el valor real se resuelve solo en tiempo de ejecución, nunca se guarda en caché.
+- **Organiza por carpeta.** Los escenarios se descubren de forma recursiva, así que puedes agruparlos en subcarpetas (`e2e/scenarios/contacts/list.json`, `e2e/scenarios/auth/login.json`). El **`scenario_id` es la identidad** — `run --all`, la suite de vitest y `depends_on` se resuelven todos por él, con independencia de la ruta del archivo (los ids duplicados se reportan).
 
 ## Dependencias entre escenarios (`depends_on`)
 
