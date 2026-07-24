@@ -17,6 +17,7 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promove uma fatia de um plano em cache a um fragmento reutilizável |
 | `windup secret set <account> [--user u] [--password p]` | Registra credenciais de teste: valores → `.env.local`, mapeamento → `windup.credentials.json` |
 | `windup secret list` | Contas + se cada ENV está definida (nunca imprime valores) |
+| `windup secret remove <account>` | Remove uma conta: apaga o mapeamento e os valores no `.env.local` (alias: `rm`) |
 | `windup sig <url> [--repeat n]` | Assinatura estrutural da página (diagnóstico) |
 | `windup bench <scenario>` | Protocolo completo de validação (geração, determinismo do replay, recuperação de falhas) |
 | `windup cache clear` | Descarta o cache de trajetória (as próximas execuções replanejam) |

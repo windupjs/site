@@ -17,6 +17,7 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | 把缓存计划中的一段提升为可复用片段 |
 | `windup secret set <account> [--user u] [--password p]` | 注册测试凭据：值 → `.env.local`，映射 → `windup.credentials.json` |
 | `windup secret list` | 账户 + 每个 ENV 是否已设置（从不打印值） |
+| `windup secret remove <account>` | 删除一个账户：移除映射及其在 `.env.local` 中的值（别名：`rm`） |
 | `windup sig <url> [--repeat n]` | 页面结构签名（诊断用） |
 | `windup bench <scenario>` | 完整验证协议（生成、回放确定性、失败恢复） |
 | `windup cache clear` | 清空轨迹缓存（后续运行会重新规划） |
