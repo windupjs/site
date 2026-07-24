@@ -14,7 +14,7 @@ Browser E2E tests can use an LLM **only for planning** (and re-planning on failu
 ## Principles
 
 1. **The LLM is the exception, not the rule.** One call per cache miss; replays never call it.
-2. **Zero hardcoded site knowledge.** The engine may know *frameworks* (Next.js, react-router, design-system naming) and the web platform — never a specific site. All site knowledge arrives as input or is discovered at runtime.
+2. **Zero hardcoded site knowledge.** The engine may know *frameworks* (Next.js, react-router, TanStack Router, design-system naming) and the web platform — never a specific site. All site knowledge arrives as input or is discovered at runtime.
 3. **Every execution is also collection.** The executor already visits every page of a flow; persisting what it sees costs ~one `evaluate` per action.
 4. **Knowledge is cache, not truth.** Anything the site map or static scan asserts can be stale; it degrades to runtime discovery. Precedence: `execution > static > llm`.
 5. **Cost never surprises.** Every LLM touchpoint has an explicit cap; every call is recorded in a ledger; repeated static/assist work is memoized.
@@ -51,7 +51,7 @@ Module boundaries (all in `packages/windup/src/`):
 | `cache.ts` | Trajectory cache keyed by `scenario_id` + start-URL **path** (environment-portable). Saved only after full verified execution; a failed replay invalidates and re-plans, keeping the stale entry as evidence. |
 | `signature.ts` | Structural page identity: SHA-256 of normalized interactive elements — no text, no data — so environment noise doesn't split identities. |
 | `sitemap.ts` | Page/transition graph. Nodes carry `source: execution\|static\|llm` with staleness and provenance. Prompt slice: BFS (depth ≤ 3), term-scored, within a char budget. |
-| `scan/` | Project indexing. Layer 1: routes by convention (Next.js, react-router). Layer 2: interactive elements via brace-aware JSX parsing (raw tags + design-system components). Layer 3: capped LLM-assist, memoized per file hash. |
+| `scan/` | Project indexing. Layer 1: routes by convention (Next.js, react-router, TanStack Router). Layer 2: interactive elements via brace-aware JSX parsing (raw tags + design-system components). Layer 3: capped LLM-assist, memoized per file hash. |
 | `fragments.ts` | Reusable tested sub-trajectories, committed in `e2e/fragments/`. Plans reference them by id; the cache stores the reference (updates propagate). |
 | `authoring.ts` | `windup new` — the LLM rewrites a rough instruction into a precise scenario grounded in the site map and manifest; credentials auto-registered and scrubbed; output is a committed file for review. |
 | `metrics.ts` / `costs.ts` | Every run writes a ledger record (tokens, calls, model, timing, failure class). Prices are a dated per-model table; `windup costs` recomputes so history stays correct. |
