@@ -30,10 +30,16 @@ export default defineConfig({
     },
     vocabulary: { "order": "the Order entity, screen /orders" },
   },
+  // Sinais de prontidão reutilizáveis por glob de rota (anti-flaky) — veja abaixo.
+  readySignals: {
+    "**/workspace/**": "#app-ready",              // espere por isto antes de agir em qualquer página /workspace/*
+    "**/reports/**": ["#grid", "[data-loaded]"],  // um ou mais seletores
+  },
 });
 ```
 
 - **`context.credentials`** mapeia nomes de conta para referências ENV. Quando uma tarefa menciona a conta, o plano usa `value_ref` — credenciais do manifesto têm precedência mesmo que a página exiba valores, e o planejador é proibido de inventar nomes de ENV.
+- **`readySignals`** mapeia um glob de rota para o(s) seletor(es) CSS que devem estar **visíveis antes de o executor rodar a primeira ação** em uma página correspondente. É aplicado de forma determinística em tempo de execução (sem LLM, $0, não faz parte do plano em cache) sempre que uma execução entra em uma rota correspondente — assim uma espera de hidratação/carregamento é definida uma vez por rota em vez de repetida como uma dica em cada cenário. Ele fecha a corrida em tempo de carregamento onde um elemento está presente mas seus manipuladores ainda não foram anexados (algo que a espera por elemento do Playwright não consegue ver). Best-effort: um sinal que nunca aparece dentro do timeout registra um aviso e continua (nunca faz a suíte falhar de forma dura).
 - **LLM-assist** (camada 3 do scan) lê arquivos que as camadas estáticas não conseguiram resolver (rotas construídas dinamicamente, componentes indiretos), limitado por `maxCalls`. Os resultados são lembrados por hash de arquivo — arquivos inalterados nunca custam de novo. Os custos são registrados no livro-razão e mostrados por `windup costs`.
 
 ## O que fica onde
