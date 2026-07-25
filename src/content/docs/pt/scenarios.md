@@ -43,6 +43,26 @@ Os fluxos raramente começam do zero — criar uma conta bancária exige estar l
 
 `windup new` lida com dependências das duas formas: `--depends-on login` as declara explicitamente, e **o LLM autor também as sugere por conta própria** — ele vê todos os cenários existentes (id + task) e, quando a instrução pressupõe um estado que um deles produz ("já logado…"), emite `depends_on` automaticamente (filtrado mecanicamente contra ids reais de cenários — nunca inventado).
 
+## Reutilização isomórfica de planos (`like`)
+
+Em escala, muitos cenários são o **mesmo fluxo em uma rota/entidade diferente** — criar um contato, criar um negócio, criar uma empresa acionam todos o mesmo formulário. Em vez de pagar uma chamada de planejamento ao LLM para cada um, um cenário pode reutilizar o plano **já comprovado** de outro:
+
+```json
+{
+  "scenario_id": "deals-create",
+  "start_url": "/deals/new",
+  "task": "Type 'Big Deal' into the Name field and click Save; verify a new row appears.",
+  "like": { "scenario": "contacts-create", "set": { "Alice": "Big Deal" } }
+}
+```
+
+- `like.scenario` nomeia o cenário cujo plano em cache ativo é o modelo. O Windup o instancia para **este** cenário — este `start_url`, e `like.set` troca quaisquer valores de preenchimento que difiram (`"source literal" → "value to use here"`, aplicado apenas aos campos `value`; os seletores e os segredos `value_ref` ficam intactos).
+- O plano reutilizado **ainda é executado e verificado** antes de ser confiado e colocado em cache — exatamente a mesma barreira que todo plano passa. Se as páginas não forem de fato isomórficas (um seletor não corresponde, a verificação falha), o Windup **recorre ao planejamento normal com o LLM**. Ele nunca pula a verificação, então não pode produzir um falso verde silencioso.
+- Quando verifica, a execução custou **zero chamadas ao LLM** e o cenário agora tem seu próprio plano em cache; as execuções seguintes são replays `$0` comuns.
+- A origem precisa ter sido planejada uma vez primeiro (seu plano é o modelo). Em uma suíte onde a origem roda depois, o cenário `like` simplesmente planeja com o LLM naquela rodada e reutiliza na próxima — sem erro, apenas uma otimização perdida.
+
+Reutilize planos inteiros com `like`; reutilize um **bloco de ações** entre fluxos de resto diferentes com um fragmento (`windup fragment extract`). Ambos mantêm a garantia determinista e verificada.
+
 ## Idempotência, setup e teardown
 
 Um replay reexecuta o **mesmo plano em cache com os mesmos valores** — ideal para fluxos **idempotentes** (editar um registro fixo para um valor fixo, alternar e checar, ler/listar/filtrar). Ele **não** serve para um **CREATE** puro cujo recurso tem uma chave única não reutilizável: a primeira execução o cria, todo replay viola a restrição. Duas formas de cobrir escritas:
