@@ -28,6 +28,7 @@ description: La referencia completa de la CLI de Windup — cada comando, los fl
 |---|---|
 | `--all` | Ejecuta cada escenario del directorio — modo CI, un navegador caliente para toda la suite. Código de salida distinto de cero si algún escenario falla. |
 | `--concurrency <n>` | Ejecuta hasta `n` escenarios en paralelo sobre un único navegador caliente compartido con contextos aislados — ~2× más rápido en una suite mixta. Secuencial por defecto. |
+| `--changed` / `--since <ref>` | Con `--all`: ejecuta solo los escenarios que un cambio afecta — `--changed` compara el árbol de trabajo contra `HEAD`, `--since main` (o cualquier ref de git) contra esa ref. Un escenario se ejecuta cuando su archivo cambió, cuando no tiene un plan en caché, o cuando su plan visita una ruta cuya fuente indexada cambió. Recurre a la suite completa cuando el impacto no puede probarse (archivos no atribuidos, sin git/mapa del sitio) — nunca un falso verde silencioso; un conjunto de afectados vacío sale con 0. |
 | `--no-cache` | Ignora el plan en caché y replanifica desde cero (fuerza una llamada al LLM), incluso cuando existe una trayectoria válida. Úsalo para regenerar un plan a propósito. |
 | `--no-map` | Planifica sin el grafo del mapa del sitio — omite las rutas y selectores indexados. Útil para depurar el planificador o un entorno recién creado. |
 | `--repeat <n>` | Ejecuta el escenario `n` veces seguidas sobre el mismo navegador caliente — comprobaciones de estabilidad y flakes. |

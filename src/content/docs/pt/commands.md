@@ -28,6 +28,7 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 |---|---|
 | `--all` | Roda todos os cenários do diretório — modo CI, um navegador aquecido para a suíte inteira. Código de saída diferente de zero se qualquer cenário falhar. |
 | `--concurrency <n>` | Roda até `n` cenários em paralelo em um único navegador aquecido compartilhado com contextos isolados — ~2× mais rápido em uma suíte mista. Sequencial por padrão. |
+| `--changed` / `--since <ref>` | Com `--all`: roda apenas os cenários que uma mudança afeta — `--changed` compara a árvore de trabalho com `HEAD`, `--since main` (ou qualquer ref do git) com essa ref. Um cenário roda quando seu arquivo mudou, quando não tem um plano em cache, ou quando seu plano visita uma rota cuja fonte indexada mudou. Recorre à suíte inteira quando o impacto não pode ser provado (arquivos não atribuídos, sem git/mapa do site) — nunca um falso verde silencioso; um conjunto de afetados vazio sai com 0. |
 | `--no-cache` | Ignora o plano em cache e replaneja do zero (força uma chamada ao LLM), mesmo quando existe uma trajetória válida. Use para regenerar um plano de propósito. |
 | `--no-map` | Planeja sem o grafo do mapa do site — pula as rotas e seletores indexados. Útil para depurar o planejador ou um ambiente novinho. |
 | `--repeat <n>` | Roda o cenário `n` vezes seguidas no mesmo navegador aquecido — checagens de estabilidade e instabilidade. |
