@@ -61,6 +61,8 @@ A replay re-runs the **same cached plan with the same values** — ideal for **i
 
 `setup` runs before the scenario and its dependencies (a failure fails the run); `teardown` runs after, **always** — pass or fail (a failure is a warning). They are your own trusted commands (like a test's `beforeEach`/`afterEach`), run in the project root with the process env, and never enter the plan or cache.
 
+For state shared by the whole suite (seed a fixture database once, start a stub), use `suite.setup` / `suite.teardown` in the [configuration](/configuration/) — they run **once** around `run --all` (the `beforeAll`/`afterAll` analogue), while per-scenario hooks handle per-test state.
+
 ## Authoring with `windup new`
 
 > **The task and its final verification are the LLM's best guess** from your instruction and the site map — an LLM can pick a plausible-but-wrong destination. `windup new` steers the verification toward the instruction's actual goal (a visible element/text over a guessed route) and recommends confirming with `--validate` (generate → run → self-refine until green) or a first `windup run`.

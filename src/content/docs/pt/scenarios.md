@@ -61,6 +61,8 @@ Um replay reexecuta o **mesmo plano em cache com os mesmos valores** — ideal p
 
 `setup` roda antes do cenário e de suas dependências (uma falha faz a execução falhar); `teardown` roda depois, **sempre** — passando ou falhando (uma falha é um aviso). São seus próprios comandos confiáveis (como o `beforeEach`/`afterEach` de um teste), rodam na raiz do projeto com o env do processo, e nunca entram no plano ou no cache.
 
+Para o estado compartilhado por toda a suíte (semear um banco de dados de fixtures uma vez, iniciar um stub), use `suite.setup` / `suite.teardown` na [configuração](/configuration/) — eles rodam **uma vez** ao redor de `run --all` (o análogo de `beforeAll`/`afterAll`), enquanto os hooks por cenário cuidam do estado por teste.
+
 ## Autoria com `windup new`
 
 > **A tarefa e sua verificação final são o melhor palpite do LLM** a partir da sua instrução e do mapa do site — um LLM pode escolher um destino plausível-porém-errado. `windup new` direciona a verificação para o objetivo real da instrução (um elemento/texto visível em vez de uma rota adivinhada) e recomenda confirmar com `--validate` (gerar → rodar → autorrefinar até ficar verde) ou uma primeira `windup run`.
