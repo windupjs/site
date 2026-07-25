@@ -19,6 +19,7 @@ Um cenário é um arquivo JSON no seu diretório de cenários (padrão `e2e/scen
 - `start_url` é **opcional** (padrão `/`) e deve permanecer livre de ambiente: um caminho, resolvido contra a base URL efetiva.
 - Termine a tarefa com **o que verificar** — isso vira a pós-condição final do plano.
 - Nunca coloque segredos nas tarefas. Referencie contas a partir do manifesto do projeto (veja [Credenciais de teste](/pt/docs/credentials)); o plano usará `value_ref: "ENV:VAR"` e o valor real é resolvido apenas em tempo de execução, nunca em cache.
+- **Diálogos nativos & verificação não-toast.** O Windup lida com diálogos nativos do navegador (`window.confirm`/`alert`/`prompt`) que protegem ações destrutivas (arquivar, excluir, cancelar): o planejador adiciona `"dialog": "accept"` (ou `"dismiss"` para cancelar) à ação que abre o diálogo — caso contrário o diálogo é auto-dispensado e a ação silenciosamente não faz nada. Ele também direciona a verificação final para um sinal **persistente** (uma linha que desaparece, um rótulo alterado, uma URL) em vez de um toast/snackbar efêmero que some em segundos.
 - **Organize por pasta.** Os cenários são descobertos recursivamente, então você pode agrupá-los em subpastas (`e2e/scenarios/contacts/list.json`, `e2e/scenarios/auth/login.json`). O **`scenario_id` é a identidade** — `run --all`, a suíte do vitest e `depends_on` resolvem todos por ele, independentemente do caminho do arquivo (ids duplicados são reportados).
 
 ## Dependências entre cenários (`depends_on`)

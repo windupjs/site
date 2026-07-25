@@ -19,6 +19,7 @@ description: 一个场景就是一个用纯自然语言描述测试的 JSON 文�
 - `start_url` 是**可选的**（默认为 `/`），且应保持与环境无关：只是一个路径，相对于生效的 base URL 解析。
 - 在任务末尾写上**要验证什么** —— 那会成为计划的最终后置条件。
 - 切勿把密钥放进任务里。请按名称引用项目清单中的账户（参见[测试凭据](/zh/docs/credentials)）；计划会使用 `value_ref: "ENV:VAR"`，真实值仅在运行时解析，从不缓存。
+- **原生对话框与非 toast 验证。** Windup 会处理那些守卫破坏性操作（归档、删除、取消）的浏览器原生对话框（`window.confirm`/`alert`/`prompt`）：规划器会在打开对话框的那个动作上加入 `"dialog": "accept"`（或用 `"dismiss"` 取消）—— 否则对话框会被自动关闭，而该动作会悄无声息地什么都不做。它还会把最终验证导向一个**持久**信号（一行消失、一个标签改变、一个 URL），而不是几秒钟内就消失的短暂 toast/snackbar。
 - **按文件夹组织。** 场景是递归发现的，因此你可以把它们分组到子文件夹中（`e2e/scenarios/contacts/list.json`、`e2e/scenarios/auth/login.json`）。**`scenario_id` 才是身份标识** —— `run --all`、vitest 套件和 `depends_on` 都按它解析，与文件路径无关（重复的 id 会被报告）。
 
 ## 场景依赖（`depends_on`）
