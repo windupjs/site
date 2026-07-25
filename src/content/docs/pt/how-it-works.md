@@ -33,4 +33,6 @@ Scripts escritos à mão são baratos de rodar, mas caros de manter. Agentes de 
 | Determinismo | alto | baixo — improvisa toda vez | alto — mesmo plano em cada replay |
 | App mudou | você conserta o script | pode fazer outra coisa em silêncio | verificação falha → replanejamento automático |
 
+**O que o cache compra é `$0`, não "instantâneo".** Um acerto de cache pula o *planejamento* do LLM (`plan=0ms`, `llm_calls=0`) — mas as ações de Playwright do plano ainda rodam, e qualquer cadeia [`depends_on`](/scenarios/) ainda executa, então o tempo real é tempo de navegador real, não uma consulta. Cada execução reporta o detalhamento — `total=… (plan=… deps=… exec=… setup=…)` — onde `deps` é a cadeia de dependências, `exec` são as ações deste cenário e `setup` é o contexto do navegador. A maior alavanca são os **snapshots de sessão**: o estado de autenticação de uma dependência (`storageState`) é capturado uma vez e restaurado em replays posteriores, de modo que o fluxo de login não é reexecutado para cada dependente (`deps≈0`).
+
 Para os mecanismos mais profundos — fronteiras entre módulos, formatos de dados, postura de custo e segurança — veja [Arquitetura e especificação](/pt/docs/architecture).

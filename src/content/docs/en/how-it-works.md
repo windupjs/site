@@ -33,4 +33,6 @@ Hand-written scripts are cheap to run but expensive to maintain. Per-run AI agen
 | Determinism | high | low — improvises each time | high — same plan every replay |
 | App changed | you fix the script | may silently do something else | verification fails → auto re-plan |
 
+**What the cache buys is `$0`, not "instant".** A cache hit skips the LLM *planning* (`plan=0ms`, `llm_calls=0`) — but the plan's Playwright actions still run, and any [`depends_on`](/scenarios/) chain still executes, so wall-clock is real-browser time, not a lookup. Each run reports the breakdown — `total=… (plan=… deps=… exec=… setup=…)` — where `deps` is the dependency chain, `exec` is this scenario's actions and `setup` is the browser context. The biggest lever is **session snapshots**: a dependency's auth state (`storageState`) is captured once and restored on later replays, so the login flow isn't re-run for every dependent (`deps≈0`).
+
 For the deeper mechanics — module boundaries, data formats, cost and security posture — see [Architecture &amp; spec](/docs/architecture).
