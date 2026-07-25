@@ -14,6 +14,7 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `windup scan [--update] [--no-assist]` | Statically index routes and interactive elements into the site map; `--update` re-indexes only files changed since the last scan (git diff); `--no-assist` skips the LLM layer (zero cost) |
 | `windup costs [--last n] [--days n] [--json]` | AI usage report from the run ledger: totals, free replays, per-provider, per-model and per-scenario breakdown, scan and authoring spend |
 | `windup status` | Site-map pages by source, staleness, cached scenarios, fragments |
+| `windup coverage [--json]` | Cross-reference indexed routes (`windup scan`) with your scenarios — which routes have a scenario and which have none (finds coverage gaps automatically, no LLM) |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promote a slice of a cached plan to a reusable fragment |
 | `windup secret set <account> [--user u] [--password p]` | Register test credentials: values → `.env.local`, mapping → `windup.credentials.json` |
 | `windup secret list` | Accounts + whether each ENV is set (never prints values) |

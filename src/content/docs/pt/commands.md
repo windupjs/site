@@ -14,6 +14,7 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 | `windup scan [--update] [--no-assist]` | Indexa estaticamente rotas e elementos interativos no mapa do site; `--update` reindexa apenas arquivos alterados desde o último scan (git diff); `--no-assist` pula a camada de LLM (custo zero) |
 | `windup costs [--last n] [--days n] [--json]` | Relatório de uso de IA a partir do livro-razão de execuções: totais, replays gratuitos, detalhamento por provedor, por modelo e por cenário, gasto de scan e de autoria |
 | `windup status` | Páginas do mapa do site por origem, obsolescência, cenários em cache, fragmentos |
+| `windup coverage [--json]` | Cruza as rotas indexadas (`windup scan`) com os seus cenários — quais rotas têm um cenário e quais não têm nenhum (encontra lacunas de cobertura automaticamente, sem LLM) |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promove uma fatia de um plano em cache a um fragmento reutilizável |
 | `windup secret set <account> [--user u] [--password p]` | Registra credenciais de teste: valores → `.env.local`, mapeamento → `windup.credentials.json` |
 | `windup secret list` | Contas + se cada ENV está definida (nunca imprime valores) |

@@ -14,6 +14,7 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `windup scan [--update] [--no-assist]` | 静态地把路由和交互元素索引进站点地图；`--update` 仅重新索引自上次扫描以来变更的文件（git diff）；`--no-assist` 跳过 LLM 层（零成本） |
 | `windup costs [--last n] [--days n] [--json]` | 来自运行账本的 AI 使用报告：总计、免费回放、按提供商、按模型、按场景的细分，以及扫描和编写花费 |
 | `windup status` | 站点地图页面（按来源）、陈旧度、已缓存的场景、片段 |
+| `windup coverage [--json]` | 将已索引的路由（`windup scan`）与你的场景交叉引用 —— 哪些路由有场景、哪些没有（自动发现覆盖率缺口，无需 LLM） |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | 把缓存计划中的一段提升为可复用片段 |
 | `windup secret set <account> [--user u] [--password p]` | 注册测试凭据：值 → `.env.local`，映射 → `windup.credentials.json` |
 | `windup secret list` | 账户 + 每个 ENV 是否已设置（从不打印值） |

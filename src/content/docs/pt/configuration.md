@@ -40,12 +40,18 @@ export default defineConfig({
     setup:    "npm run db:seed",
     teardown: "npm run db:reset",
   },
+  // Lista de bloqueio de segurança: aborta se um plano chegar a tocar nisto (guardrail de CI).
+  forbid: {
+    selectors: ["#change-password", "[data-danger]"],  // correspondência de substring no seletor de um plano
+    urls: ["**/account/password", "**/admin/**"],       // globs de caminho que a execução nunca deve alcançar
+  },
 });
 ```
 
 - **`context.credentials`** mapeia nomes de conta para referências ENV. Quando uma tarefa menciona a conta, o plano usa `value_ref` — credenciais do manifesto têm precedência mesmo que a página exiba valores, e o planejador é proibido de inventar nomes de ENV.
 - **`readySignals`** mapeia um glob de rota para o(s) seletor(es) CSS que devem estar **visíveis antes de o executor rodar a primeira ação** em uma página correspondente. É aplicado de forma determinística em tempo de execução (sem LLM, $0, não faz parte do plano em cache) sempre que uma execução entra em uma rota correspondente — assim uma espera de hidratação/carregamento é definida uma vez por rota em vez de repetida como uma dica em cada cenário. Ele fecha a corrida em tempo de carregamento onde um elemento está presente mas seus manipuladores ainda não foram anexados (algo que a espera por elemento do Playwright não consegue ver). Best-effort: um sinal que nunca aparece dentro do timeout registra um aviso e continua (nunca faz a suíte falhar de forma dura).
 - **`suite.setup` / `suite.teardown`** são comando(s) de shell que rodam **uma vez** ao redor de um `run --all` — o setup antes do primeiro cenário, o teardown depois do último (sempre, mesmo em caso de falha) — para fixtures de toda a suíte (semear/resetar um banco de dados compartilhado, iniciar um stub). O `setup`/`teardown` por cenário (no JSON do cenário) continuam cuidando do estado por teste. Um `suite.setup` que falha aborta a suíte antes de qualquer cenário rodar; um `suite.teardown` que falha é um aviso.
+- **`forbid`** é uma lista de bloqueio de segurança — um guardrail de CI contra efeitos colaterais irreversíveis. Se qualquer ação do plano mirar um **seletor** proibido (correspondência de substring, ex. `#change-password`) ou a execução alcançar uma **URL** proibida (glob de caminho, ex. `**/account/password`), a execução **aborta** com uma falha `forbidden` em vez de realizá-la. Você declara a lista de perigos (o motor nunca a infere), então mesmo que um replanejamento derive rumo a "Trocar senha", ele é interrompido antes do clique. Uma falha `forbidden` nunca invalida o cache nem replaneja, portanto não precisa de chave de LLM.
 - **LLM-assist** (camada 3 do scan) lê arquivos que as camadas estáticas não conseguiram resolver (rotas construídas dinamicamente, componentes indiretos), limitado por `maxCalls`. Os resultados são lembrados por hash de arquivo — arquivos inalterados nunca custam de novo. Os custos são registrados no livro-razão e mostrados por `windup costs`.
 
 ## O que fica onde
