@@ -10,7 +10,7 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 ```
 
 - `--all` runs every scenario in the directory (one warm browser for the whole suite).
-- **Suite summary & module grouping.** `--all` prints a suite line — pass rate, cache-hit rate, re-plans, LLM calls, cost, total time — plus a per-**module** (folder) breakdown. The HTML report groups scenarios by module (with cache-hit / re-plan tiles); JUnit emits one `<testsuite>` per module; JSON carries the full summary (`by_module`, `flaky`) and a `module` per case.
+- **Suite summary & module grouping.** `--all` prints a suite line — pass rate, cache-hit rate, re-plans, LLM calls, cost, and **wall-clock time** (real elapsed; the inflated sum-of-totals is shown alongside with the concurrency, e.g. `wall 130s (sum 512s · concurrency 4)`) — plus a per-**module** (folder) breakdown. The HTML report groups scenarios by module (with cache-hit / re-plan tiles), leads with the wall-clock, and gives each scenario a duration breakdown bar that reconciles to its total; JUnit emits one `<testsuite>` per module; JSON carries the full summary (`wall_ms`, `concurrency`, `by_module`, `flaky`) and a per-case `duration_breakdown`.
 - **Flake score.** `--repeat <n>` is aggregated per scenario — one that passes some-but-not-all of its runs is listed flaky (`passed X/N`), so data-dependent flakiness surfaces before you commit a green.
 - Exit code is non-zero when any scenario fails.
 - `--concurrency <n>` runs scenarios in parallel over one shared warm browser (~2× faster on a mixed suite); `--browser firefox|webkit` runs the suite cross-browser.

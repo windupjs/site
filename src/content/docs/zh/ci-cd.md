@@ -10,7 +10,7 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 ```
 
 - `--all` 运行目录中的每个场景（整个套件共用一个热浏览器）。
-- **套件摘要与模块分组。** `--all` 打印一行套件汇总 —— 通过率、缓存命中率、重新规划次数、LLM 调用次数、花费、总耗时 —— 外加按**模块**（文件夹）的细分。HTML 报告按模块对场景分组（带缓存命中 / 重新规划的小块）；JUnit 为每个模块产出一个 `<testsuite>`；JSON 携带完整摘要（`by_module`、`flaky`）以及每个用例的 `module`。
+- **套件摘要与模块分组。** `--all` 打印一行套件汇总 —— 通过率、缓存命中率、重新规划次数、LLM 调用次数、花费，以及**实际耗时**（wall-clock，真实经过时间；膨胀后的总耗时之和会连同并发数一并显示，例如 `wall 130s (sum 512s · concurrency 4)`）—— 外加按**模块**（文件夹）的细分。HTML 报告按模块对场景分组（带缓存命中 / 重新规划的小块），以实际耗时为首要指标，并为每个场景提供一条可对账到其总耗时的耗时细分条；JUnit 为每个模块产出一个 `<testsuite>`；JSON 携带完整摘要（`wall_ms`、`concurrency`、`by_module`、`flaky`）以及每个用例的 `duration_breakdown`。
 - **Flaky 评分。** `--repeat <n>` 会按场景聚合 —— 某个场景在部分而非全部运行中通过，就会被列为 flaky（`passed X/N`），这样依赖数据的不稳定性会在你提交绿色结果之前浮现。
 - 任何场景失败时退出码为非零。
 - `--concurrency <n>` 在一个共享的热浏览器上并行运行场景（混合套件下约快 2 倍）；`--browser firefox|webkit` 跨浏览器运行整个套件。
