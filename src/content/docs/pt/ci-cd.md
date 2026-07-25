@@ -19,6 +19,18 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 - `windup costs --json` reporta o gasto com IA para rastreamento no pipeline.
 - `--stream` emite **NDJSON** no stdout — um evento por marco (`run:start`, `planning`, `plan`, `action`, `replan`, `run:end`) — para CI ou dashboard acompanharem a execução ao vivo. O progresso humano (`--verbose`) vai para o stderr, mantendo o stdout NDJSON puro.
 
+## Testes não destrutivos — fique no limite do efeito colateral
+
+Uma suíte que roda a **cada push** nunca deve cobrar um cartão, enviar um email/OTP, criar uma conta ou mutar estado persistente. A regra confiável: **teste até o limite de um efeito colateral, e pare ali.** Quase toda tela é coberta assim — as verificações valiosas disparam *antes* da chamada de rede:
+
+- **Validação do lado do cliente** — email/CPF/cartão inválido, campos obrigatórios, valores fora do intervalo. A mensagem aparece *antes* de qualquer requisição, então afirmá-la é seguro.
+- **Telas de navegação e de leitura** — listas, filtros, abas, telas de detalhe, estados vazios.
+- **Estado do lado do cliente via [`seed`](/scenarios/)** — quantidades/remoção/limites do carrinho (localStorage), um dispositivo POS (sessionStorage) — alcançado sem uma ida e volta ao servidor.
+- **Estados de erro por tokens/slugs falsos** — `/order/BOGUS` → "não encontrado", um link inválido → "expirado". Totalmente determinista, sem necessidade de dados de seed.
+- **Diálogos de confirmação — abra e *cancele*.** Afirme que o diálogo "Excluir?" aparece, então descarte-o (um `confirm` nativo via `"dialog": "dismiss"`; um modal clicando em Cancelar). Você verifica a UI de guarda sem realizar a ação destrutiva.
+
+Mantenha fora do CI: pagamento real, envios de OTP/email/WhatsApp, criação de conta/empresa, salvar configuração que persiste (**cuidado com os toggles de clique único que salvam sem etapa de confirmação**), um check-in que consome um voucher, e — o mais perigoso de todos — **mudar a senha da conta de teste**. O Windup não vai impedir você de escrever tal passo, então a disciplina vive nos cenários: cada um para antes da ação irreversível. `setup`/`teardown` existem para as escritas que você genuinamente precisa exercitar — faça-as contra um fixture descartável, nunca dados de produção.
+
 ## Exemplo: GitHub Actions
 
 ```yaml

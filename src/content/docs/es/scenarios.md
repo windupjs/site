@@ -64,6 +64,27 @@ A gran escala, muchos escenarios son el **mismo flujo en una ruta/entidad distin
 
 Reutiliza planes enteros con `like`; reutiliza un **bloque de acciones** entre flujos por lo demás distintos con un fragmento (`windup fragment extract`). Ambos mantienen la garantía determinista y verificada.
 
+## Fixtures del lado del cliente (`seed`)
+
+Parte del estado vive por completo en el navegador — un carrito en `localStorage`, un dispositivo POS seleccionado en `sessionStorage`. Construirlo a través de la UI cada vez es lento y acopla la prueba a ese flujo. `seed` inyecta ese estado **antes de que el plan se ejecute**, de forma determinista y sin ninguna llamada al servidor:
+
+```json
+{
+  "scenario_id": "cart-updates-quantity",
+  "start_url": "/checkout/cart",
+  "task": "Increase the first item's quantity to 3 and verify the total updates.",
+  "seed": {
+    "localStorage": { "cart": "[{\"id\":\"tkt-1\",\"qty\":2,\"price\":50}]" },
+    "sessionStorage": { "pos_device": "reader-7" }
+  }
+}
+```
+
+- Se siembra por **origen** (por defecto: el origen de `start_url`; anúlalo con `seed.origin`) mediante un script de inicialización de Playwright que se ejecuta antes de los scripts de la app, de modo que la página carga ya en ese estado.
+- **Cada clave se establece solo si está ausente** — las mutaciones propias de la app (un carrito que la prueba luego edita) nunca se sobrescriben en navegaciones posteriores.
+- **No** forma parte del plan en caché: se ejecuta en cada corrida (incluidas las repeticiones `$0`), de modo que los escenarios sembrados permanecen deterministas.
+- Seguro para CI por construcción: alcanzas un estado del lado del cliente directamente en lugar de conducir un flujo que podría llegar al servidor. Ideal para escenarios de carrito/checkout y POS.
+
 ## Idempotencia, setup y teardown
 
 Un replay reejecuta el **mismo plan en caché con los mismos valores** — ideal para flujos **idempotentes** (editar un registro fijo a un valor fijo, alternar y comprobar, leer/listar/filtrar). **No** encaja con un **CREATE** puro cuyo recurso tiene una clave única no reutilizable: la primera ejecución lo crea, cada replay viola la restricción. Dos formas de cubrir las escrituras:

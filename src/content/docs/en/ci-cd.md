@@ -19,6 +19,18 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 - `windup costs --json` reports AI spend for pipeline tracking.
 - `--stream` emits **NDJSON** to stdout — one event per milestone (`run:start`, `planning`, `plan`, `action`, `replan`, `run:end`) — so CI or a dashboard can follow a run live. Human progress (`--verbose`) goes to stderr, keeping stdout pure NDJSON.
 
+## Non-destructive testing — stay at the side-effect boundary
+
+A suite that runs on **every push** must never charge a card, send an email/OTP, create an account, or mutate persistent state. The reliable rule: **test up to the boundary of a side effect, and stop there.** Almost every screen is coverable this way — the valuable checks fire *before* the network call:
+
+- **Client-side validation** — invalid email/CPF/card, required fields, out-of-range values. The message appears *before* any request, so asserting it is safe.
+- **Navigation & read screens** — lists, filters, tabs, detail views, empty states.
+- **Client-side state via [`seed`](/scenarios/)** — cart quantities/removal/limits (localStorage), a POS device (sessionStorage) — reached without a server round-trip.
+- **Error states from bogus tokens/slugs** — `/order/BOGUS` → "not found", an invalid link → "expired". Fully deterministic, no seed data needed.
+- **Confirmation dialogs — open and *cancel*.** Assert the "Delete?" dialog appears, then dismiss it (a native `confirm` via `"dialog": "dismiss"`; a modal by clicking Cancel). You verify the guard UI without performing the destructive action.
+
+Keep out of CI: real payment, OTP/email/WhatsApp sends, account/company creation, saving config that persists (**watch single-click toggles that save with no confirm step**), a check-in that consumes a voucher, and — most dangerous of all — **changing the test account's password**. Windup won't stop you from authoring such a step, so the discipline lives in the scenarios: every one stops before the irreversible action. `setup`/`teardown` exist for the writes you genuinely must exercise — do them against a disposable fixture, never production data.
+
 ## Example: GitHub Actions
 
 ```yaml

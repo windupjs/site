@@ -64,6 +64,27 @@ At scale, many scenarios are the **same flow on a different route/entity** — c
 
 Reuse whole plans with `like`; reuse an **action block** across otherwise-different flows with a fragment (`windup fragment extract`). Both keep the deterministic, verified guarantee.
 
+## Client-side fixtures (`seed`)
+
+Some state lives entirely in the browser — a shopping cart in `localStorage`, a selected POS device in `sessionStorage`. Building it through the UI every time is slow and couples the test to that flow. `seed` injects that state **before the plan runs**, deterministically and with no server call:
+
+```json
+{
+  "scenario_id": "cart-updates-quantity",
+  "start_url": "/checkout/cart",
+  "task": "Increase the first item's quantity to 3 and verify the total updates.",
+  "seed": {
+    "localStorage": { "cart": "[{\"id\":\"tkt-1\",\"qty\":2,\"price\":50}]" },
+    "sessionStorage": { "pos_device": "reader-7" }
+  }
+}
+```
+
+- Seeded per **origin** (default: the `start_url` origin; override with `seed.origin`) via a Playwright init script that runs before the app's scripts, so the page loads already in that state.
+- **Each key is set only if absent** — the app's own mutations (a cart the test then edits) are never clobbered on later navigations.
+- It's **not** part of the cached plan: it runs on every run (including `$0` replays), so seeded scenarios stay deterministic.
+- CI-safe by construction: you reach a client-side state directly instead of driving a flow that might hit the server. Great for cart/checkout and POS scenarios.
+
 ## Idempotency, setup & teardown
 
 A replay re-runs the **same cached plan with the same values** — ideal for **idempotent** flows (edit a fixed record to a fixed value, toggle and check, read/list/filter). It does **not** fit a pure **CREATE** whose resource has a non-reusable unique key: the first run creates it, every replay violates the constraint. Two ways to cover writes:

@@ -64,6 +64,27 @@ Em escala, muitos cenários são o **mesmo fluxo em uma rota/entidade diferente*
 
 Reutilize planos inteiros com `like`; reutilize um **bloco de ações** entre fluxos de resto diferentes com um fragmento (`windup fragment extract`). Ambos mantêm a garantia determinista e verificada.
 
+## Fixtures do lado do cliente (`seed`)
+
+Parte do estado vive inteiramente no navegador — um carrinho em `localStorage`, um dispositivo POS selecionado em `sessionStorage`. Construí-lo pela UI toda vez é lento e acopla o teste a esse fluxo. `seed` injeta esse estado **antes de o plano rodar**, de forma determinista e sem nenhuma chamada ao servidor:
+
+```json
+{
+  "scenario_id": "cart-updates-quantity",
+  "start_url": "/checkout/cart",
+  "task": "Increase the first item's quantity to 3 and verify the total updates.",
+  "seed": {
+    "localStorage": { "cart": "[{\"id\":\"tkt-1\",\"qty\":2,\"price\":50}]" },
+    "sessionStorage": { "pos_device": "reader-7" }
+  }
+}
+```
+
+- Semeado por **origem** (padrão: a origem de `start_url`; sobrescreva com `seed.origin`) via um script de inicialização do Playwright que roda antes dos scripts da app, de modo que a página já carrega nesse estado.
+- **Cada chave é definida apenas se estiver ausente** — as mutações da própria app (um carrinho que o teste depois edita) nunca são sobrescritas em navegações posteriores.
+- **Não** faz parte do plano em cache: roda em toda execução (incluindo replays `$0`), de modo que cenários semeados permanecem deterministas.
+- Seguro para CI por construção: você alcança um estado do lado do cliente diretamente em vez de conduzir um fluxo que poderia chegar ao servidor. Ótimo para cenários de carrinho/checkout e POS.
+
 ## Idempotência, setup e teardown
 
 Um replay reexecuta o **mesmo plano em cache com os mesmos valores** — ideal para fluxos **idempotentes** (editar um registro fixo para um valor fixo, alternar e checar, ler/listar/filtrar). Ele **não** serve para um **CREATE** puro cujo recurso tem uma chave única não reutilizável: a primeira execução o cria, todo replay viola a restrição. Duas formas de cobrir escritas:

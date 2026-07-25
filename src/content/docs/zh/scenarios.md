@@ -64,6 +64,27 @@ description: 一个场景就是一个用纯自然语言描述测试的 JSON 文�
 
 用 `like` 复用整个计划；用片段（`windup fragment extract`）在其他方面不同的流程之间复用一个**动作块**。两者都保持确定性、经过验证的保证。
 
+## 客户端 fixtures（`seed`）
+
+有些状态完全存在于浏览器中 —— `localStorage` 里的购物车、`sessionStorage` 里选定的 POS 设备。每次都通过 UI 构建它既慢又把测试与那个流程耦合在一起。`seed` 会**在计划运行之前**注入该状态，确定性地且无需任何服务器调用：
+
+```json
+{
+  "scenario_id": "cart-updates-quantity",
+  "start_url": "/checkout/cart",
+  "task": "Increase the first item's quantity to 3 and verify the total updates.",
+  "seed": {
+    "localStorage": { "cart": "[{\"id\":\"tkt-1\",\"qty\":2,\"price\":50}]" },
+    "sessionStorage": { "pos_device": "reader-7" }
+  }
+}
+```
+
+- 按**源**播种（默认：`start_url` 的源；用 `seed.origin` 覆盖），通过一个在应用脚本之前运行的 Playwright 初始化脚本，因此页面加载时就已处于该状态。
+- **每个键仅在缺失时才设置** —— 应用自身的变更（测试随后编辑的购物车）在后续导航中绝不会被覆盖。
+- 它**不**属于缓存的计划：它在每次运行时都会执行（包括 `$0` 重放），因此被播种的场景保持确定性。
+- 天生对 CI 安全：你直接到达一个客户端状态，而不是驱动一个可能触及服务器的流程。非常适合购物车/checkout 和 POS 场景。
+
 ## 幂等性、setup 与 teardown
 
 一次回放会用**相同的值重跑同一份缓存计划** —— 非常适合**幂等**流程（把一条固定记录编辑为一个固定值、切换并检查、读取/列表/过滤）。它**不**适合一个纯粹的 **CREATE**，其资源带有不可复用的唯一键：第一次运行会创建它，之后每次回放都会违反该约束。有两种方式覆盖写入操作：

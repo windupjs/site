@@ -19,6 +19,18 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 - `windup costs --json` 汇报 AI 花费，用于流水线追踪。
 - `--stream` 向 stdout 输出 **NDJSON**——每个里程碑一个事件（`run:start`、`planning`、`plan`、`action`、`replan`、`run:end`）——让 CI 或仪表板实时跟踪运行。人类可读进度（`--verbose`）走 stderr，使 stdout 保持纯 NDJSON。
 
+## 非破坏性测试 —— 停在副作用的边界
+
+在**每次 push** 时运行的套件绝不能扣款、发送 email/OTP、创建账户或改变持久化状态。可靠的规则：**测试到副作用的边界为止，然后停在那里。** 几乎每个屏幕都能这样覆盖 —— 有价值的检查在网络调用*之前*触发：
+
+- **客户端校验** —— 无效的 email/CPF/卡号、必填字段、超出范围的值。消息在任何请求*之前*出现，所以断言它是安全的。
+- **导航与只读屏幕** —— 列表、过滤器、标签页、详情视图、空状态。
+- **通过 [`seed`](/scenarios/) 的客户端状态** —— 购物车数量/移除/上限（localStorage）、一个 POS 设备（sessionStorage）—— 无需服务器往返即可到达。
+- **来自伪造 token/slug 的错误状态** —— `/order/BOGUS` → "未找到"，无效链接 → "已过期"。完全确定性，无需 seed 数据。
+- **确认对话框 —— 打开并*取消*。** 断言 "删除？" 对话框出现，然后将其关闭（原生 `confirm` 通过 `"dialog": "dismiss"`；模态框则点击取消）。你在不执行破坏性操作的情况下验证守护 UI。
+
+不要放进 CI：真实支付、OTP/email/WhatsApp 发送、账户/公司创建、保存会持久化的配置（**当心单击即保存、没有确认步骤的开关**）、消耗代金券的签到，以及 —— 最危险的 —— **修改测试账户的密码**。Windup 不会阻止你编写这样的步骤，所以这份纪律活在场景里：每一个都在不可逆操作之前停下。`setup`/`teardown` 是为你确实必须执行的写操作而存在的 —— 针对一次性 fixture 执行它们，绝不要针对生产数据。
+
 ## 示例：GitHub Actions
 
 ```yaml

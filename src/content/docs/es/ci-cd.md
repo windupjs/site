@@ -19,6 +19,18 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 - `windup costs --json` reporta el gasto de IA para el seguimiento del pipeline.
 - `--stream` emite **NDJSON** en stdout — un evento por hito (`run:start`, `planning`, `plan`, `action`, `replan`, `run:end`) — para que CI o un dashboard sigan la ejecución en vivo. El progreso humano (`--verbose`) va a stderr, manteniendo stdout como NDJSON puro.
 
+## Pruebas no destructivas — quédate en el límite del efecto secundario
+
+Una suite que se ejecuta en **cada push** nunca debe cobrar una tarjeta, enviar un email/OTP, crear una cuenta ni mutar estado persistente. La regla confiable: **prueba hasta el límite de un efecto secundario, y detente ahí.** Casi toda pantalla es cubrible de este modo — las comprobaciones valiosas se disparan *antes* de la llamada de red:
+
+- **Validación del lado del cliente** — email/CPF/tarjeta inválidos, campos obligatorios, valores fuera de rango. El mensaje aparece *antes* de cualquier petición, así que afirmarlo es seguro.
+- **Pantallas de navegación y de lectura** — listas, filtros, pestañas, vistas de detalle, estados vacíos.
+- **Estado del lado del cliente vía [`seed`](/scenarios/)** — cantidades/eliminación/límites del carrito (localStorage), un dispositivo POS (sessionStorage) — alcanzado sin un ida y vuelta al servidor.
+- **Estados de error por tokens/slugs falsos** — `/order/BOGUS` → "no encontrado", un enlace inválido → "expirado". Totalmente determinista, sin necesidad de datos de seed.
+- **Diálogos de confirmación — ábrelos y *cancélalos*.** Afirma que aparece el diálogo "¿Eliminar?", luego descártalo (un `confirm` nativo vía `"dialog": "dismiss"`; un modal haciendo clic en Cancelar). Verificas la UI de guarda sin realizar la acción destructiva.
+
+Mantén fuera de CI: pago real, envíos de OTP/email/WhatsApp, creación de cuenta/empresa, guardar configuración que persiste (**cuidado con los toggles de un solo clic que guardan sin paso de confirmación**), un check-in que consume un voucher, y — lo más peligroso de todo — **cambiar la contraseña de la cuenta de prueba**. Windup no te impedirá escribir tal paso, así que la disciplina vive en los escenarios: cada uno se detiene antes de la acción irreversible. `setup`/`teardown` existen para las escrituras que genuinamente debes ejercitar — hazlas contra un fixture desechable, nunca datos de producción.
+
 ## Ejemplo: GitHub Actions
 
 ```yaml
