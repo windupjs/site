@@ -31,6 +31,8 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 | `--no-cache` | Ignora o plano em cache e replaneja do zero (força uma chamada ao LLM), mesmo quando existe uma trajetória válida. Use para regenerar um plano de propósito. |
 | `--no-map` | Planeja sem o grafo do mapa do site — pula as rotas e seletores indexados. Útil para depurar o planejador ou um ambiente novinho. |
 | `--repeat <n>` | Roda o cenário `n` vezes seguidas no mesmo navegador aquecido — checagens de estabilidade e instabilidade. |
+| `--verbose` | Imprime marcos de planejamento/execução no stderr — um heartbeat para provedores lentos (ex.: `--llm claude-code`, cujo planejamento pode levar minutos sem saída). |
+| `--stream` | Emite eventos NDJSON legíveis por máquina (um por marco: `run:start`, `planning`, `plan`, `action`, `replan`, `run:end`) no stdout para CI/dashboards; `--verbose` fica no stderr, então o stdout é NDJSON puro. |
 | `--headed` | Mostra a janela do navegador em vez de rodar headless. |
 | `--slowmo <ms>` | Adiciona um atraso entre ações para você acompanhar cada passo — ritmo de demo e depuração. |
 | `--base-url <url>` | Sobrescreve a origem da URL inicial nesta execução (dev / staging / CI). Rebaseia até URLs de cenário absolutas, preservando caminho e query. |

@@ -31,6 +31,8 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `--no-cache` | Ignore the cached plan and re-plan from scratch (forces one LLM call), even when a valid trajectory exists. Use to regenerate a plan on purpose. |
 | `--no-map` | Plan without the site-map graph — skip the indexed routes and selectors. Useful for debugging the planner or a brand-new environment. |
 | `--repeat <n>` | Run the scenario `n` times back-to-back over the same warm browser — stability and flake checks. |
+| `--verbose` | Print planning/execution milestones to stderr — a heartbeat for slow providers (e.g. `--llm claude-code`, where planning can take minutes with no output). |
+| `--stream` | Emit machine-readable NDJSON events (one per milestone: `run:start`, `planning`, `plan`, `action`, `replan`, `run:end`) to stdout for CI/dashboards; `--verbose` stays on stderr so stdout is pure NDJSON. |
 | `--headed` | Show the browser window instead of running headless. |
 | `--slowmo <ms>` | Add a delay between actions so you can watch each step — demo and debugging pace. |
 | `--base-url <url>` | Override the start-URL origin for this run (dev / staging / CI). Rebases even absolute scenario URLs, preserving path and query. |

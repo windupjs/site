@@ -37,11 +37,32 @@ Los flujos rara vez empiezan de cero — crear una cuenta bancaria requiere habe
 - Sin un `start_url`, el escenario dependiente **continúa desde donde terminó la última dependencia** — y en la primera planificación el LLM ve esa página real (el dashboard tras el login), en lugar de planificar a ciegas.
 - Las cadenas funcionan (`login` → `select-company` → `create-account`), los ciclos se rechazan, y una dependencia fallida hace fallar la ejecución con el tipo `dependency` antes de que el escenario en sí empiece.
 - Cada dependencia conserva su propia autorreparación: si su plan en caché se rompe, se replanifica y se vuelve a cachear — los dependientes se benefician automáticamente.
+- **Autorreparación guiada.** Una replanificación le indica al planificador el selector exacto que falló ("no lo reutilices"), reenfatiza tus hints y — con `--suggest` — le pasa a la replanificación el mismo diagnóstico experto que leerías, de modo que corrige en vez de volver a proponer un selector refutado. Si un escenario sigue replanificando sin estabilizarse, Windup advierte que probablemente la app carece de un selector estable (una brecha de accesibilidad) o tiene una race, en lugar de dar vueltas en silencio.
 - Editar el `task` de un escenario invalida su plan en caché (una prueba reescrita es una prueba distinta).
 
 `windup new` maneja las dependencias en ambos sentidos: `--depends-on login` las declara explícitamente, y **el LLM autor también las sugiere por su cuenta** — ve cada escenario existente (id + tarea) y, cuando la instrucción presupone un estado que uno de ellos produce ("ya con sesión iniciada…"), emite `depends_on` automáticamente (filtrado mecánicamente contra los ids de escenarios reales — nunca inventados).
 
+## Idempotencia, setup y teardown
+
+Un replay reejecuta el **mismo plan en caché con los mismos valores** — ideal para flujos **idempotentes** (editar un registro fijo a un valor fijo, alternar y comprobar, leer/listar/filtrar). **No** encaja con un **CREATE** puro cuyo recurso tiene una clave única no reutilizable: la primera ejecución lo crea, cada replay viola la restricción. Dos formas de cubrir las escrituras:
+
+1. **Prefiere escenarios idempotentes** — edita un registro de prueba conocido en vez de crear uno nuevo; el replay cuesta `$0` y no deja residuos.
+2. **Hooks `setup` / `teardown`** — comandos de shell que se ejecutan **fuera** del plan en caché (por tanto en cada replay), para fixtures o limpieza (hard-delete de lo que la prueba creó, reset vía SQL/HTTP):
+
+```json
+{
+  "scenario_id": "create-contact",
+  "task": "Open Contacts, create a contact with CPF 111.111.111-11 and verify it appears in the list.",
+  "setup":    "psql \"$DATABASE_URL\" -c \"delete from contacts where national_id = '11111111111'\"",
+  "teardown": "psql \"$DATABASE_URL\" -c \"delete from contacts where national_id = '11111111111'\""
+}
+```
+
+`setup` se ejecuta antes del escenario y sus dependencias (un fallo hace fallar la ejecución); `teardown` se ejecuta después, **siempre** — pase o falle (un fallo es una advertencia). Son tus propios comandos de confianza (como el `beforeEach`/`afterEach` de una prueba), se ejecutan en la raíz del proyecto con el env del proceso, y nunca entran en el plan ni en la caché.
+
 ## Autoría con `windup new`
+
+> **La tarea y su verificación final son la mejor conjetura del LLM** a partir de tu instrucción y el mapa del sitio — un LLM puede elegir un destino plausible pero equivocado. `windup new` orienta la verificación hacia el objetivo real de la instrucción (un elemento/texto visible en vez de una ruta adivinada) y recomienda confirmar con `--validate` (generar → ejecutar → autorrefinar hasta ponerse en verde) o una primera `windup run`.
 
 No tienes que escribir tareas detalladas a mano. Dale a `windup new` una instrucción imprecisa y el LLM actúa como autor de pruebas — la reescribe en un escenario preciso y verificable usando el **mapa del sitio** (pantallas, menús y elementos reales de `windup scan` y ejecuciones pasadas) y el **manifiesto del proyecto** (cuentas referenciadas por nombre, nunca credenciales literales):
 

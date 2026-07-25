@@ -14,6 +14,7 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 - `--concurrency <n>` roda cenários em paralelo em um único navegador aquecido compartilhado (~2× mais rápido em uma suíte mista); `--browser firefox|webkit` roda a suíte em multi-navegador.
 - `--reporter junit` gera JUnit XML (GitHub Actions, GitLab e Jenkins consomem nativamente); `--reporter json` gera um resumo legível por máquina; `--reporter html` gera uma página autocontida e amigável para humanos (zero JS/dependências — suba como artefato de CI ou abra localmente). Saída padrão: `.windup/reports/`.
 - `windup costs --json` reporta o gasto com IA para rastreamento no pipeline.
+- `--stream` emite **NDJSON** no stdout — um evento por marco (`run:start`, `planning`, `plan`, `action`, `replan`, `run:end`) — para CI ou dashboard acompanharem a execução ao vivo. O progresso humano (`--verbose`) vai para o stderr, mantendo o stdout NDJSON puro.
 
 ## Exemplo: GitHub Actions
 

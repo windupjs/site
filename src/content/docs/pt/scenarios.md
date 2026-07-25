@@ -37,11 +37,32 @@ Os fluxos raramente começam do zero — criar uma conta bancária exige estar l
 - Sem um `start_url`, o cenário dependente **continua de onde a última dependência terminou** — e no primeiro planejamento o LLM vê essa página real (o dashboard pós-login), em vez de planejar às cegas.
 - Cadeias funcionam (`login` → `select-company` → `create-account`), ciclos são rejeitados, e uma dependência que falha faz a execução falhar com o tipo `dependency` antes mesmo de o cenário em si começar.
 - Cada dependência mantém sua própria autorreparação: se o plano em cache dela quebrar, ela replaneja e recacheia — os dependentes se beneficiam automaticamente.
+- **Autorreparação guiada.** Um replanejamento informa ao planejador o seletor exato que falhou ("não o reutilize"), reenfatiza suas dicas e — com `--suggest` — realimenta o replanejamento com o mesmo diagnóstico especializado que você leria, para que ele corrija em vez de repropor um seletor já refutado. Se um cenário continua replanejando sem estabilizar, o Windup avisa que o app provavelmente não tem um seletor estável (uma lacuna de acessibilidade) ou tem uma condição de corrida, em vez de repetir silenciosamente.
 - Editar a `task` de um cenário invalida seu plano em cache (um teste reescrito é um teste diferente).
 
 `windup new` lida com dependências das duas formas: `--depends-on login` as declara explicitamente, e **o LLM autor também as sugere por conta própria** — ele vê todos os cenários existentes (id + task) e, quando a instrução pressupõe um estado que um deles produz ("já logado…"), emite `depends_on` automaticamente (filtrado mecanicamente contra ids reais de cenários — nunca inventado).
 
+## Idempotência, setup e teardown
+
+Um replay reexecuta o **mesmo plano em cache com os mesmos valores** — ideal para fluxos **idempotentes** (editar um registro fixo para um valor fixo, alternar e checar, ler/listar/filtrar). Ele **não** serve para um **CREATE** puro cujo recurso tem uma chave única não reutilizável: a primeira execução o cria, todo replay viola a restrição. Duas formas de cobrir escritas:
+
+1. **Prefira cenários idempotentes** — edite um registro de teste conhecido em vez de criar um novo; o replay é `$0` e não deixa resíduo.
+2. **Hooks `setup` / `teardown`** — comandos de shell que rodam **fora** do plano em cache (ou seja, em todo replay), para fixtures ou limpeza (apagar de vez o que o teste criou, resetar via SQL/HTTP):
+
+```json
+{
+  "scenario_id": "create-contact",
+  "task": "Open Contacts, create a contact with CPF 111.111.111-11 and verify it appears in the list.",
+  "setup":    "psql \"$DATABASE_URL\" -c \"delete from contacts where national_id = '11111111111'\"",
+  "teardown": "psql \"$DATABASE_URL\" -c \"delete from contacts where national_id = '11111111111'\""
+}
+```
+
+`setup` roda antes do cenário e de suas dependências (uma falha faz a execução falhar); `teardown` roda depois, **sempre** — passando ou falhando (uma falha é um aviso). São seus próprios comandos confiáveis (como o `beforeEach`/`afterEach` de um teste), rodam na raiz do projeto com o env do processo, e nunca entram no plano ou no cache.
+
 ## Autoria com `windup new`
+
+> **A tarefa e sua verificação final são o melhor palpite do LLM** a partir da sua instrução e do mapa do site — um LLM pode escolher um destino plausível-porém-errado. `windup new` direciona a verificação para o objetivo real da instrução (um elemento/texto visível em vez de uma rota adivinhada) e recomenda confirmar com `--validate` (gerar → rodar → autorrefinar até ficar verde) ou uma primeira `windup run`.
 
 Você não precisa escrever tarefas detalhadas à mão. Dê a `windup new` uma instrução vaga e o LLM age como autor de testes — ele a reescreve em um cenário preciso e verificável usando o **mapa do site** (telas, menus e elementos reais de `windup scan` e execuções passadas) e o **manifesto do projeto** (contas referenciadas por nome, nunca credenciais literais):
 

@@ -37,11 +37,32 @@ Flows rarely start from zero — creating a bank account requires being logged i
 - Without a `start_url`, the dependent scenario **continues from where the last dependency ended** — and on first planning the LLM sees that real page (the post-login dashboard), instead of planning blind.
 - Chains work (`login` → `select-company` → `create-account`), cycles are rejected, and a failing dependency fails the run with kind `dependency` before the scenario itself starts.
 - Each dependency keeps its own self-healing: if its cached plan breaks, it re-plans and re-caches — dependents benefit automatically.
+- **Guided self-heal.** A re-plan tells the planner the exact selector that failed ("don't reuse it"), re-emphasizes your hints, and — with `--suggest` — feeds the same expert diagnosis you'd read back into the re-plan, so it corrects instead of re-proposing a refuted selector. If a scenario keeps re-planning without stabilizing, Windup warns that the app likely lacks a stable selector (an accessibility gap) or has a race, instead of churning silently.
 - Editing a scenario's `task` invalidates its cached plan (a rewritten test is a different test).
 
 `windup new` handles dependencies both ways: `--depends-on login` declares them explicitly, and **the author LLM also suggests them on its own** — it sees every existing scenario (id + task) and, when the instruction presupposes a state one of them produces ("already logged in…"), emits `depends_on` automatically (mechanically filtered against real scenario ids — never invented).
 
+## Idempotency, setup & teardown
+
+A replay re-runs the **same cached plan with the same values** — ideal for **idempotent** flows (edit a fixed record to a fixed value, toggle and check, read/list/filter). It does **not** fit a pure **CREATE** whose resource has a non-reusable unique key: the first run creates it, every replay violates the constraint. Two ways to cover writes:
+
+1. **Prefer idempotent scenarios** — edit a known test record instead of creating a new one; the replay is `$0` and leaves no residue.
+2. **`setup` / `teardown` hooks** — shell commands that run **outside** the cached plan (so on every replay), for fixtures or cleanup (hard-delete what the test created, reset via SQL/HTTP):
+
+```json
+{
+  "scenario_id": "create-contact",
+  "task": "Open Contacts, create a contact with CPF 111.111.111-11 and verify it appears in the list.",
+  "setup":    "psql \"$DATABASE_URL\" -c \"delete from contacts where national_id = '11111111111'\"",
+  "teardown": "psql \"$DATABASE_URL\" -c \"delete from contacts where national_id = '11111111111'\""
+}
+```
+
+`setup` runs before the scenario and its dependencies (a failure fails the run); `teardown` runs after, **always** — pass or fail (a failure is a warning). They are your own trusted commands (like a test's `beforeEach`/`afterEach`), run in the project root with the process env, and never enter the plan or cache.
+
 ## Authoring with `windup new`
+
+> **The task and its final verification are the LLM's best guess** from your instruction and the site map — an LLM can pick a plausible-but-wrong destination. `windup new` steers the verification toward the instruction's actual goal (a visible element/text over a guessed route) and recommends confirming with `--validate` (generate → run → self-refine until green) or a first `windup run`.
 
 You don't have to write detailed tasks by hand. Give `windup new` a rough instruction and the LLM acts as a test author — it rewrites it into a precise, verifiable scenario using the **site map** (real screens, menus and elements from `windup scan` and past runs) and the **project manifest** (accounts referenced by name, never literal credentials):
 

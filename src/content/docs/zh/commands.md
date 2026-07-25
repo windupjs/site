@@ -31,6 +31,8 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `--no-cache` | 忽略缓存的计划并从头重新规划（强制一次 LLM 调用），即便存在有效轨迹。用于有意重新生成计划。 |
 | `--no-map` | 不带站点地图图进行规划 —— 跳过已索引的路由和选择器。适合调试规划器或全新环境。 |
 | `--repeat <n>` | 在同一个热浏览器上把场景连续运行 `n` 次 —— 稳定性和抖动检查。 |
+| `--verbose` | 将规划/执行的里程碑打印到 stderr——为慢速提供方（如 `--llm claude-code`，其规划可能耗时数分钟且无输出）提供心跳。 |
+| `--stream` | 向 stdout 输出机器可读的 NDJSON 事件（每个里程碑一行：`run:start`、`planning`、`plan`、`action`、`replan`、`run:end`），供 CI/仪表板使用；`--verbose` 仍走 stderr，因此 stdout 保持纯 NDJSON。 |
 | `--headed` | 显示浏览器窗口，而非以无头模式运行。 |
 | `--slowmo <ms>` | 在操作之间加入延迟，让你能观察每一步 —— 演示和调试节奏。 |
 | `--base-url <url>` | 为本次运行覆盖起始 URL 的 origin（dev / staging / CI）。对绝对的场景 URL 也进行重定基，并保留路径和查询串。 |
