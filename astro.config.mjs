@@ -22,8 +22,13 @@ export default defineConfig({
     }),
   ],
   markdown: {
-    // Plain code blocks styled with our own tokens — guarantees correct
-    // rendering in both light and dark themes (no baked-in Shiki colors).
-    syntaxHighlight: false,
+    // Shiki dual-theme syntax highlighting: each token carries a light color
+    // and a `--shiki-dark` var; global.css swaps to the dark var when the page
+    // is dark (data-theme or prefers-color-scheme). Backgrounds stay ours
+    // (--code-bg) so code matches the warm palette in both themes.
+    shikiConfig: {
+      themes: { light: 'github-light', dark: 'github-dark' },
+      wrap: true,
+    },
   },
 });

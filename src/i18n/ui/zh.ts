@@ -13,7 +13,7 @@ const zh = {
   },
 
   header: {
-    nav: { how: '工作原理', features: '功能特性', docs: '文档', start: '快速开始' },
+    nav: { how: '工作原理', features: '功能特性', docs: '文档', changelog: '更新日志', start: '快速开始' },
     home: 'Windup 主页',
     npm: 'npm 上的 Windup',
     github: 'GitHub 上的 Windup',
@@ -118,7 +118,7 @@ const zh = {
   features: {
     kicker: '功能特性',
     title: 'QA 工作流所需的一切 —— 唯独不要选择器。',
-    note: '一款为真实项目打造的 CLI：场景编写、密钥管理、依赖关系、成本追踪和 CI 报告器。',
+    note: '一款为真实项目打造的 CLI：场景编写、依赖关系、动态值（OTP/magic-link）、客户端夹具、会话快照、安全禁用名单、覆盖缺口、可访问性审计、CI 分片与报告器。',
     items: [
       { title: '自然语言场景', body: '用纯自然语言描述测试。无需选择器、无需页面对象、无需维护测试代码。' },
       { title: '规划一次，免费回放', body: '从第二次运行起：llm_calls=0、~1s、$0。缓存的计划每次都以相同方式运行。' },
@@ -134,6 +134,16 @@ const zh = {
       { title: '多提供商', body: 'Google Gemini 和 OpenAI，可按次运行选择（--llm openai:gpt-5-mini）。windup costs 按提供商和模型追踪花费。' },
       { title: 'run --concurrency', cmd: true, body: '在一个共享的热浏览器上以隔离的上下文并行运行多个场景 —— 混合套件下约快 2 倍，在有规划或长流程时更快。默认串行。' },
       { title: '跨浏览器', body: '用 --browser 在 Chromium（默认）、Firefox 或 WebKit 上运行相同的场景。同一份计划可在三者上回放 —— 编写一次，处处运行。' },
+      { title: 'config.resolve', cmd: true, body: '在运行时从作者声明的来源（cmd/http/fn）获取动态值（OTP 验证码、magic-link）。计划通过 value_ref/url_ref 使用它们 —— 解锁无密码登录。resolveFields 以确定性方式绑定字段。' },
+      { title: 'Session snapshots', body: '依赖的认证状态（storageState）只捕获一次，并在缓存回放时恢复 —— 因此不必为每个依赖方重新运行登录流程（deps≈0）。套件的重大提速。' },
+      { title: 'config.seed', cmd: true, body: '在计划运行前注入 localStorage/sessionStorage —— 无需服务器往返即可直达购物车或某个 POS 设备状态。确定且对 CI 安全。' },
+      { title: 'config.forbid', cmd: true, body: '安全禁用名单：针对被禁止的选择器或 URL 的运行会中止 —— 防止更改测试密码、删除数据或持久化配置的 CI 护栏。' },
+      { title: 'windup coverage', cmd: true, body: '将 windup scan 索引的路由与你的场景交叉比对，列出还没有测试的路由 —— 自动发现覆盖缺口。' },
+      { title: 'windup doctor', cmd: true, body: 'CI 前的预检：LLM 密钥、浏览器、场景可解析、无孤立片段、站点地图已扫描 —— 优先捕捉常见的「到 CI 就会挂」问题。' },
+      { title: 'run --a11y', cmd: true, body: '对每个场景的最终页面进行一次免费的可访问性审计（axe-core）—— 报告违规项。仅供参考；从不导致运行失败。' },
+      { title: 'run --all --shard', cmd: true, body: '将套件以轮询方式拆分到并行的 CI 运行器上（--shard 1/4、2/4、……），每一份都是独立的作业。' },
+      { title: 'run --all --changed', cmd: true, body: '增量 CI：只运行受代码或场景改动影响的场景（git diff → 路由归因），并带有安全的全量回退 —— 绝不出现无声的假绿。' },
+      { title: 'readySignals', body: '按路由 glob 复用的抗抖动就绪判定：在操作前等待应用就绪，只定义一次，而不是在每个场景中作为 hint 重复。' },
     ],
   },
 

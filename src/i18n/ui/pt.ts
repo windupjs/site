@@ -13,7 +13,7 @@ const pt = {
   },
 
   header: {
-    nav: { how: 'Como funciona', features: 'Recursos', docs: 'Documentação', start: 'Começar' },
+    nav: { how: 'Como funciona', features: 'Recursos', docs: 'Documentação', changelog: 'Changelog', start: 'Começar' },
     home: 'Página inicial do Windup',
     npm: 'Windup no npm',
     github: 'Windup no GitHub',
@@ -118,7 +118,7 @@ const pt = {
   features: {
     kicker: 'Recursos',
     title: 'Tudo que um fluxo de QA precisa — menos os seletores.',
-    note: 'Uma CLI feita para projetos reais: autoria, segredos, dependências, controle de custos e relatórios de CI.',
+    note: 'Uma CLI feita para projetos reais: autoria, dependências, valores dinâmicos (OTP/magic-link), fixtures no lado do cliente, snapshots de sessão, uma denylist de segurança, lacunas de cobertura, auditorias de acessibilidade, sharding de CI e reporters.',
     items: [
       { title: 'Cenários em linguagem natural', body: 'Descreva o teste em linguagem simples. Sem seletores, sem page objects, sem código de teste para manter.' },
       { title: 'Planeje uma vez, replay grátis', body: 'A partir da 2ª execução: llm_calls=0, ~1s, $0. O plano em cache roda igual todas as vezes.' },
@@ -134,6 +134,16 @@ const pt = {
       { title: 'Multi-provedor', body: 'Google Gemini e OpenAI, escolhidos por execução (--llm openai:gpt-5-mini). windup costs rastreia gastos por provedor e modelo.' },
       { title: 'run --concurrency', cmd: true, body: 'Roda cenários em paralelo em um único navegador aquecido compartilhado com contextos isolados — ~2× mais rápido em uma suíte mista, mais ainda com planejamento ou fluxos longos. Sequencial por padrão.' },
       { title: 'Multi-navegador', body: 'Rode os mesmos cenários no Chromium (padrão), Firefox ou WebKit com --browser. Um único plano faz replay nos três — escreva uma vez, rode em todos.' },
+      { title: 'config.resolve', cmd: true, body: 'Valores dinâmicos (códigos OTP, magic-links) obtidos em tempo de execução de uma fonte declarada pelo autor (cmd/http/fn). Um plano os usa via value_ref/url_ref — desbloqueia o login sem senha. resolveFields vincula um campo de forma determinística.' },
+      { title: 'Session snapshots', body: 'O estado de autenticação (storageState) de uma dependência é capturado uma vez e restaurado nos replays em cache — assim o fluxo de login não é reexecutado para cada dependente (deps≈0). O grande ganho de velocidade da suíte.' },
+      { title: 'config.seed', cmd: true, body: 'Injeta localStorage/sessionStorage antes de um plano rodar — chegue direto a um carrinho ou ao estado de um dispositivo de PDV, sem ida e volta ao servidor. Determinístico e seguro para CI.' },
+      { title: 'config.forbid', cmd: true, body: 'Denylist de segurança: uma execução que mira um seletor ou URL proibido é abortada — a proteção de CI contra trocar a senha de teste, apagar dados ou persistir configuração.' },
+      { title: 'windup coverage', cmd: true, body: 'Cruza as rotas que o windup scan indexou com seus cenários e lista as rotas que ainda não têm teste — lacunas de cobertura, encontradas automaticamente.' },
+      { title: 'windup doctor', cmd: true, body: 'Verificação antes do CI: chave do LLM, navegador, cenários que fazem parse, sem fragmentos órfãos, mapa do site escaneado — pega primeiro os problemas comuns do tipo "vai quebrar no CI".' },
+      { title: 'run --a11y', cmd: true, body: 'Uma auditoria de acessibilidade gratuita (axe-core) na página final de cada cenário — violações reportadas. Informativa; nunca falha a execução.' },
+      { title: 'run --all --shard', cmd: true, body: 'Divide a suíte em rodízio entre runners de CI paralelos (--shard 1/4, 2/4, …), cada um um job separado.' },
+      { title: 'run --all --changed', cmd: true, body: 'CI incremental: roda apenas os cenários que uma mudança de código ou de cenário afeta (git diff → atribuição de rotas), com um fallback seguro para a suíte completa — nunca um falso verde silencioso.' },
+      { title: 'readySignals', body: 'Prontidão reutilizável anti-flake por glob de rota: espere o app estar pronto antes de agir, definido uma vez em vez de repetido como hint em cada cenário.' },
     ],
   },
 

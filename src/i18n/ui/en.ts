@@ -11,7 +11,7 @@ const en = {
   },
 
   header: {
-    nav: { how: 'How it works', features: 'Features', docs: 'Docs', start: 'Get started' },
+    nav: { how: 'How it works', features: 'Features', docs: 'Docs', changelog: 'Changelog', start: 'Get started' },
     home: 'Windup home',
     npm: 'Windup on npm',
     github: 'Windup on GitHub',
@@ -116,7 +116,7 @@ const en = {
   features: {
     kicker: 'Features',
     title: 'Everything a QA workflow needs — minus the selectors.',
-    note: 'A CLI built for real projects: authoring, secrets, dependencies, cost tracking and CI reporters.',
+    note: 'A CLI built for real projects: authoring, dependencies, dynamic values (OTP/magic-link), client-side fixtures, session snapshots, a safety denylist, coverage gaps, accessibility audits, CI sharding and reporters.',
     items: [
       { title: 'Natural-language scenarios', body: 'Describe the test in plain language. No selectors, no page objects, no test code to maintain.' },
       { title: 'Plan once, replay free', body: 'From the 2nd run on: llm_calls=0, ~1s, $0. The cached plan runs the same way every time.' },
@@ -132,6 +132,16 @@ const en = {
       { title: 'Multi-provider', body: 'Google Gemini and OpenAI, picked per run (--llm openai:gpt-5-mini). windup costs tracks spend by provider and model.' },
       { title: 'run --concurrency', cmd: true, body: 'Run scenarios in parallel over one shared warm browser with isolated contexts — ~2× faster on a mixed suite, more with planning or long flows. Sequential by default.' },
       { title: 'Cross-browser', body: 'Run the same scenarios on Chromium (default), Firefox or WebKit with --browser. A single plan replays across all three — author once, run everywhere.' },
+      { title: 'config.resolve', cmd: true, body: 'Dynamic values (OTP codes, magic-links) fetched at run time from an author-declared source (cmd/http/fn). A plan uses them via value_ref/url_ref — unblocks passwordless login. resolveFields binds a field deterministically.' },
+      { title: 'Session snapshots', body: 'A dependency’s auth state (storageState) is captured once and restored on cached replays — so the login flow isn’t re-run for every dependent (deps≈0). The big suite speed-up.' },
+      { title: 'config.seed', cmd: true, body: 'Inject localStorage/sessionStorage before a plan runs — reach a cart or a POS-device state directly, with no server round-trip. Deterministic and CI-safe.' },
+      { title: 'config.forbid', cmd: true, body: 'Safety denylist: a run that targets a forbidden selector or URL aborts — the CI guardrail against changing the test password, deleting data, or persisting config.' },
+      { title: 'windup coverage', cmd: true, body: 'Cross-references the routes windup scan indexed with your scenarios and lists the routes that have no test yet — coverage gaps, found automatically.' },
+      { title: 'windup doctor', cmd: true, body: 'Preflight before CI: LLM key, browser, scenarios parse, no orphaned fragments, site map scanned — catches the common "it’ll break in CI" problems first.' },
+      { title: 'run --a11y', cmd: true, body: 'A free accessibility audit (axe-core) on each scenario’s final page — violations reported. Informational; never fails the run.' },
+      { title: 'run --all --shard', cmd: true, body: 'Round-robin-split the suite across parallel CI runners (--shard 1/4, 2/4, …), each a separate job.' },
+      { title: 'run --all --changed', cmd: true, body: 'Incremental CI: run only the scenarios a code or scenario change affects (git diff → route attribution), with a safe full-suite fallback — never a silent false green.' },
+      { title: 'readySignals', body: 'Reusable anti-flake readiness per route glob: wait for the app to be ready before acting, defined once instead of repeated as a hint in every scenario.' },
     ],
   },
 

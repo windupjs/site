@@ -204,16 +204,21 @@ th.col-windup { color: var(--accent); }
   border: 1px solid var(--line);
 }
 
-/* code blocks */
+/* code blocks — Shiki dual-theme tokens on our own warm background */
 .prose pre {
-  background: var(--code-bg); border: 1px solid var(--line); border-radius: 10px;
+  background: var(--code-bg) !important; border: 1px solid var(--line); border-radius: 10px;
   padding: 16px 18px; margin: 0 0 20px;
   font-size: 13px; line-height: 1.6;
   white-space: pre-wrap; overflow-wrap: anywhere;
 }
 .prose pre code {
-  font-family: var(--font-mono); color: var(--ink);
+  font-family: var(--font-mono);
   background: none; border: none; padding: 0; font-size: inherit;
+}
+/* Dark mode: swap each Shiki token to its dark color (inline light color wins otherwise). */
+:root[data-theme="dark"] .prose pre code span { color: var(--shiki-dark) !important; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .prose pre code span { color: var(--shiki-dark) !important; }
 }
 
 .prose blockquote {

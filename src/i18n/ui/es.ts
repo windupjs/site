@@ -9,7 +9,7 @@ const es = {
   },
 
   header: {
-    nav: { how: 'Cómo funciona', features: 'Características', docs: 'Docs', start: 'Empezar' },
+    nav: { how: 'Cómo funciona', features: 'Características', docs: 'Docs', changelog: 'Changelog', start: 'Empezar' },
     home: 'Inicio de Windup',
     npm: 'Windup en npm',
     github: 'Windup en GitHub',
@@ -114,7 +114,7 @@ const es = {
   features: {
     kicker: 'Características',
     title: 'Todo lo que necesita un flujo de QA — menos los selectores.',
-    note: 'Una CLI hecha para proyectos reales: autoría, secretos, dependencias, seguimiento de costes y reporters de CI.',
+    note: 'Una CLI hecha para proyectos reales: autoría, dependencias, valores dinámicos (OTP/magic-link), fixtures del lado del cliente, snapshots de sesión, una denylist de seguridad, huecos de cobertura, auditorías de accesibilidad, sharding de CI y reporters.',
     items: [
       { title: 'Escenarios en lenguaje natural', body: 'Describe la prueba en lenguaje natural. Sin selectores, sin page objects, sin código de prueba que mantener.' },
       { title: 'Planifica una vez, reproduce gratis', body: 'A partir de la 2ª ejecución: llm_calls=0, ~1s, $0. El plan en caché se ejecuta igual siempre.' },
@@ -130,6 +130,16 @@ const es = {
       { title: 'Multiproveedor', body: 'Google Gemini y OpenAI, elegidos por ejecución (--llm openai:gpt-5-mini). windup costs rastrea el gasto por proveedor y modelo.' },
       { title: 'run --concurrency', cmd: true, body: 'Ejecuta escenarios en paralelo sobre un único navegador caliente compartido con contextos aislados — ~2× más rápido en una suite mixta, más con planificación o flujos largos. Secuencial por defecto.' },
       { title: 'Multinavegador', body: 'Ejecuta los mismos escenarios en Chromium (por defecto), Firefox o WebKit con --browser. Un único plan se reproduce en los tres — escribe una vez, ejecuta en todos.' },
+      { title: 'config.resolve', cmd: true, body: 'Valores dinámicos (códigos OTP, magic-links) obtenidos en tiempo de ejecución desde una fuente declarada por el autor (cmd/http/fn). Un plan los usa mediante value_ref/url_ref — desbloquea el inicio de sesión sin contraseña. resolveFields vincula un campo de forma determinista.' },
+      { title: 'Session snapshots', body: 'El estado de autenticación (storageState) de una dependencia se captura una vez y se restaura en los replays desde caché — así el flujo de login no se reejecuta para cada dependiente (deps≈0). La gran mejora de velocidad de la suite.' },
+      { title: 'config.seed', cmd: true, body: 'Inyecta localStorage/sessionStorage antes de que un plan se ejecute — llega directo a un carrito o al estado de un dispositivo TPV, sin ida y vuelta al servidor. Determinista y seguro para CI.' },
+      { title: 'config.forbid', cmd: true, body: 'Denylist de seguridad: una ejecución que apunta a un selector o URL prohibido se aborta — la salvaguarda de CI contra cambiar la contraseña de prueba, borrar datos o persistir configuración.' },
+      { title: 'windup coverage', cmd: true, body: 'Cruza las rutas que windup scan indexó con tus escenarios y lista las rutas que aún no tienen prueba — huecos de cobertura, encontrados automáticamente.' },
+      { title: 'windup doctor', cmd: true, body: 'Comprobación previa al CI: clave del LLM, navegador, escenarios que parsean, sin fragmentos huérfanos, mapa del sitio escaneado — detecta primero los problemas típicos del tipo "va a romperse en CI".' },
+      { title: 'run --a11y', cmd: true, body: 'Una auditoría de accesibilidad gratuita (axe-core) en la página final de cada escenario — violaciones reportadas. Informativa; nunca falla la ejecución.' },
+      { title: 'run --all --shard', cmd: true, body: 'Reparte la suite por turnos entre runners de CI paralelos (--shard 1/4, 2/4, …), cada uno un job separado.' },
+      { title: 'run --all --changed', cmd: true, body: 'CI incremental: ejecuta solo los escenarios que afecta un cambio de código o de escenario (git diff → atribución de rutas), con un fallback seguro a la suite completa — nunca un falso verde silencioso.' },
+      { title: 'readySignals', body: 'Preparación reutilizable anti-flakes por glob de ruta: espera a que la app esté lista antes de actuar, definida una vez en lugar de repetida como hint en cada escenario.' },
     ],
   },
 
