@@ -45,6 +45,11 @@ export default defineConfig({
     selectors: ["#change-password", "[data-danger]"],  // coincidencia de subcadena en el selector de un plan
     urls: ["**/account/password", "**/admin/**"],       // globs de ruta que la ejecución nunca debe alcanzar
   },
+  // Valores dinámicos obtenidos en tiempo de ejecución (OTP, magic-links) — referenciados por un plan vía value_ref/url_ref.
+  resolve: {
+    otp_code:   { source: { kind: "cmd", command: "psql \"$DATABASE_URL\" -tAc \"select code from otp_codes order by created_at desc limit 1\"" }, extract: { regex: "(\\d{6})" }, poll: { timeout_ms: 30000 } },
+    magic_link: { source: { kind: "http", url: "https://inbox.test/latest" }, extract: { json: "body.url" }, url: true },
+  },
 });
 ```
 
@@ -52,6 +57,7 @@ export default defineConfig({
 - **`readySignals`** mapea un glob de ruta al/los selector(es) CSS que deben estar **visibles antes de que el ejecutor lance la primera acción** en una página coincidente. Se aplica de forma determinista en tiempo de ejecución (sin LLM, $0, no forma parte del plan en caché) cada vez que una ejecución entra en una ruta coincidente — así una espera de hidratación/carga se define una vez por ruta en lugar de repetirse como una pista en cada escenario. Cierra la carrera en tiempo de carga donde un elemento está presente pero sus manejadores aún no están adjuntos (algo que la espera por elemento de Playwright no puede ver). Best-effort: una señal que nunca aparece dentro del timeout registra una advertencia y continúa (nunca hace fallar de forma dura la suite).
 - **`suite.setup` / `suite.teardown`** son comando(s) de shell que se ejecutan **una vez** alrededor de un `run --all` — el setup antes del primer escenario, el teardown después del último (siempre, incluso si falla) — para fixtures de toda la suite (sembrar/resetear una base de datos compartida, arrancar un stub). El `setup`/`teardown` por escenario (en el JSON del escenario) siguen gestionando el estado por prueba. Un `suite.setup` que falla aborta la suite antes de que se ejecute cualquier escenario; un `suite.teardown` que falla es una advertencia.
 - **`forbid`** es una lista de bloqueo de seguridad — un guardarraíl de CI contra efectos secundarios irreversibles. Si alguna acción del plan apunta a un **selector** prohibido (coincidencia de subcadena, p. ej. `#change-password`) o la ejecución alcanza una **URL** prohibida (glob de ruta, p. ej. `**/account/password`), la ejecución **aborta** con un fallo `forbidden` en lugar de realizarla. Tú declaras la lista de peligros (el motor nunca la infiere), así que aunque un replan derive hacia "Cambiar contraseña", se detiene antes del clic. Un fallo `forbidden` nunca invalida la caché ni replanifica, por lo que no necesita clave de LLM.
+- **`resolve`** declara valores dinámicos obtenidos en tiempo de ejecución (un código OTP, una URL de magic-link) — lo que desbloquea el inicio de sesión con OTP/magic-link/sin contraseña. Un plan referencia uno vía `value_ref: "<name>"` (un fill) o `url_ref: "<name>"` (un goto); Windup obtiene el **`source`** (`cmd` stdout de shell, `http` fetch, o `fn` un módulo del proyecto), extrae el valor con **`extract`** (un grupo de captura `regex` o una ruta de puntos `json`) y hace **`poll`** hasta que aparece (30 s por defecto). El **source lo declara el autor, nunca lo genera el LLM** (sin vector de ejecución de código desde el modelo), y el valor resuelto es **efímero** — se usa para el fill/goto y nunca se escribe en la caché, el informe ni los logs.
 - **Asistencia LLM** (capa 3 de scan) lee archivos que las capas estáticas no pudieron resolver (rutas construidas dinámicamente, componentes indirectos), limitada por `maxCalls`. Los resultados se recuerdan por hash de archivo — los archivos sin cambios nunca vuelven a costar. Los costes se registran en el libro mayor y se muestran con `windup costs`.
 
 ## Qué vive dónde

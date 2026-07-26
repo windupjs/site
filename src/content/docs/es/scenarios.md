@@ -44,6 +44,8 @@ Los flujos rara vez empiezan de cero — crear una cuenta bancaria requiere habe
 
 `windup new` maneja las dependencias en ambos sentidos: `--depends-on login` las declara explícitamente, y **el LLM autor también las sugiere por su cuenta** — ve cada escenario existente (id + tarea) y, cuando la instrucción presupone un estado que uno de ellos produce ("ya con sesión iniciada…"), emite `depends_on` automáticamente (filtrado mecánicamente contra los ids de escenarios reales — nunca inventados).
 
+**Precondiciones de datos (`requires`).** `depends_on` captura una dependencia de *escenario*; `requires` documenta una de *datos* — los datos de semilla (seed) que un escenario asume: `"requires": ["1 active attraction", "a paid order"]`. Es declarativo (Windup lo muestra en el informe para que un fallo causado por datos faltantes sea legible, y traza el ciclo crear→usar→archivar) — para sembrar realmente los datos, usa `setup` / `suite.setup`.
+
 ## Reutilización isomórfica de planes (`like`)
 
 A gran escala, muchos escenarios son el **mismo flujo en una ruta/entidad distinta** — crear un contacto, crear un negocio, crear una empresa accionan todos el mismo formulario. En lugar de pagar una llamada de planificación al LLM por cada uno, un escenario puede reutilizar el plan **ya probado** de otro:
