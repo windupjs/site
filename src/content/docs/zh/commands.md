@@ -31,6 +31,8 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `--all` | 运行目录中的每个场景 —— CI 模式，整个套件共用一个热浏览器。任何场景失败则退出码为非零。 |
 | `--concurrency <n>` | 在一个共享的热浏览器上以隔离的上下文并行运行最多 `n` 个场景 —— 混合套件下约快 2 倍。默认串行。 |
 | `--shard <i/n>` | 配合 `--all`：运行第 *i* 个分片（共 *n* 个，对场景列表做轮询式拆分）—— 将一个大套件分摊到并行的 CI runner 上（`--shard 1/4`、`--shard 2/4`、……），每个都是独立的 job。 |
+| `--retries <n>` | 对以**瞬时**方式失败的场景（网络重置、水合竞态导致的验证未命中、不稳定的 `setup`/`dependency`）额外重跑至多 `n` 次 —— 第一次通过即胜出。`config.forbid` 拦截永不重试。仅在重试后才通过的场景会被标记为 `flaky`（控制台 `↻`、HTML 报告中的 `FLAKY n×` 徽章、JSON 及 `run:end` 流中的 `flaky`/`attempts`）—— 暴露出来，而非掩盖。 |
+| `--max-wall <seconds>` | 配合 `--all`：套件的**时间预算**。一旦挂钟时间超过上限，就停止启动新场景（进行中的会跑完）并以非零码退出 —— 失控的套件会让构建失败，而不是把 runner 挂住。顺序模式和 `--concurrency` 下都有效。 |
 | `--a11y` | 每个场景结束后，对最终页面运行一次 [axe-core](https://github.com/dequelabs/axe-core) 无障碍审计并报告违规项。仅供参考 —— 绝不使运行失败。需选择启用的可选依赖：`npm i -D axe-core`。 |
 | `--tag <names>` | 配合 `--all`：仅运行带有其中任一标签的场景（以逗号分隔，例如 `smoke,checkout`）。可与 `--shard` 和 `--changed` 组合。 |
 | `--trace` | 在**失败的**场景上，保存一份 Playwright 跟踪（`.windup/reports/traces/<id>.zip`，可在跟踪查看器中打开）+ 一张整页截图；HTML 报告会链接到两者。仅在失败时捕获。 |
