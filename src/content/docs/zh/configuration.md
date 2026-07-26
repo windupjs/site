@@ -50,6 +50,8 @@ export default defineConfig({
     otp_code:   { source: { kind: "cmd", command: "psql \"$DATABASE_URL\" -tAc \"select code from otp_codes order by created_at desc limit 1\"" }, extract: { regex: "(\\d{6})" }, poll: { timeout_ms: 30000 } },
     magic_link: { source: { kind: "http", url: "https://inbox.test/latest" }, extract: { json: "body.url" }, url: true },
   },
+  // 确定性绑定：匹配字段上的任何 fill 都从该 resolver 填充。
+  resolveFields: { "[name=otp]": "otp_code" },
 });
 ```
 
@@ -58,6 +60,7 @@ export default defineConfig({
 - **`suite.setup` / `suite.teardown`** 是围绕一次 `run --all` **只运行一次**的 shell 命令 —— setup 在第一个场景之前运行，teardown 在最后一个场景之后运行（始终运行，即使失败）—— 用于整个套件范围的夹具（为共享数据库播种/重置、启动一个 stub）。每个场景各自的 `setup`/`teardown`（在场景 JSON 中）仍负责各测试的状态。失败的 `suite.setup` 会在任何场景运行之前中止整个套件；失败的 `suite.teardown` 只是一个警告。
 - **`forbid`** 是一个安全拒绝列表 —— 针对不可逆副作用的 CI 护栏。如果任何计划动作瞄准了被禁止的**选择器**（子串匹配，例如 `#change-password`），或运行到达了被禁止的 **URL**（路径 glob，例如 `**/account/password`），运行会以 `forbidden` 失败**中止**，而不会执行它。你来声明危险清单（引擎绝不推断），因此即便重新规划游走到"修改密码"，也会在点击之前被拦下。`forbidden` 失败绝不会使缓存失效或重新规划，因此无需 LLM 密钥。
 - **`resolve`** 声明在运行时获取的动态值（一个 OTP 码、一个 magic-link URL）—— 正是它解除了 OTP/magic-link/无密码登录的阻塞。计划通过 `value_ref: "<name>"`（一次 fill）或 `url_ref: "<name>"`（一次 goto）引用它；Windup 获取 **`source`**（`cmd` shell 标准输出、`http` fetch，或 `fn` 一个项目模块），用 **`extract`**（一个 `regex` 捕获组或一个 `json` 点路径）取出该值，并 **`poll`** 直到它出现（默认 30 秒）。**source 由作者声明，绝不由 LLM 生成**（没有从模型执行代码的向量），而解析出的值是**临时的** —— 仅用于该 fill/goto，绝不写入缓存、报告或日志。
+- **`resolveFields`** 以确定性方式把一个字段绑定到一个 resolver —— 推荐用于 CI。以**选择器子串**为键（`{ "[name=otp]": "otp_code" }`），匹配字段上的任何 fill 都从该 resolver 填充，**覆盖计划在那里放入的任何内容**。因此 OTP 流程不再依赖规划器记得发出 `value_ref` —— 即便它填入了一个字面量或一个大小写不同的名称，Windup 仍会解析该字段（像 `OTP_CODE` / `otp-code` 这样的名称会归一化为已声明的 `otp_code`）。
 - **LLM 辅助**（扫描的第 3 层）会读取静态层无法解析的文件（动态构建的路由、间接组件），并受 `maxCalls` 限额约束。结果按文件哈希记忆 —— 未变更的文件不会再次产生费用。费用记录在账本中，并由 `windup costs` 展示。
 
 ## 各文件归属

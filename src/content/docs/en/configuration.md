@@ -50,6 +50,8 @@ export default defineConfig({
     otp_code:   { source: { kind: "cmd", command: "psql \"$DATABASE_URL\" -tAc \"select code from otp_codes order by created_at desc limit 1\"" }, extract: { regex: "(\\d{6})" }, poll: { timeout_ms: 30000 } },
     magic_link: { source: { kind: "http", url: "https://inbox.test/latest" }, extract: { json: "body.url" }, url: true },
   },
+  // Deterministic binding: any fill on a matching field is filled from the resolver.
+  resolveFields: { "[name=otp]": "otp_code" },
 });
 ```
 
@@ -58,6 +60,7 @@ export default defineConfig({
 - **`suite.setup` / `suite.teardown`** are shell command(s) run **once** around a `run --all` — setup before the first scenario, teardown after the last (always, even on failure) — for suite-wide fixtures (seed/reset a shared database, start a stub). Per-scenario `setup`/`teardown` (in the scenario JSON) still handle per-test state. A failing `suite.setup` aborts the suite before any scenario runs; a failing `suite.teardown` is a warning.
 - **`forbid`** is a safety denylist — a CI guardrail against irreversible side effects. If any plan action targets a forbidden **selector** (substring match, e.g. `#change-password`) or the run reaches a forbidden **URL** (path glob, e.g. `**/account/password`), the run **aborts** with a `forbidden` failure instead of performing it. You declare the danger list (the engine never infers it), so even if a re-plan wanders toward "Change password", it's stopped before the click. A `forbidden` failure never invalidates the cache or re-plans, so it needs no LLM key.
 - **`resolve`** declares dynamic values fetched at run time (an OTP code, a magic-link URL) — the thing that unblocks OTP/magic-link/passwordless login. A plan references one via `value_ref: "<name>"` (a fill) or `url_ref: "<name>"` (a goto); Windup fetches the **`source`** (`cmd` shell stdout, `http` fetch, or `fn` a project module), pulls the value out with **`extract`** (a `regex` capture group or a `json` dot-path), and **`poll`**s until it appears (default 30 s). The **source is author-declared, never LLM-generated** (no code-exec-from-model vector), and the resolved value is **ephemeral** — used for the fill/goto and never written to the cache, report or logs.
+- **`resolveFields`** binds a field to a resolver deterministically — recommended for CI. Keyed by a **selector substring** (`{ "[name=otp]": "otp_code" }`), any fill on a matching field is filled from that resolver, **overriding whatever the plan put there**. So the OTP flow no longer depends on the planner remembering to emit `value_ref` — even if it fills a literal or a differently-cased name, Windup still resolves the field (names like `OTP_CODE` / `otp-code` normalize to a declared `otp_code`).
 - **LLM-assist** (scan layer 3) reads files the static layers couldn't resolve (dynamically built routes, indirect components), capped by `maxCalls`. Results are remembered per file hash — unchanged files never cost again. Costs are recorded in the ledger and shown by `windup costs`.
 
 ## What lives where
