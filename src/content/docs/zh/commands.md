@@ -38,6 +38,7 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `--retries <n>` | 对以**瞬时**方式失败的场景（网络重置、水合竞态导致的验证未命中、不稳定的 `setup`/`dependency`）额外重跑至多 `n` 次 —— 第一次通过即胜出。`config.forbid` 拦截永不重试。仅在重试后才通过的场景会被标记为 `flaky`（控制台 `↻`、HTML 报告中的 `FLAKY n×` 徽章、JSON 及 `run:end` 流中的 `flaky`/`attempts`）—— 暴露出来，而非掩盖。 |
 | `--max-wall <seconds>` | 配合 `--all`：套件的**时间预算**。一旦挂钟时间超过上限，就停止启动新场景（进行中的会跑完）并以非零码退出 —— 失控的套件会让构建失败，而不是把 runner 挂住。顺序模式和 `--concurrency` 下都有效。 |
 | `--bail` | 配合 `--all`：在**第一次失败**后就停止启动新场景 —— PR check 的快速反馈。与 `--retries`/`--max-wall` 组成护栏三件套；顺序模式和 `--concurrency` 下都有效。 |
+| `--no-prewarm` | 关闭**浏览器预热**。默认情况下，顺序的 `run --all` 会在关键路径之外预先创建下一个场景所需的全新 context+page（每场景省下约 200 ms，隔离不变）；此开关将其关闭。只有顺序运行会预热。 |
 | `--a11y` | 每个场景结束后，对最终页面运行一次 [axe-core](https://github.com/dequelabs/axe-core) 无障碍审计并报告违规项。仅供参考 —— 绝不使运行失败。需选择启用的可选依赖：`npm i -D axe-core`。 |
 | `--tag <names>` | 配合 `--all`：仅运行带有其中任一标签的场景（以逗号分隔，例如 `smoke,checkout`）。可与 `--shard` 和 `--changed` 组合。 |
 | `--trace` | 在**失败的**场景上，保存一份 Playwright 跟踪（`.windup/reports/traces/<id>.zip`，可在跟踪查看器中打开）+ 一张整页截图；HTML 报告会链接到两者。仅在失败时捕获。 |

@@ -23,6 +23,7 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 - **`windup doctor`** 是一次预检 —— LLM 密钥、浏览器、场景可解析、无孤立片段、站点地图已扫描 —— 在流水线运行之前抓出常见的「到了 CI 就会挂」问题。
 - 任何场景失败时退出码为非零。
 - `--concurrency <n>` 在一个共享的热浏览器上并行运行场景（混合套件下约快 2 倍）；`--browser firefox|webkit` 跨浏览器运行整个套件。
+- **浏览器预热（默认开启；`--no-prewarm`）。** 在顺序的 `run --all` 中，当一个场景运行时，Windup 会预先创建*下一个*场景所需的**全新** context+page —— 它约 200 ms 的启动发生在关键路径之外，而不是变成空等（一个场景的 `setup` 段降到约 0）。隔离不变：每个场景仍获得自己干净的 context。只有顺序运行会预热 —— `--concurrency > 1` 已经在各 worker 间重叠了启动。
 - **增量运行（`--changed` / `--since <ref>`）。** 配合 `--all`，只运行受某次改动影响的场景：`--changed` 将工作区与 `HEAD` 做差异比较，`--since main`（或任意 git ref）与该 ref 比较。当某个场景自身的文件发生变更、没有缓存计划、或其计划访问了某条**索引源**已变更的路由（即站点地图的文件→路由归属）时，该场景会被选中。它可靠但粗粒度，且**绝不出现静默的假绿**：如果 diff 触及了地图无法归属到某条路由的文件（共享代码、配置），或者没有 git/站点地图，Windup 会运行整个套件并打印原因。用 `windup scan` 保持归属为最新；对完整的合并前/夜间关卡使用纯 `--all`。
 - `--reporter junit` 产出 JUnit XML（GitHub Actions、GitLab 和 Jenkins 原生消费它）；`--reporter json` 产出机器可读的摘要；`--reporter html` 产出一个自包含、对人类友好的页面（零 JS/依赖 —— 可作为 CI 制品上传或本地打开）。默认输出：`.windup/reports/`。HTML 报告中每个场景的动作列表会显示每一步的**类型和目标**（`a4 · fill · otp`、`a2 · click · Add to cart`、`a1 · goto · →/checkout`）—— fill 的值永不显示（密钥/OTP 不外泄）。
 - `windup costs --json` 汇报 AI 花费，用于流水线追踪。
