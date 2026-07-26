@@ -15,6 +15,7 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 | `windup costs [--last n] [--days n] [--json]` | Relatório de uso de IA a partir do livro-razão de execuções: totais, replays gratuitos, detalhamento por provedor, por modelo e por cenário, gasto de scan e de autoria |
 | `windup status` | Páginas do mapa do site por origem, obsolescência, cenários em cache, fragmentos |
 | `windup coverage [--json]` | Cruza as rotas indexadas (`windup scan`) com os seus cenários — quais rotas têm um cenário e quais não têm nenhum (encontra lacunas de cobertura automaticamente, sem LLM) |
+| `windup doctor` | Verificações prévias (preflight) — chave do LLM do provedor, navegador instalado, os cenários parseiam, sem referências a fragmentos órfãs, mapa do site escaneado. Sem navegador/LLM/rede; código de saída diferente de zero diante de um problema grave |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promove uma fatia de um plano em cache a um fragmento reutilizável |
 | `windup secret set <account> [--user u] [--password p]` | Registra credenciais de teste: valores → `.env.local`, mapeamento → `windup.credentials.json` |
 | `windup secret list` | Contas + se cada ENV está definida (nunca imprime valores) |
@@ -29,6 +30,9 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 |---|---|
 | `--all` | Roda todos os cenários do diretório — modo CI, um navegador aquecido para a suíte inteira. Código de saída diferente de zero se qualquer cenário falhar. |
 | `--concurrency <n>` | Roda até `n` cenários em paralelo em um único navegador aquecido compartilhado com contextos isolados — ~2× mais rápido em uma suíte mista. Sequencial por padrão. |
+| `--shard <i/n>` | Com `--all`: roda o shard *i* de *n* (divisão round-robin da lista de cenários) — distribui uma suíte grande entre runners de CI em paralelo (`--shard 1/4`, `--shard 2/4`, …), cada um um job separado. |
+| `--a11y` | Após cada cenário, roda uma auditoria de acessibilidade com [axe-core](https://github.com/dequelabs/axe-core) na página final e reporta as violações. Informativa — nunca faz a execução falhar. Dependência opcional opt-in: `npm i -D axe-core`. |
+| `--watch` | Re-roda um único cenário sempre que seu arquivo muda — um ciclo de autoria rápido. |
 | `--changed` / `--since <ref>` | Com `--all`: roda apenas os cenários que uma mudança afeta — `--changed` compara a árvore de trabalho com `HEAD`, `--since main` (ou qualquer ref do git) com essa ref. Um cenário roda quando seu arquivo mudou, quando não tem um plano em cache, ou quando seu plano visita uma rota cuja fonte indexada mudou. Recorre à suíte inteira quando o impacto não pode ser provado (arquivos não atribuídos, sem git/mapa do site) — nunca um falso verde silencioso; um conjunto de afetados vazio sai com 0. |
 | `--no-cache` | Ignora o plano em cache e replaneja do zero (força uma chamada ao LLM), mesmo quando existe uma trajetória válida. Use para regenerar um plano de propósito. |
 | `--no-map` | Planeja sem o grafo do mapa do site — pula as rotas e seletores indexados. Útil para depurar o planejador ou um ambiente novinho. |

@@ -15,6 +15,7 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `windup costs [--last n] [--days n] [--json]` | AI usage report from the run ledger: totals, free replays, per-provider, per-model and per-scenario breakdown, scan and authoring spend |
 | `windup status` | Site-map pages by source, staleness, cached scenarios, fragments |
 | `windup coverage [--json]` | Cross-reference indexed routes (`windup scan`) with your scenarios — which routes have a scenario and which have none (finds coverage gaps automatically, no LLM) |
+| `windup doctor` | Preflight checks — LLM key for the provider, browser installed, scenarios parse, no orphaned fragment references, site map scanned. No browser/LLM/network; non-zero exit on a hard problem |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promote a slice of a cached plan to a reusable fragment |
 | `windup secret set <account> [--user u] [--password p]` | Register test credentials: values → `.env.local`, mapping → `windup.credentials.json` |
 | `windup secret list` | Accounts + whether each ENV is set (never prints values) |
@@ -29,6 +30,9 @@ description: The full Windup CLI reference — every command, the run flags, and
 |---|---|
 | `--all` | Run every scenario in the directory — CI mode, one warm browser for the whole suite. Non-zero exit code if any scenario fails. |
 | `--concurrency <n>` | Run up to `n` scenarios in parallel over one shared warm browser with isolated contexts — ~2× faster on a mixed suite. Sequential by default. |
+| `--shard <i/n>` | With `--all`: run shard *i* of *n* (round-robin split of the scenario list) — spread a big suite across parallel CI runners (`--shard 1/4`, `--shard 2/4`, …), each a separate job. |
+| `--a11y` | After each scenario, run an [axe-core](https://github.com/dequelabs/axe-core) accessibility audit on the final page and report violations. Informational — never fails the run. Opt-in optional dependency: `npm i -D axe-core`. |
+| `--watch` | Re-run a single scenario whenever its file changes — a fast authoring loop. |
 | `--changed` / `--since <ref>` | With `--all`: run only the scenarios a change affects — `--changed` diffs the working tree against `HEAD`, `--since main` (or any git ref) against that ref. A scenario runs when its file changed, when it has no cached plan, or when its plan visits a route whose indexed source changed. Falls back to the full suite when impact can't be proven (unattributed files, no git/site map) — never a silent false green; an empty affected set exits 0. |
 | `--no-cache` | Ignore the cached plan and re-plan from scratch (forces one LLM call), even when a valid trajectory exists. Use to regenerate a plan on purpose. |
 | `--no-map` | Plan without the site-map graph — skip the indexed routes and selectors. Useful for debugging the planner or a brand-new environment. |
