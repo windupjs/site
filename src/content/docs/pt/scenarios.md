@@ -46,6 +46,8 @@ Os fluxos raramente começam do zero — criar uma conta bancária exige estar l
 
 **Pré-condições de dados (`requires`).** `depends_on` captura uma dependência de *cenário*; `requires` documenta uma de *dados* — os dados de seed (semente) que um cenário assume: `"requires": ["1 active attraction", "a paid order"]`. É declarativo (o Windup o mostra no relatório para que uma falha causada por dados ausentes seja legível, e mapeia o ciclo criar→usar→arquivar) — para de fato semear os dados, use `setup` / `suite.setup`.
 
+**Tags (`tags`).** Marque um cenário com `"tags": ["smoke", "checkout"]` e rode um subconjunto no CI com `run --all --tag smoke` — smoke a cada push, a suíte completa toda noite.
+
 ## Reutilização isomórfica de planos (`like`)
 
 Em escala, muitos cenários são o **mesmo fluxo em uma rota/entidade diferente** — criar um contato, criar um negócio, criar uma empresa acionam todos o mesmo formulário. Em vez de pagar uma chamada de planejamento ao LLM para cada um, um cenário pode reutilizar o plano **já comprovado** de outro:

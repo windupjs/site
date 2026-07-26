@@ -32,6 +32,9 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `--concurrency <n>` | Run up to `n` scenarios in parallel over one shared warm browser with isolated contexts — ~2× faster on a mixed suite. Sequential by default. |
 | `--shard <i/n>` | With `--all`: run shard *i* of *n* (round-robin split of the scenario list) — spread a big suite across parallel CI runners (`--shard 1/4`, `--shard 2/4`, …), each a separate job. |
 | `--a11y` | After each scenario, run an [axe-core](https://github.com/dequelabs/axe-core) accessibility audit on the final page and report violations. Informational — never fails the run. Opt-in optional dependency: `npm i -D axe-core`. |
+| `--tag <names>` | With `--all`: run only scenarios carrying any of these tags (comma-separated, e.g. `smoke,checkout`). Composes with `--shard` and `--changed`. |
+| `--trace` | On a **failed** scenario, save a Playwright trace (`.windup/reports/traces/<id>.zip`, openable in the trace viewer) + a full-page screenshot; the HTML report links both. Captured only on failure. |
+| `--github` | Emit GitHub Actions `::error::` annotations for failures + a Markdown job summary to `$GITHUB_STEP_SUMMARY`. Auto-on when `GITHUB_ACTIONS=true`. |
 | `--watch` | Re-run a single scenario whenever its file changes — a fast authoring loop. |
 | `--changed` / `--since <ref>` | With `--all`: run only the scenarios a change affects — `--changed` diffs the working tree against `HEAD`, `--since main` (or any git ref) against that ref. A scenario runs when its file changed, when it has no cached plan, or when its plan visits a route whose indexed source changed. Falls back to the full suite when impact can't be proven (unattributed files, no git/site map) — never a silent false green; an empty affected set exits 0. |
 | `--no-cache` | Ignore the cached plan and re-plan from scratch (forces one LLM call), even when a valid trajectory exists. Use to regenerate a plan on purpose. |

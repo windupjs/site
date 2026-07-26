@@ -32,6 +32,9 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `--concurrency <n>` | 在一个共享的热浏览器上以隔离的上下文并行运行最多 `n` 个场景 —— 混合套件下约快 2 倍。默认串行。 |
 | `--shard <i/n>` | 配合 `--all`：运行第 *i* 个分片（共 *n* 个，对场景列表做轮询式拆分）—— 将一个大套件分摊到并行的 CI runner 上（`--shard 1/4`、`--shard 2/4`、……），每个都是独立的 job。 |
 | `--a11y` | 每个场景结束后，对最终页面运行一次 [axe-core](https://github.com/dequelabs/axe-core) 无障碍审计并报告违规项。仅供参考 —— 绝不使运行失败。需选择启用的可选依赖：`npm i -D axe-core`。 |
+| `--tag <names>` | 配合 `--all`：仅运行带有其中任一标签的场景（以逗号分隔，例如 `smoke,checkout`）。可与 `--shard` 和 `--changed` 组合。 |
+| `--trace` | 在**失败的**场景上，保存一份 Playwright 跟踪（`.windup/reports/traces/<id>.zip`，可在跟踪查看器中打开）+ 一张整页截图；HTML 报告会链接到两者。仅在失败时捕获。 |
+| `--github` | 为失败发出 GitHub Actions `::error::` 注解 + 向 `$GITHUB_STEP_SUMMARY` 写入一份 Markdown job 摘要。当 `GITHUB_ACTIONS=true` 时自动开启。 |
 | `--watch` | 每当单个场景的文件发生变更时重新运行它 —— 快速的编写循环。 |
 | `--changed` / `--since <ref>` | 配合 `--all`：只运行受某次改动影响的场景 —— `--changed` 将工作区与 `HEAD` 做差异比较，`--since main`（或任意 git ref）与该 ref 比较。当某个场景的文件发生变更、没有缓存计划、或其计划访问了某条索引源已变更的路由时，该场景会被运行。当影响无法被证明时（无法归属的文件、没有 git/站点地图）回退到整个套件 —— 绝不出现静默的假绿；受影响集合为空时以 0 退出。 |
 | `--no-cache` | 忽略缓存的计划并从头重新规划（强制一次 LLM 调用），即便存在有效轨迹。用于有意重新生成计划。 |

@@ -46,6 +46,8 @@ Flows rarely start from zero — creating a bank account requires being logged i
 
 **Data preconditions (`requires`).** `depends_on` captures a *scenario* dependency; `requires` documents a *data* one — the seed data a scenario assumes: `"requires": ["1 active attraction", "a paid order"]`. It's declarative (Windup shows it in the report so a failure caused by missing data is legible, and it maps out the create→use→archive cycle) — to actually seed the data, use `setup` / `suite.setup`.
 
+**Tags (`tags`).** Label a scenario with `"tags": ["smoke", "checkout"]` and run a subset in CI with `run --all --tag smoke` — smoke on every push, the full suite nightly.
+
 ## Isomorphic plan reuse (`like`)
 
 At scale, many scenarios are the **same flow on a different route/entity** — create a contact, create a deal, create a company all drive the same form. Instead of paying an LLM planning call for each, a scenario can reuse another's **already-proven** plan:
