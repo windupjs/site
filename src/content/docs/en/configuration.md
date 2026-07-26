@@ -52,6 +52,14 @@ export default defineConfig({
   },
   // Deterministic binding: any fill on a matching field is filled from the resolver.
   resolveFields: { "[name=otp]": "otp_code" },
+  // Request stubbing: deterministic responses for matched requests (a 500, an empty list, a dropped call).
+  network: [
+    { url: "**/api/orders", json: [] },                 // force an empty list
+    { url: "**/api/report", status: 500 },              // simulate a server error
+    { url: "**/analytics", abort: true },               // drop the request (network error)
+  ],
+  // Frozen clock: pin the page's time and/or timezone for date-dependent scenarios.
+  clock: { now: "2026-01-15T09:00:00Z", timezone: "America/Sao_Paulo" },
 });
 ```
 
@@ -60,6 +68,8 @@ export default defineConfig({
 - **`suite.setup` / `suite.teardown`** are shell command(s) run **once** around a `run --all` — setup before the first scenario, teardown after the last (always, even on failure) — for suite-wide fixtures (seed/reset a shared database, start a stub). Per-scenario `setup`/`teardown` (in the scenario JSON) still handle per-test state. A failing `suite.setup` aborts the suite before any scenario runs; a failing `suite.teardown` is a warning.
 - **`forbid`** is a safety denylist — a CI guardrail against irreversible side effects. If any plan action targets a forbidden **selector** (substring match, e.g. `#change-password`) or the run reaches a forbidden **URL** (path glob, e.g. `**/account/password`), the run **aborts** with a `forbidden` failure instead of performing it. You declare the danger list (the engine never infers it), so even if a re-plan wanders toward "Change password", it's stopped before the click. A `forbidden` failure never invalidates the cache or re-plans, so it needs no LLM key.
 - **`resolve`** declares dynamic values fetched at run time (an OTP code, a magic-link URL) — the thing that unblocks OTP/magic-link/passwordless login. A plan references one via `value_ref: "<name>"` (a fill) or `url_ref: "<name>"` (a goto); Windup fetches the **`source`** (`cmd` shell stdout, `http` fetch, or `fn` a project module), pulls the value out with **`extract`** (a `regex` capture group or a `json` dot-path), and **`poll`**s until it appears (default 30 s). The **source is author-declared, never LLM-generated** (no code-exec-from-model vector), and the resolved value is **ephemeral** — used for the fill/goto and never written to the cache, report or logs.
+- **`network`** stubs HTTP requests deterministically — a list of rules matched against the request URL (a **substring** or a **glob**) plus an optional `method`, **first match wins**. Respond with `status` (default 200) + `body`/`json` (a `json` body sets `content-type` automatically) + optional `headers`/`contentType`, or `abort: true` to drop the request (a simulated network error). It lets a scenario reach a hard-to-seed state — a 500, an empty list, a failing third-party call — without touching the backend. Author-declared, applied on every run and **never part of the cached plan**.
+- **`clock`** pins the page's time. `now` (an ISO string or epoch ms) freezes `Date`/`Date.now()` to a fixed instant — injected before any page script, so `new Date()` in the app returns it — for scenarios that would otherwise drift ("orders from today", a countdown). `timezone` (an IANA name) sets the browser's zone natively. Frozen, not moving; applied every run, never cached.
 - **`resolveFields`** binds a field to a resolver deterministically — recommended for CI. Keyed by a **selector substring** (`{ "[name=otp]": "otp_code" }`), any fill on a matching field is filled from that resolver, **overriding whatever the plan put there**. So the OTP flow no longer depends on the planner remembering to emit `value_ref` — even if it fills a literal or a differently-cased name, Windup still resolves the field (names like `OTP_CODE` / `otp-code` normalize to a declared `otp_code`).
 - **LLM-assist** (scan layer 3) reads files the static layers couldn't resolve (dynamically built routes, indirect components), capped by `maxCalls`. Results are remembered per file hash — unchanged files never cost again. Costs are recorded in the ledger and shown by `windup costs`.
 

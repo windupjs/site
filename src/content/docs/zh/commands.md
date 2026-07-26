@@ -15,7 +15,11 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `windup costs [--last n] [--days n] [--json]` | 来自运行账本的 AI 使用报告：总计、免费回放、按提供商、按模型、按场景的细分，以及扫描和编写花费 |
 | `windup status` | 站点地图页面（按来源）、陈旧度、已缓存的场景、片段 |
 | `windup coverage [--json]` | 将已索引的路由（`windup scan`）与你的场景交叉引用 —— 哪些路由有场景、哪些没有（自动发现覆盖率缺口，无需 LLM） |
-| `windup doctor` | 预检 —— 提供商的 LLM 密钥、已安装浏览器、场景可解析、无孤立的片段引用、站点地图已扫描。不启动浏览器/LLM/网络；遇到硬性问题时退出码为非零 |
+| `windup doctor` | 预检 —— 提供商的 LLM 密钥、已安装浏览器、场景可解析、无孤立的片段引用、站点地图已扫描、`config.network`/`clock` 格式正确。不启动浏览器/LLM/网络；遇到硬性问题时退出码为非零 |
+| `windup why <scenario> [--json]` | 诊断一个场景：缓存状态（可回放还是将要规划）、重规划 churn、`depends_on` 链、运行历史与最近一次失败 —— 全部来自 ledger，无 LLM |
+| `windup explain <scenario> [--json]` | 把缓存的计划打印为可读步骤（前往 / 点击 / 填充 / 验证）。无需打开 JSON 即可审阅计划；绝不显示 fill 的机密值 |
+| `windup diff <scenario> [--json]` | 比较一个场景最近的两次运行 —— 结果翻转、缓存，以及 Δ 时间 / Δ 成本 / Δ 动作数（一次回归检查） |
+| `windup badge [--json] [--out <path>]` | 从每个场景最近一次运行生成套件状态徽章 —— 一个自包含的 SVG（`N/M passing · $0`）或一个 shields.io 端点 JSON |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | 把缓存计划中的一段提升为可复用片段 |
 | `windup secret set <account> [--user u] [--password p]` | 注册测试凭据：值 → `.env.local`，映射 → `windup.credentials.json` |
 | `windup secret list` | 账户 + 每个 ENV 是否已设置（从不打印值） |
@@ -33,6 +37,7 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `--shard <i/n>` | 配合 `--all`：运行第 *i* 个分片（共 *n* 个，对场景列表做轮询式拆分）—— 将一个大套件分摊到并行的 CI runner 上（`--shard 1/4`、`--shard 2/4`、……），每个都是独立的 job。 |
 | `--retries <n>` | 对以**瞬时**方式失败的场景（网络重置、水合竞态导致的验证未命中、不稳定的 `setup`/`dependency`）额外重跑至多 `n` 次 —— 第一次通过即胜出。`config.forbid` 拦截永不重试。仅在重试后才通过的场景会被标记为 `flaky`（控制台 `↻`、HTML 报告中的 `FLAKY n×` 徽章、JSON 及 `run:end` 流中的 `flaky`/`attempts`）—— 暴露出来，而非掩盖。 |
 | `--max-wall <seconds>` | 配合 `--all`：套件的**时间预算**。一旦挂钟时间超过上限，就停止启动新场景（进行中的会跑完）并以非零码退出 —— 失控的套件会让构建失败，而不是把 runner 挂住。顺序模式和 `--concurrency` 下都有效。 |
+| `--bail` | 配合 `--all`：在**第一次失败**后就停止启动新场景 —— PR check 的快速反馈。与 `--retries`/`--max-wall` 组成护栏三件套；顺序模式和 `--concurrency` 下都有效。 |
 | `--a11y` | 每个场景结束后，对最终页面运行一次 [axe-core](https://github.com/dequelabs/axe-core) 无障碍审计并报告违规项。仅供参考 —— 绝不使运行失败。需选择启用的可选依赖：`npm i -D axe-core`。 |
 | `--tag <names>` | 配合 `--all`：仅运行带有其中任一标签的场景（以逗号分隔，例如 `smoke,checkout`）。可与 `--shard` 和 `--changed` 组合。 |
 | `--trace` | 在**失败的**场景上，保存一份 Playwright 跟踪（`.windup/reports/traces/<id>.zip`，可在跟踪查看器中打开）+ 一张整页截图；HTML 报告会链接到两者。仅在失败时捕获。 |

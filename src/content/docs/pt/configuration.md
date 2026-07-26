@@ -52,6 +52,14 @@ export default defineConfig({
   },
   // Vínculo determinístico: qualquer fill em um campo correspondente é preenchido a partir do resolver.
   resolveFields: { "[name=otp]": "otp_code" },
+  // Stub de requests: respostas determinísticas para requisições que casarem (um 500, uma lista vazia, uma chamada caída).
+  network: [
+    { url: "**/api/orders", json: [] },                 // força uma lista vazia
+    { url: "**/api/report", status: 500 },              // simula um erro do servidor
+    { url: "**/analytics", abort: true },               // descarta a requisição (erro de rede)
+  ],
+  // Relógio congelado: fixa a hora e/ou o timezone da página para cenários dependentes de data.
+  clock: { now: "2026-01-15T09:00:00Z", timezone: "America/Sao_Paulo" },
 });
 ```
 
@@ -60,6 +68,8 @@ export default defineConfig({
 - **`suite.setup` / `suite.teardown`** são comando(s) de shell que rodam **uma vez** ao redor de um `run --all` — o setup antes do primeiro cenário, o teardown depois do último (sempre, mesmo em caso de falha) — para fixtures de toda a suíte (semear/resetar um banco de dados compartilhado, iniciar um stub). O `setup`/`teardown` por cenário (no JSON do cenário) continuam cuidando do estado por teste. Um `suite.setup` que falha aborta a suíte antes de qualquer cenário rodar; um `suite.teardown` que falha é um aviso.
 - **`forbid`** é uma lista de bloqueio de segurança — um guardrail de CI contra efeitos colaterais irreversíveis. Se qualquer ação do plano mirar um **seletor** proibido (correspondência de substring, ex. `#change-password`) ou a execução alcançar uma **URL** proibida (glob de caminho, ex. `**/account/password`), a execução **aborta** com uma falha `forbidden` em vez de realizá-la. Você declara a lista de perigos (o motor nunca a infere), então mesmo que um replanejamento derive rumo a "Trocar senha", ele é interrompido antes do clique. Uma falha `forbidden` nunca invalida o cache nem replaneja, portanto não precisa de chave de LLM.
 - **`resolve`** declara valores dinâmicos obtidos em tempo de execução (um código OTP, uma URL de magic-link) — o que desbloqueia o login com OTP/magic-link/sem senha. Um plano referencia um via `value_ref: "<name>"` (um fill) ou `url_ref: "<name>"` (um goto); o Windup obtém o **`source`** (`cmd` stdout de shell, `http` fetch, ou `fn` um módulo do projeto), extrai o valor com **`extract`** (um grupo de captura `regex` ou um caminho de pontos `json`) e faz **`poll`** até ele aparecer (30 s por padrão). O **source é declarado pelo autor, nunca gerado pelo LLM** (sem vetor de execução de código a partir do modelo), e o valor resolvido é **efêmero** — usado para o fill/goto e nunca escrito no cache, relatório ou logs.
+- **`network`** faz stub de requisições HTTP de forma determinística — uma lista de regras cotejadas contra a URL da requisição (uma **substring** ou um **glob**) mais um `method` opcional, **a primeira correspondência vence**. Responde com `status` (padrão 200) + `body`/`json` (um corpo `json` define o `content-type` automaticamente) + `headers`/`contentType` opcionais, ou `abort: true` para descartar a requisição (um erro de rede simulado). Permite que um cenário alcance um estado difícil de semear — um 500, uma lista vazia, uma chamada de terceiros que falha — sem tocar o backend. Declarado pelo autor, aplicado em cada run e **nunca parte do plano cacheado**.
+- **`clock`** fixa a hora da página. `now` (uma string ISO ou epoch ms) congela `Date`/`Date.now()` num instante fixo — injetado antes de qualquer script da página, então `new Date()` na app o retorna — para cenários que de outra forma derivariam ("pedidos de hoje", uma contagem regressiva). `timezone` (um nome IANA) define a zona do navegador nativamente. Congelado, não avança; aplicado em cada run, nunca cacheado.
 - **`resolveFields`** vincula um campo a um resolver de forma determinística — recomendado para CI. Indexado por uma **substring de seletor** (`{ "[name=otp]": "otp_code" }`), qualquer fill em um campo correspondente é preenchido a partir daquele resolver, **sobrepondo o que quer que o plano tenha colocado ali**. Assim o fluxo de OTP não depende mais de o planejador lembrar de emitir `value_ref` — mesmo que ele preencha um literal ou um nome com capitalização diferente, o Windup ainda resolve o campo (nomes como `OTP_CODE` / `otp-code` normalizam para um `otp_code` declarado).
 - **LLM-assist** (camada 3 do scan) lê arquivos que as camadas estáticas não conseguiram resolver (rotas construídas dinamicamente, componentes indiretos), limitado por `maxCalls`. Os resultados são lembrados por hash de arquivo — arquivos inalterados nunca custam de novo. Os custos são registrados no livro-razão e mostrados por `windup costs`.
 

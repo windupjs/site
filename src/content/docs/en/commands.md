@@ -15,7 +15,11 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `windup costs [--last n] [--days n] [--json]` | AI usage report from the run ledger: totals, free replays, per-provider, per-model and per-scenario breakdown, scan and authoring spend |
 | `windup status` | Site-map pages by source, staleness, cached scenarios, fragments |
 | `windup coverage [--json]` | Cross-reference indexed routes (`windup scan`) with your scenarios — which routes have a scenario and which have none (finds coverage gaps automatically, no LLM) |
-| `windup doctor` | Preflight checks — LLM key for the provider, browser installed, scenarios parse, no orphaned fragment references, site map scanned. No browser/LLM/network; non-zero exit on a hard problem |
+| `windup doctor` | Preflight checks — LLM key for the provider, browser installed, scenarios parse, no orphaned fragment references, site map scanned, `config.network`/`clock` well-formed. No browser/LLM/network; non-zero exit on a hard problem |
+| `windup why <scenario> [--json]` | Diagnose one scenario: cache state (replay-ready or will-plan), re-plan churn, `depends_on` chain, run history and the last failure — all from the ledger, no LLM |
+| `windup explain <scenario> [--json]` | Print the cached plan as readable steps (go to / click / fill / verify). Review a plan without opening the JSON; a fill's secret value is never shown |
+| `windup diff <scenario> [--json]` | Compare a scenario's two most recent runs — result flip, cache, and Δ time / Δ cost / Δ actions (a regression check) |
+| `windup badge [--json] [--out <path>]` | Suite-status badge from each scenario's latest run — a self-contained SVG (`N/M passing · $0`) or a shields.io endpoint JSON |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promote a slice of a cached plan to a reusable fragment |
 | `windup secret set <account> [--user u] [--password p]` | Register test credentials: values → `.env.local`, mapping → `windup.credentials.json` |
 | `windup secret list` | Accounts + whether each ENV is set (never prints values) |
@@ -33,6 +37,7 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `--shard <i/n>` | With `--all`: run shard *i* of *n* (round-robin split of the scenario list) — spread a big suite across parallel CI runners (`--shard 1/4`, `--shard 2/4`, …), each a separate job. |
 | `--retries <n>` | Re-run a scenario that failed a **transient** way (network reset, hydration-race verification miss, wobbly `setup`/`dependency`) up to `n` extra times — first pass wins. A `config.forbid` block is never retried. A scenario that passes only on a retry is flagged `flaky` (console `↻`, `FLAKY n×` badge in the HTML report, `flaky`/`attempts` in JSON and the `run:end` stream) — surfaced, not swallowed. |
 | `--max-wall <seconds>` | With `--all`: a suite **time budget**. Once the wall-clock crosses the cap, stop starting new scenarios (in-flight ones finish) and exit non-zero — a runaway suite fails the build instead of hanging the runner. Works sequentially and under `--concurrency`. |
+| `--bail` | With `--all`: stop starting new scenarios after the **first failure** — fast PR-check feedback. Completes the guard-rail trio with `--retries`/`--max-wall`; works sequentially and under `--concurrency`. |
 | `--a11y` | After each scenario, run an [axe-core](https://github.com/dequelabs/axe-core) accessibility audit on the final page and report violations. Informational — never fails the run. Opt-in optional dependency: `npm i -D axe-core`. |
 | `--tag <names>` | With `--all`: run only scenarios carrying any of these tags (comma-separated, e.g. `smoke,checkout`). Composes with `--shard` and `--changed`. |
 | `--trace` | On a **failed** scenario, save a Playwright trace (`.windup/reports/traces/<id>.zip`, openable in the trace viewer) + a full-page screenshot; the HTML report links both. Captured only on failure. |

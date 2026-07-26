@@ -14,6 +14,7 @@ npx windup run --all --reporter junit --report-file reports/windup.xml
 - **Flaky 评分 + 根因提示。** `--repeat <n>` 会按场景聚合 —— 某个场景在部分而非全部运行中通过，就会被列为 flaky（`passed X/N`），并附上从其各次运行中读出的可能根因**提示**（起始页签名漂移 → 水合竞态；网络失败；始终相同的动作 → 不稳定的选择器；缓存频繁变动 → 非确定性回放），这样依赖数据的不稳定性会浮现，并在你提交绿色结果之前指向某处。
 - **重试 flake —— `--retries N`。** 对以**瞬时**方式失败的场景（网络重置、水合竞态导致的验证未命中、不稳定的 `setup`/`dependency`）额外重跑至多 N 次 —— 第一次通过即胜出。`config.forbid` 拦截**永不**重试（那是刻意的守卫，不是 flake）。flake 会被**暴露而非掩盖**：仅在重试后才转绿的场景会被标记为 `flaky`（控制台 `↻ N passed only on retry`、HTML 报告中的 `FLAKY N×` 徽章、JSON 及 `run:end` 流中的 `flaky`/`attempts`）—— 让你去修复根因，而不是把红色构建洗成绿色。
 - **时间预算 —— `--all --max-wall <seconds>`。** 一道护栏：一旦套件的挂钟时间超过上限，Windup 就**停止启动新场景**（进行中的会跑完 —— 不会中途取消任何工作）并**以非零码退出**，于是失控的套件会让构建失败，而不是把 runner 挂住。顺序模式和 `--concurrency` 下都有效。会打印 `⏱ --max-wall Ns exceeded — X/Y ran, Z not started`。
+- **快速失败 —— `--all --bail`。** 在**第一次失败**后就停止启动新场景 —— 在 PR check 里快速得到反馈，而不必等完整套件跑完。与 `--retries`/`--max-wall` 组成护栏三件套；顺序模式和 `--concurrency` 下都有效。
 - **分片 —— `--all --shard i/n`。** 运行第 *i* 个分片（共 *n* 个，轮询式拆分），将一个大套件分摊到并行的 CI runner 上（`--shard 1/4`、`--shard 2/4`、……），每个都是独立的 job。
 - **标签 —— `--all --tag <names>`。** 给场景打标签（`"tags": ["smoke", "checkout"]`）并运行子集：`--tag smoke,checkout` 会运行任何带有其中一个标签的场景。每次 push 运行 smoke，每晚运行完整套件 —— 可与 `--shard` 和 `--changed` 组合。
 - **失败时的跟踪 + 截图 —— `--trace`。** 当某个场景失败时，Windup 会保存一份 **Playwright 跟踪**（`.windup/reports/traces/<id>.zip` —— 在 Playwright 跟踪查看器中打开它：每一步的 DOM 快照、网络和控制台）以及一张整页**截图**，HTML 报告会从失败的那一行链接到两者。直接看清 CI 中到底发生了什么，而不是从耗时去猜。（仅在失败时捕获 —— 通过的运行不会留下任何东西。）
