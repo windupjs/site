@@ -116,12 +116,20 @@ const en = {
   features: {
     kicker: 'Features',
     title: 'Everything a QA workflow needs — minus the selectors.',
-    note: 'A CLI built for real projects: authoring, dependencies, dynamic values (OTP/magic-link), client-side fixtures, session snapshots, a safety denylist, coverage gaps, accessibility audits, CI sharding and reporters.',
+    note: 'A CLI built for real projects: authoring by prose or by demonstration, dependencies, dynamic values (OTP/magic-link), device emulation, performance budgets, request stubbing, runtime-health gates, CI guard-rails, read-only diagnostics, and reporters — everything a QA workflow needs.',
     items: [
       { title: 'Natural-language scenarios', body: 'Describe the test in plain language. No selectors, no page objects, no test code to maintain.' },
       { title: 'Plan once, replay free', body: 'From the 2nd run on: llm_calls=0, ~1s, $0. The cached plan runs the same way every time.' },
       { title: 'Deterministic execution', body: 'Playwright with trusted input events (isTrusted) — reliable clicks, typing and navigation.' },
-      { title: 'Cheap verification', body: 'DOM/URL post-conditions checked on every action, with no LLM in the loop.' },
+      { title: 'Cheap verification', body: 'DOM/URL post-conditions checked on every action, with no LLM in the loop. Assert visible text, an element count, an attribute, or that something is gone — not just “a selector exists”.' },
+      { title: 'windup record', cmd: true, body: 'Author by demonstration: drive a headful browser, mark the verification with a toolbar, finish — Windup writes the scenario and caches the recorded plan ($0 replay). A typed password never enters the plan.' },
+      { title: 'windup trends / why / diff', cmd: true, body: 'Read-only diagnostics from the run ledger, no LLM: per-scenario pass-rate history, why a scenario re-plans, and what changed between two runs. Plus windup badge for a status SVG.' },
+      { title: 'Device emulation', body: 'Run a scenario at a Playwright device preset with --device "iPhone 14" — viewport, UA, mobile/touch. Cached plans are keyed per device, so mobile and desktop are separate trajectories.' },
+      { title: 'Web vitals + budgets', body: 'Capture the final page’s TTFB / FCP / LCP / CLS with --web-vitals, and fail the run when config.budgets is exceeded — a performance gate that rides on the run you already do.' },
+      { title: 'config.network / config.clock', cmd: true, body: 'Stub a request (a 500, an empty list, a dropped call) and freeze the clock/timezone — per run, never cached. Scope them to a single scenario, so one error-state test doesn’t leak into every run.' },
+      { title: 'Runtime health gates', body: 'Fail a scenario that logged a console error or got a silent 5xx during the run (--fail-on-console / --fail-on-5xx) — a run can’t “pass” while the page is broken underneath.' },
+      { title: 'CI guard-rails', body: 'Retry a flake (--retries), cap the suite’s wall-clock (--max-wall), stop on first failure (--bail), or quarantine a known-flaky scenario so it reports without failing the build — surfaced, never hidden.' },
+      { title: 'windup suggest-scenarios', cmd: true, body: 'From the routes with no test yet, the LLM drafts one scenario per uncovered route — closing the scan → coverage → author loop.' },
       { title: 'windup new', cmd: true, body: 'LLM-assisted authoring: writes the scenario from your app’s real screens (site map) + project manifest. --validate runs and refines until it passes.' },
       { title: 'windup scan', cmd: true, body: 'Indexes your routes and elements straight from the source (Next.js, react-router).' },
       { title: 'windup secret', cmd: true, body: 'Credentials never enter the scenario, cache, LLM prompt or git — only ENV:* references, resolved at runtime.' },
@@ -143,6 +151,25 @@ const en = {
       { title: 'run --all --changed', cmd: true, body: 'Incremental CI: run only the scenarios a code or scenario change affects (git diff → route attribution), with a safe full-suite fallback — never a silent false green.' },
       { title: 'readySignals', body: 'Reusable anti-flake readiness per route glob: wait for the app to be ready before acting, defined once instead of repeated as a hint in every scenario.' },
     ],
+  },
+
+  record: {
+    kicker: 'New in 1.0',
+    title: 'Author by demonstration',
+    lead: 'Prefer showing over describing? <strong>windup record</strong> opens a headful browser at your app — you click the flow, mark what to verify, and finish. Windup writes the scenario <em>and</em> caches the recorded plan, so it replays deterministically at <span class="mono">$0</span>, no LLM.',
+    cmd: 'npx windup record --url http://localhost:3000',
+    steps: [
+      { n: '1', title: 'Click the flow', body: 'A real browser opens at your app. Log in, navigate, fill forms — just use it.' },
+      { n: '2', title: 'Mark the verification', body: 'A floating toolbar sits at the bottom: hit ◉ then click the element the test should check — or mark nothing to verify the final URL.' },
+      { n: '3', title: 'Finish → $0 replay', body: '“■ finalizar” (or Ctrl-C). Windup writes the scenario + caches the plan. windup run <id> replays it at $0.' },
+    ],
+    points: [
+      'A typed <strong>password never enters the plan</strong> — it’s stored in .env.local and referenced as an ENV value_ref.',
+      'Recorded selectors follow the engine’s own priority (#id → [data-testid] → [name] → type → role/text), with an accessible-name fallback.',
+      'A real UI change invalidates the cache? It <strong>self-heals</strong> by re-planning from the task, like any scenario.',
+    ],
+    docHref: '/docs/scenarios',
+    docLabel: 'How windup record works →',
   },
 
   codeExample: {
@@ -241,6 +268,7 @@ const en = {
     ariaPager: 'Pagination',
     prev: 'Previous',
     next: 'Next',
+    onThisPage: 'On this page',
     mobileJump: 'Jump to a docs page',
     aiNoteHtml:
       '<strong>Using an AI assistant?</strong> Point it at <a href="/llms.txt"><code>/llms.txt</code></a> — or <a href="/llms-full.txt"><code>/llms-full.txt</code></a> for the whole thing in one file — then describe your flows. It can author and run the scenarios for you.',

@@ -118,12 +118,20 @@ const pt = {
   features: {
     kicker: 'Recursos',
     title: 'Tudo que um fluxo de QA precisa — menos os seletores.',
-    note: 'Uma CLI feita para projetos reais: autoria, dependências, valores dinâmicos (OTP/magic-link), fixtures no lado do cliente, snapshots de sessão, uma denylist de segurança, lacunas de cobertura, auditorias de acessibilidade, sharding de CI e reporters.',
+    note: 'Uma CLI feita para projetos reais: autoria por prosa ou por demonstração, dependências, valores dinâmicos (OTP/magic-link), emulação de dispositivo, orçamentos de performance, stub de requests, barreiras de saúde em runtime, guard-rails de CI, diagnósticos de leitura e reporters — tudo que um fluxo de QA precisa.',
     items: [
       { title: 'Cenários em linguagem natural', body: 'Descreva o teste em linguagem simples. Sem seletores, sem page objects, sem código de teste para manter.' },
       { title: 'Planeje uma vez, replay grátis', body: 'A partir da 2ª execução: llm_calls=0, ~1s, $0. O plano em cache roda igual todas as vezes.' },
       { title: 'Execução determinística', body: 'Playwright com eventos de entrada confiáveis (isTrusted) — cliques, digitação e navegação confiáveis.' },
-      { title: 'Verificação barata', body: 'Pós-condições de DOM/URL checadas em cada ação, sem LLM no loop.' },
+      { title: 'Verificação barata', body: 'Pós-condições de DOM/URL checadas em cada ação, sem LLM no loop. Asserte texto visível, uma contagem de elementos, um atributo, ou que algo sumiu — não só “um seletor existe”.' },
+      { title: 'windup record', cmd: true, body: 'Autoria por demonstração: dirige um navegador headful, marca a verificação com uma toolbar, finaliza — o Windup escreve o cenário e cacheia o plano gravado (replay $0). Uma senha digitada nunca entra no plano.' },
+      { title: 'windup trends / why / diff', cmd: true, body: 'Diagnósticos de leitura a partir do ledger, sem LLM: histórico de pass-rate por cenário, por que um cenário re-planeja, e o que mudou entre dois runs. Mais windup badge para um SVG de status.' },
+      { title: 'Emulação de dispositivo', body: 'Roda um cenário num preset do Playwright com --device "iPhone 14" — viewport, UA, mobile/touch. Planos cacheados são keyados por dispositivo, então mobile e desktop são trajetórias separadas.' },
+      { title: 'Web vitals + orçamentos', body: 'Captura o TTFB / FCP / LCP / CLS da página final com --web-vitals, e faz o run falhar quando config.budgets é ultrapassado — um gate de performance montado sobre o run que você já faz.' },
+      { title: 'config.network / config.clock', cmd: true, body: 'Faz stub de um request (um 500, uma lista vazia, uma chamada caída) e congela o relógio/timezone — por run, nunca cacheado. Aplique-os a um único cenário, então um teste de estado de erro não vaza pra todo run.' },
+      { title: 'Barreiras de saúde em runtime', body: 'Faz um cenário falhar se a página logou um erro de console ou recebeu um 5xx silencioso durante o run (--fail-on-console / --fail-on-5xx) — um run não pode “passar” enquanto a página está quebrada por baixo.' },
+      { title: 'Guard-rails de CI', body: 'Repete um flake (--retries), limita o relógio da suíte (--max-wall), para na primeira falha (--bail), ou põe um cenário flaky em quarentena pra ele reportar sem fazer o build falhar — exposto, nunca escondido.' },
+      { title: 'windup suggest-scenarios', cmd: true, body: 'Das rotas ainda sem teste, o LLM redige um cenário por rota descoberta — fechando o ciclo scan → cobertura → autoria.' },
       { title: 'windup new', cmd: true, body: 'Autoria assistida por LLM: escreve o cenário a partir das telas reais do seu app (mapa do site) + manifesto do projeto. --validate roda e refina até passar.' },
       { title: 'windup scan', cmd: true, body: 'Indexa suas rotas e elementos direto do código-fonte (Next.js, react-router).' },
       { title: 'windup secret', cmd: true, body: 'Credenciais nunca entram no cenário, no cache, no prompt do LLM ou no git — apenas referências ENV:*, resolvidas em tempo de execução.' },
@@ -145,6 +153,25 @@ const pt = {
       { title: 'run --all --changed', cmd: true, body: 'CI incremental: roda apenas os cenários que uma mudança de código ou de cenário afeta (git diff → atribuição de rotas), com um fallback seguro para a suíte completa — nunca um falso verde silencioso.' },
       { title: 'readySignals', body: 'Prontidão reutilizável anti-flake por glob de rota: espere o app estar pronto antes de agir, definido uma vez em vez de repetido como hint em cada cenário.' },
     ],
+  },
+
+  record: {
+    kicker: 'Novo no 1.0',
+    title: 'Autoria por demonstração',
+    lead: 'Prefere mostrar a descrever? O <strong>windup record</strong> abre um navegador headful no seu app — você percorre o fluxo clicando, marca o que verificar e finaliza. O Windup escreve o cenário <em>e</em> cacheia o plano gravado, então ele replaya de forma determinística em <span class="mono">$0</span>, sem LLM.',
+    cmd: 'npx windup record --url http://localhost:3000',
+    steps: [
+      { n: '1', title: 'Percorra o fluxo', body: 'Um navegador real abre no seu app. Faça login, navegue, preencha formulários — é só usar.' },
+      { n: '2', title: 'Marque a verificação', body: 'Uma toolbar flutuante embaixo: aperte ◉ e clique no elemento que o teste deve checar — ou não marque nada para verificar a URL final.' },
+      { n: '3', title: 'Finalize → replay $0', body: '“■ finalizar” (ou Ctrl-C). O Windup escreve o cenário + cacheia o plano. windup run <id> replaya em $0.' },
+    ],
+    points: [
+      'Uma <strong>senha digitada nunca entra no plano</strong> — vai pro .env.local e é referenciada como um ENV value_ref.',
+      'Seletores gravados seguem a prioridade do próprio motor (#id → [data-testid] → [name] → type → role/texto), com um fallback por nome acessível.',
+      'Uma mudança real de UI invalida o cache? Ele <strong>se auto-repara</strong> re-planejando pela tarefa, como qualquer cenário.',
+    ],
+    docHref: '/docs/scenarios',
+    docLabel: 'Como o windup record funciona →',
   },
 
   codeExample: {
@@ -243,6 +270,7 @@ const pt = {
     ariaPager: 'Paginação',
     prev: 'Anterior',
     next: 'Próximo',
+    onThisPage: 'Nesta página',
     mobileJump: 'Ir para uma página da documentação',
     aiNoteHtml:
       '<strong>Usando um assistente de IA?</strong> Aponte-o para <a href="/pt/llms.txt"><code>/llms.txt</code></a> — ou <a href="/pt/llms-full.txt"><code>/llms-full.txt</code></a> para tudo em um só arquivo — e depois descreva seus fluxos. Ele pode escrever e rodar os cenários por você.',

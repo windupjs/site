@@ -118,12 +118,20 @@ const zh = {
   features: {
     kicker: '功能特性',
     title: 'QA 工作流所需的一切 —— 唯独不要选择器。',
-    note: '一款为真实项目打造的 CLI：场景编写、依赖关系、动态值（OTP/magic-link）、客户端夹具、会话快照、安全禁用名单、覆盖缺口、可访问性审计、CI 分片与报告器。',
+    note: '一款为真实项目打造的 CLI：以文字或演示编写、依赖关系、动态值（OTP/magic-link）、设备模拟、性能预算、请求打桩、运行时健康门禁、CI 护栏、只读诊断与报告器 —— QA 工作流所需的一切。',
     items: [
       { title: '自然语言场景', body: '用纯自然语言描述测试。无需选择器、无需页面对象、无需维护测试代码。' },
       { title: '规划一次，免费回放', body: '从第二次运行起：llm_calls=0、~1s、$0。缓存的计划每次都以相同方式运行。' },
       { title: '确定性执行', body: 'Playwright 配合可信输入事件（isTrusted）—— 可靠的点击、输入与导航。' },
-      { title: '廉价验证', body: '每个操作都检查 DOM/URL 后置条件，回路中没有 LLM。' },
+      { title: '廉价验证', body: '每个操作都检查 DOM/URL 后置条件，回路中没有 LLM。可断言可见文本、元素数量、某个属性，或某物已消失 —— 而不只是“某个选择器存在”。' },
+      { title: 'windup record', cmd: true, body: '通过演示编写：驱动一个有头浏览器，用工具栏标记验证，完成 —— Windup 写出场景并缓存录制的计划（$0 回放）。输入的密码绝不会进入计划。' },
+      { title: 'windup trends / why / diff', cmd: true, body: '来自运行 ledger 的只读诊断，无 LLM：每场景的通过率历史、某场景为何重新规划、两次运行之间有何变化。还有 windup badge 生成状态 SVG。' },
+      { title: '设备模拟', body: '用 --device "iPhone 14" 在某个 Playwright 设备预设下运行场景 —— 视口、UA、移动/触摸。缓存计划按设备分键，因此移动端和桌面端是独立轨迹。' },
+      { title: 'Web vitals + 预算', body: '用 --web-vitals 捕获最终页面的 TTFB / FCP / LCP / CLS，并在超过 config.budgets 时让运行失败 —— 一个搭在你已有运行之上的性能门禁。' },
+      { title: 'config.network / config.clock', cmd: true, body: '为请求打桩（一个 500、一个空列表、一次掉线的调用）并冻结时钟/时区 —— 每次运行都应用，绝不缓存。把它们限定到单个场景，于是一个错误状态测试不会泄漏到每次运行。' },
+      { title: '运行时健康门禁', body: '让在运行期间记录了 console 错误或收到静默 5xx 的场景失败（--fail-on-console / --fail-on-5xx）—— 页面底下坏了，运行就不能“通过”。' },
+      { title: 'CI 护栏', body: '重试 flake（--retries）、限制套件挂钟（--max-wall）、首次失败即停（--bail），或隔离一个已知 flaky 的场景让它照常报告而不使构建失败 —— 暴露，而非隐藏。' },
+      { title: 'windup suggest-scenarios', cmd: true, body: '针对尚无测试的路由，LLM 为每条未覆盖路由起草一个场景 —— 闭合 scan → 覆盖 → 编写 的循环。' },
       { title: 'windup new', cmd: true, body: 'LLM 辅助编写：根据你应用的真实页面（站点地图）+ 项目清单生成场景。--validate 会运行并不断改进，直到通过。' },
       { title: 'windup scan', cmd: true, body: '直接从源代码（Next.js、react-router）索引你的路由和元素。' },
       { title: 'windup secret', cmd: true, body: '凭据从不进入场景、缓存、LLM 提示词或 git —— 只有 ENV:* 引用，在运行时解析。' },
@@ -145,6 +153,25 @@ const zh = {
       { title: 'run --all --changed', cmd: true, body: '增量 CI：只运行受代码或场景改动影响的场景（git diff → 路由归因），并带有安全的全量回退 —— 绝不出现无声的假绿。' },
       { title: 'readySignals', body: '按路由 glob 复用的抗抖动就绪判定：在操作前等待应用就绪，只定义一次，而不是在每个场景中作为 hint 重复。' },
     ],
+  },
+
+  record: {
+    kicker: '1.0 新功能',
+    title: '通过演示编写',
+    lead: '与其描述，不如演示？<strong>windup record</strong> 在你的应用上打开一个有头浏览器 —— 你点击走一遍流程，标记要验证什么，然后完成。Windup 会写出场景<em>并</em>缓存录制的计划，于是它以 <span class="mono">$0</span>、无 LLM 的方式确定性回放。',
+    cmd: 'npx windup record --url http://localhost:3000',
+    steps: [
+      { n: '1', title: '点击走流程', body: '一个真实浏览器在你的应用上打开。登录、导航、填表 —— 正常使用即可。' },
+      { n: '2', title: '标记验证', body: '底部有一个浮动工具栏：点 ◉ 然后点击测试应检查的元素 —— 或者什么都不标记以验证最终 URL。' },
+      { n: '3', title: '完成 → $0 回放', body: '“■ finalizar”（或 Ctrl-C）。Windup 写出场景 + 缓存计划。windup run <id> 以 $0 回放。' },
+    ],
+    points: [
+      '输入的<strong>密码绝不会进入计划</strong> —— 它存入 .env.local，并以 ENV value_ref 引用。',
+      '录制的选择器遵循引擎自身的优先级（#id → [data-testid] → [name] → type → role/文本），并以可访问名称作为回退。',
+      '真实的 UI 变更让缓存失效？它会按任务重新规划来<strong>自愈</strong>，和任何场景一样。',
+    ],
+    docHref: '/docs/scenarios',
+    docLabel: 'windup record 如何工作 →',
   },
 
   codeExample: {
@@ -243,6 +270,7 @@ const zh = {
     ariaPager: '分页',
     prev: '上一页',
     next: '下一页',
+    onThisPage: '本页目录',
     mobileJump: '跳转到某个文档页面',
     aiNoteHtml:
       '<strong>在用 AI 助手？</strong>把它指向 <a href="/zh/llms.txt"><code>/zh/llms.txt</code></a> —— 或 <a href="/zh/llms-full.txt"><code>/zh/llms-full.txt</code></a> 获取汇于一个文件的完整内容 —— 然后描述你的流程。它可以为你编写并运行场景。',
