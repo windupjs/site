@@ -230,7 +230,7 @@ const zh = {
 
   footer: {
     tagline: '自然语言 E2E 测试，确定性回放。',
-    beta: 'beta',
+    beta: '1.0',
     note: '可用且经过测试。基于 MIT 许可证开源。',
     nav: '页脚',
     links: { npm: 'npm', github: 'GitHub', spec: '规范', changelog: '更新日志', llms: 'llms.txt', license: 'MIT License' },

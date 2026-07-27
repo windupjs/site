@@ -230,7 +230,7 @@ const pt = {
 
   footer: {
     tagline: 'Testes E2E em linguagem natural com replay determinístico.',
-    beta: 'beta',
+    beta: '1.0',
     note: 'Utilizável e testado. Código aberto sob a licença MIT.',
     nav: 'Rodapé',
     links: { npm: 'npm', github: 'GitHub', spec: 'Spec', changelog: 'Changelog', llms: 'llms.txt', license: 'Licença MIT' },

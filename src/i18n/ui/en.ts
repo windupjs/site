@@ -228,7 +228,7 @@ const en = {
 
   footer: {
     tagline: 'Natural-language E2E tests with deterministic replay.',
-    beta: 'beta',
+    beta: '1.0',
     note: 'Usable and tested. Open-source under the MIT license.',
     nav: 'Footer',
     links: { npm: 'npm', github: 'GitHub', spec: 'Spec', changelog: 'Changelog', llms: 'llms.txt', license: 'MIT License' },
