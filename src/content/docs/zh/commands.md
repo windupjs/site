@@ -42,7 +42,8 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `--max-wall <seconds>` | 配合 `--all`：套件的**时间预算**。一旦挂钟时间超过上限，就停止启动新场景（进行中的会跑完）并以非零码退出 —— 失控的套件会让构建失败，而不是把 runner 挂住。顺序模式和 `--concurrency` 下都有效。 |
 | `--bail` | 配合 `--all`：在**第一次失败**后就停止启动新场景 —— PR check 的快速反馈。与 `--retries`/`--max-wall` 组成护栏三件套；顺序模式和 `--concurrency` 下都有效。 |
 | `--no-prewarm` | 关闭**浏览器预热**。默认情况下，顺序的 `run --all` 会在关键路径之外预先创建下一个场景所需的全新 context+page（每场景省下约 200 ms，隔离不变）；此开关将其关闭。只有顺序运行会预热。 |
-| `--fail-on-console` | 如果页面在运行期间记录了 console 错误或抛出未捕获异常，则该场景失败（无论如何都会记录；`config.network` 的桩会被排除）。 |
+| `--fail-on-console` | 如果运行期间出现 **JS** 错误——未捕获的异常、`console.error` 或 CSP 违规——则该场景失败（无论如何都会记录；`config.failOn.ignore` 按消息或 URL 匹配）。 |
+| `--fail-on-resource` | 如果运行期间某个**子资源**（img/font/script/xhr）加载失败并返回 4xx，则该场景失败——这是与 `--fail-on-console` 分开的门禁，因此损坏的图片不会淹没 JS 错误。 |
 | `--fail-on-5xx` | 如果运行期间有任何请求收到 5xx 响应，则该场景失败。`config.network` 刻意设置的 5xx 桩以及 `config.failOn.ignore` 中的 URL 会被排除。 |
 | `--device <name>` | 模拟一个 Playwright 设备预设（例如 `"iPhone 14"`、`"Pixel 7"`、`"iPad Pro 11"`）—— 视口、user-agent、缩放、移动/触摸。缓存计划按设备分键（移动端和桌面端是独立轨迹）。移动端模拟需要 chromium。 |
 | `--web-vitals` | 捕获最终页面的 TTFB / FCP / LCP / DCL / load / CLS 并报告（信息性）。用 `config.budgets` 给它们设门禁。 |
