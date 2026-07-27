@@ -20,20 +20,20 @@ Windup opens a **headful** browser at your start URL. Use the app normally — l
 
 On finish, Windup writes **two** things:
 
-1. **The scenario file** (`e2e/scenarios/<id>.json`) — with a task summarizing the flow, for humans and for a future re-plan.
+1. **The scenario file** (`e2e/scenarios/<id>.json`) — with a task synthesized from the **visible labels** of what you clicked (`click "Ver ingressos" → fill "Quantidade" → click "Continuar", verifying "Continuar"`), not an opaque "14 interaction(s)". That readable task is what makes a recording survive a cache invalidation: the self-heal re-plans from a real description of the flow, not a blind count. (With an LLM key, Windup writes a one-sentence summary instead; `--no-llm` skips that call.)
 2. **The cached plan** — your recorded actions, stored as the trajectory. So `windup run <id>` replays it **immediately, at $0, with no LLM**.
 
 If a real UI change later invalidates the cache, the scenario **self-heals** — it re-plans from the task like any other, so a recording isn't a dead end.
 
 ## What gets captured
 
-Each click and field entry becomes an action with a **stable selector** and an accessible **description**. The selector follows the engine's own priority — the same order the planner and signature trust:
+Each click and field entry becomes an action with an accessible **description** and a selector that is **unique-checked at capture time** — each candidate along the anchor ladder is accepted only if it identifies the element **uniquely on the page** at that moment:
 
 ```
-#id  →  [data-testid]  →  [name]  →  tag[type]  →  role / text
+#id  →  [data-testid]  →  [name]  →  [aria-label]  →  [placeholder]  →  clean unique text
 ```
 
-Recorded selectors are a **starting point you can edit** — open the scenario and tighten one if you like.
+Text is used only when it's short, unique, and **carries no dynamic value** — a count or price is skipped (so a cart link never records `"1…R$ 35,00…"`) — and it's read from the element's own direct text, not its descendants'. When nothing stable is unique, Windup falls back to a short structural path and **flags the interaction unstable**, printing those after the recording (`⚠ N interaction(s) have no stable anchor …`) — the same spots a screen reader struggles with. Add a `data-testid` there, or edit the selector, before the scenario enters a suite.
 
 ## Secrets never enter the plan
 
@@ -41,7 +41,7 @@ Type a password during a recording and Windup does the safe thing automatically:
 
 ## When to use it
 
-`windup record` is a **local dev tool**: it's interactive and headful, so it needs a TTY (not CI). Reach for it when a flow is easier to click than to describe, or to bootstrap a scenario you'll then refine.
+`windup record` is a **local dev tool**: it's interactive and headful, so it needs a **TTY** (not CI). Under an agent/wrapper with no TTY, allocate a PTY: `script -q /dev/null npx windup record`. Reach for it when a flow is easier to click than to describe, or to bootstrap a scenario you'll then refine.
 
 ## Flags
 
@@ -50,4 +50,4 @@ Type a password during a recording and Windup does the safe thing automatically:
 | `--url <start>` | Start URL (defaults to `config.baseUrl`) |
 | `--id <id>` | Scenario id (default: derived from the flow) |
 | `--force` | Overwrite an existing scenario with the same id |
-| `--no-llm` | Don't call an LLM to summarize the task (a task is synthesized from the flow) |
+| `--no-llm` | Don't call an LLM to summarize the task — a readable task is synthesized from the flow's visible labels instead |
