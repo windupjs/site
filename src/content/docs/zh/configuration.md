@@ -60,6 +60,8 @@ export default defineConfig({
   ],
   // 冻结时钟：为依赖日期的场景固定页面的时间和/或时区。
   clock: { now: "2026-01-15T09:00:00Z", timezone: "America/Sao_Paulo" },
+  // 运行时健康门禁：运行期间出现 console 错误 / 5xx 时让场景失败。
+  failOn: { consoleErrors: true, http5xx: true, ignore: ["/analytics", "third-party.example"] },
 });
 ```
 
@@ -70,6 +72,7 @@ export default defineConfig({
 - **`resolve`** 声明在运行时获取的动态值（一个 OTP 码、一个 magic-link URL）—— 正是它解除了 OTP/magic-link/无密码登录的阻塞。计划通过 `value_ref: "<name>"`（一次 fill）或 `url_ref: "<name>"`（一次 goto）引用它；Windup 获取 **`source`**（`cmd` shell 标准输出、`http` fetch，或 `fn` 一个项目模块），用 **`extract`**（一个 `regex` 捕获组或一个 `json` 点路径）取出该值，并 **`poll`** 直到它出现（默认 30 秒）。**source 由作者声明，绝不由 LLM 生成**（没有从模型执行代码的向量），而解析出的值是**临时的** —— 仅用于该 fill/goto，绝不写入缓存、报告或日志。
 - **`network`** 以确定性方式为 HTTP 请求打桩 —— 一组规则按请求 URL（**子串**或 **glob**）加可选的 `method` 匹配，**首个匹配生效**。用 `status`（默认 200）+ `body`/`json`（`json` 体会自动设置 `content-type`）+ 可选的 `headers`/`contentType` 作出响应，或用 `abort: true` 丢弃请求（模拟网络错误）。它让一个场景无需触碰后端就能到达难以铺设的状态 —— 一个 500、一个空列表、一次失败的第三方调用。由作者声明，每次运行都应用，且**绝不进入缓存的计划**。
 - **`clock`** 固定页面的时间。`now`（一个 ISO 字符串或 epoch 毫秒）把 `Date`/`Date.now()` 冻结到一个固定时刻 —— 在任何页面脚本之前注入，因此应用里的 `new Date()` 会返回它 —— 用于那些否则会漂移的场景（"今天的订单"、倒计时）。`timezone`（一个 IANA 名称）原生设置浏览器的时区。冻结、不走动；每次运行都应用，绝不缓存。
+- **`failOn`** 把运行时健康信号变成失败。`consoleErrors: true` 让记录了 console 错误或抛出未捕获异常的场景失败；`http5xx: true` 让页面收到 5xx 的场景失败。`ignore` 是一组 URL/文本子串，用于静默已知噪声（分析统计、你不拥有的第三方 500）。由 `config.network` 应答的请求始终被排除 —— 刻意的桩不是真正的失败。CLI 标志 `--fail-on-console` / `--fail-on-5xx` 会为单次运行强制开启；无论哪种方式，信号都会被记录并在报告中显示。
 - **`resolveFields`** 以确定性方式把一个字段绑定到一个 resolver —— 推荐用于 CI。以**选择器子串**为键（`{ "[name=otp]": "otp_code" }`），匹配字段上的任何 fill 都从该 resolver 填充，**覆盖计划在那里放入的任何内容**。因此 OTP 流程不再依赖规划器记得发出 `value_ref` —— 即便它填入了一个字面量或一个大小写不同的名称，Windup 仍会解析该字段（像 `OTP_CODE` / `otp-code` 这样的名称会归一化为已声明的 `otp_code`）。
 - **LLM 辅助**（扫描的第 3 层）会读取静态层无法解析的文件（动态构建的路由、间接组件），并受 `maxCalls` 限额约束。结果按文件哈希记忆 —— 未变更的文件不会再次产生费用。费用记录在账本中，并由 `windup costs` 展示。
 

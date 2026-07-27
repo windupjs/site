@@ -20,6 +20,7 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `windup explain <scenario> [--json]` | Print the cached plan as readable steps (go to / click / fill / verify). Review a plan without opening the JSON; a fill's secret value is never shown |
 | `windup diff <scenario> [--json]` | Compare a scenario's two most recent runs — result flip, cache, and Δ time / Δ cost / Δ actions (a regression check) |
 | `windup badge [--json] [--out <path>]` | Suite-status badge from each scenario's latest run — a self-contained SVG (`N/M passing · $0`) or a shields.io endpoint JSON |
+| `windup suggest-scenarios [--limit n] [--force] [--dry-run] [--llm p] [--json]` | Propose (write) scenarios for the indexed routes that have no scenario yet — one LLM call per route, reusing `windup new`; drafts for you to review. `--dry-run` lists them without calling the LLM |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promote a slice of a cached plan to a reusable fragment |
 | `windup secret set <account> [--user u] [--password p]` | Register test credentials: values → `.env.local`, mapping → `windup.credentials.json` |
 | `windup secret list` | Accounts + whether each ENV is set (never prints values) |
@@ -39,6 +40,8 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `--max-wall <seconds>` | With `--all`: a suite **time budget**. Once the wall-clock crosses the cap, stop starting new scenarios (in-flight ones finish) and exit non-zero — a runaway suite fails the build instead of hanging the runner. Works sequentially and under `--concurrency`. |
 | `--bail` | With `--all`: stop starting new scenarios after the **first failure** — fast PR-check feedback. Completes the guard-rail trio with `--retries`/`--max-wall`; works sequentially and under `--concurrency`. |
 | `--no-prewarm` | Disable **browser prewarming**. By default a sequential `run --all` pre-creates the next scenario's fresh context+page off the critical path (~200 ms/scenario saved, isolation unchanged); this flag turns it off. Only sequential runs prewarm. |
+| `--fail-on-console` | Fail a scenario if the page logged a console error or threw an uncaught exception during the run (recorded either way; `config.network` stubs excluded). |
+| `--fail-on-5xx` | Fail a scenario if any request got a 5xx response during the run. Deliberate `config.network` 5xx stubs and `config.failOn.ignore` URLs are excluded. |
 | `--a11y` | After each scenario, run an [axe-core](https://github.com/dequelabs/axe-core) accessibility audit on the final page and report violations. Informational — never fails the run. Opt-in optional dependency: `npm i -D axe-core`. |
 | `--tag <names>` | With `--all`: run only scenarios carrying any of these tags (comma-separated, e.g. `smoke,checkout`). Composes with `--shard` and `--changed`. |
 | `--trace` | On a **failed** scenario, save a Playwright trace (`.windup/reports/traces/<id>.zip`, openable in the trace viewer) + a full-page screenshot; the HTML report links both. Captured only on failure. |

@@ -20,6 +20,7 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `windup explain <scenario> [--json]` | 把缓存的计划打印为可读步骤（前往 / 点击 / 填充 / 验证）。无需打开 JSON 即可审阅计划；绝不显示 fill 的机密值 |
 | `windup diff <scenario> [--json]` | 比较一个场景最近的两次运行 —— 结果翻转、缓存，以及 Δ 时间 / Δ 成本 / Δ 动作数（一次回归检查） |
 | `windup badge [--json] [--out <path>]` | 从每个场景最近一次运行生成套件状态徽章 —— 一个自包含的 SVG（`N/M passing · $0`）或一个 shields.io 端点 JSON |
+| `windup suggest-scenarios [--limit n] [--force] [--dry-run] [--llm p] [--json]` | 为尚无场景的已索引路由提议（写出）场景 —— 每条路由一次 LLM 调用，复用 `windup new`；生成草稿供你审阅。`--dry-run` 只列出而不调用 LLM |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | 把缓存计划中的一段提升为可复用片段 |
 | `windup secret set <account> [--user u] [--password p]` | 注册测试凭据：值 → `.env.local`，映射 → `windup.credentials.json` |
 | `windup secret list` | 账户 + 每个 ENV 是否已设置（从不打印值） |
@@ -39,6 +40,8 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `--max-wall <seconds>` | 配合 `--all`：套件的**时间预算**。一旦挂钟时间超过上限，就停止启动新场景（进行中的会跑完）并以非零码退出 —— 失控的套件会让构建失败，而不是把 runner 挂住。顺序模式和 `--concurrency` 下都有效。 |
 | `--bail` | 配合 `--all`：在**第一次失败**后就停止启动新场景 —— PR check 的快速反馈。与 `--retries`/`--max-wall` 组成护栏三件套；顺序模式和 `--concurrency` 下都有效。 |
 | `--no-prewarm` | 关闭**浏览器预热**。默认情况下，顺序的 `run --all` 会在关键路径之外预先创建下一个场景所需的全新 context+page（每场景省下约 200 ms，隔离不变）；此开关将其关闭。只有顺序运行会预热。 |
+| `--fail-on-console` | 如果页面在运行期间记录了 console 错误或抛出未捕获异常，则该场景失败（无论如何都会记录；`config.network` 的桩会被排除）。 |
+| `--fail-on-5xx` | 如果运行期间有任何请求收到 5xx 响应，则该场景失败。`config.network` 刻意设置的 5xx 桩以及 `config.failOn.ignore` 中的 URL 会被排除。 |
 | `--a11y` | 每个场景结束后，对最终页面运行一次 [axe-core](https://github.com/dequelabs/axe-core) 无障碍审计并报告违规项。仅供参考 —— 绝不使运行失败。需选择启用的可选依赖：`npm i -D axe-core`。 |
 | `--tag <names>` | 配合 `--all`：仅运行带有其中任一标签的场景（以逗号分隔，例如 `smoke,checkout`）。可与 `--shard` 和 `--changed` 组合。 |
 | `--trace` | 在**失败的**场景上，保存一份 Playwright 跟踪（`.windup/reports/traces/<id>.zip`，可在跟踪查看器中打开）+ 一张整页截图；HTML 报告会链接到两者。仅在失败时捕获。 |

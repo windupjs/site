@@ -20,6 +20,7 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 | `windup explain <scenario> [--json]` | Imprime o plano cacheado como passos legíveis (ir a / clicar / preencher / verificar). Revise um plano sem abrir o JSON; nunca mostra o valor secreto de um fill |
 | `windup diff <scenario> [--json]` | Compara os dois runs mais recentes de um cenário — mudança de resultado, cache e Δ tempo / Δ custo / Δ ações (uma verificação de regressão) |
 | `windup badge [--json] [--out <path>]` | Selo de status da suíte a partir do último run de cada cenário — um SVG autocontido (`N/M passing · $0`) ou um JSON de endpoint shields.io |
+| `windup suggest-scenarios [--limit n] [--force] [--dry-run] [--llm p] [--json]` | Propõe (escreve) cenários para as rotas indexadas que ainda não têm cenário — uma chamada ao LLM por rota, reusando `windup new`; rascunhos para você revisar. `--dry-run` lista sem chamar o LLM |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promove uma fatia de um plano em cache a um fragmento reutilizável |
 | `windup secret set <account> [--user u] [--password p]` | Registra credenciais de teste: valores → `.env.local`, mapeamento → `windup.credentials.json` |
 | `windup secret list` | Contas + se cada ENV está definida (nunca imprime valores) |
@@ -39,6 +40,8 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 | `--max-wall <seconds>` | Com `--all`: um **orçamento de tempo** da suíte. Quando o relógio de parede ultrapassa o teto, para de iniciar novos cenários (os em andamento terminam) e sai com código diferente de zero — uma suíte descontrolada faz o build falhar em vez de travar o runner. Funciona no sequencial e com `--concurrency`. |
 | `--bail` | Com `--all`: para de iniciar novos cenários após a **primeira falha** — feedback rápido num check de PR. Completa o trio de barreiras com `--retries`/`--max-wall`; funciona no sequencial e com `--concurrency`. |
 | `--no-prewarm` | Desativa o **pré-aquecimento do navegador**. Por padrão, um `run --all` sequencial pré-cria o contexto+página frescos do próximo cenário fora do caminho crítico (~200 ms/cenário economizados, isolation sem mudança); esta flag desliga isso. Só runs sequenciais pré-aquecem. |
+| `--fail-on-console` | Falha um cenário se a página logou um erro de console ou lançou uma exceção não capturada durante o run (é registrado de qualquer forma; stubs do `config.network` são excluídos). |
+| `--fail-on-5xx` | Falha um cenário se alguma requisição recebeu uma resposta 5xx durante o run. Stubs 5xx deliberados do `config.network` e URLs em `config.failOn.ignore` são excluídos. |
 | `--a11y` | Após cada cenário, roda uma auditoria de acessibilidade com [axe-core](https://github.com/dequelabs/axe-core) na página final e reporta as violações. Informativa — nunca faz a execução falhar. Dependência opcional opt-in: `npm i -D axe-core`. |
 | `--tag <names>` | Com `--all`: roda apenas os cenários que carregam alguma dessas tags (separadas por vírgula, p. ex. `smoke,checkout`). Compõe com `--shard` e `--changed`. |
 | `--trace` | Em um cenário **que falha**, salva um trace do Playwright (`.windup/reports/traces/<id>.zip`, abrível no visualizador de trace) + uma captura de tela de página inteira; o relatório HTML enlaça ambos. Capturado apenas na falha. |
