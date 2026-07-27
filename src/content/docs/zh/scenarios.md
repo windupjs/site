@@ -136,4 +136,14 @@ npx windup new "log in and create a cost center named Marketing" --validate
 
 **指令中的凭据绝不会落入场景文件**：它们会被自动注册为一个具名账户（值存入 `.env.local`，映射存入 `windup.credentials.json`），任务引用的是该账户 —— 参见[测试凭据](/zh/docs/credentials)。
 
+## 通过演示编写（`windup record`）
+
+`windup new` 的反向操作：不是*描述*流程，而是**演示**它。
+
+```bash
+npx windup record --url http://localhost:3000
+```
+
+Windup 在你的应用上打开一个**有头**浏览器。点击走一遍流程；底部有一个浮动工具栏 —— **◉ 标记验证**（然后点击测试要验证的元素 —— 它的可见性或文本；若不标记任何东西，Windup 就验证最终页面的 URL）以及 **■ 完成**（Ctrl-C 也会保存）。完成时它会写出**场景文件***并*​**缓存录制的计划**，于是 `windup run <id>` 立即以 **$0、无 LLM** 回放；日后缓存失效会通过按任务重新规划来自愈。录制的选择器遵循引擎自身的优先级（`#id → [data-testid] → [name] → type → role/文本`），并以可访问的 description 作为回退 —— 一个可编辑的起点。**输入的密码绝不会进入计划** —— 它被注册到 `.env.local`（已 gitignore），动作里存的是一个 `value_ref`。这是一个本地开发工具（交互式、有头）：需要 TTY，而非 CI。参数：`--url <start>`（默认 `config.baseUrl`）、`--id`、`--force`、`--no-llm`。
+
 标志：`--id <id>`、`--force`（覆盖）、`--depends-on <ids>`、`--llm <provider[:model]>`。输出是一个**供你审阅、编辑并提交**的文件 —— 编写是被辅助的，测试仍归你所有。一次 LLM 调用（~$0.001），记录在 `windup costs` 账本的 `authoring` 项下。

@@ -136,4 +136,14 @@ npx windup new "log in and create a cost center named Marketing" --validate
 
 **Credentials in the instruction never land in the scenario file**: they are auto-registered as a named account (values in `.env.local`, mapping in `windup.credentials.json`) and the task references the account — see [Test credentials](/docs/credentials).
 
+## Author by demonstration (`windup record`)
+
+The inverse of `windup new`: instead of *describing* the flow, **show it**.
+
+```bash
+npx windup record --url http://localhost:3000
+```
+
+Windup opens a **headful** browser at your app. Click through the flow; a floating toolbar sits at the bottom — **◉ mark verification** (then click the element the test should verify — its visibility or text; mark nothing and Windup verifies the final page's URL) and **■ finish** (Ctrl-C also saves). On finish it writes the **scenario file** *and* **caches the recorded plan**, so `windup run <id>` replays it immediately at **$0, no LLM**; a later cache invalidation self-heals by re-planning from the task. Recorded selectors follow the engine's own priority (`#id → [data-testid] → [name] → type → role/text`) with an accessible description as fallback — a starting point you can edit. A typed **password never enters the plan** — it's registered to `.env.local` (gitignored) and the action stores a `value_ref`. It's a local dev tool (interactive, headful): it needs a TTY, not CI. Flags: `--url <start>` (defaults to `config.baseUrl`), `--id`, `--force`, `--no-llm`.
+
 Flags: `--id <id>`, `--force` (overwrite), `--depends-on <ids>`, `--llm <provider[:model]>`. The output is a file for **you to review, edit and commit** — authoring is assisted, the test remains yours. One LLM call (~$0.001), recorded in the `windup costs` ledger under `authoring`.

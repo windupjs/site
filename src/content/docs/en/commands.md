@@ -9,6 +9,7 @@ description: The full Windup CLI reference — every command, the run flags, and
 |---|---|
 | `windup init` | Create `windup.config.ts`, `.windup/` (gitignored) and an example scenario |
 | `windup new "<instruction>" [--id x] [--force] [--depends-on ids] [--validate]` | Generate a scenario from a rough instruction; `--validate` runs and refines it until it passes (≤3 attempts) |
+| `windup record [id] [--url <start>] [--force] [--no-llm]` | Author by demonstration: drive a headful browser, mark a verification with the toolbar, finish — writes the scenario + caches the recorded plan ($0 replay). Needs a TTY |
 | `windup run [scenario]` | Run one scenario (replay when cached, plan on miss) |
 | `windup run --all` | Run every scenario — CI mode |
 | `windup scan [--update] [--no-assist]` | Statically index routes and interactive elements into the site map; `--update` re-indexes only files changed since the last scan (git diff); `--no-assist` skips the LLM layer (zero cost) |

@@ -9,6 +9,7 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 |---|---|
 | `windup init` | 创建 `windup.config.ts`、`.windup/`（已加入 gitignore）和一个示例场景 |
 | `windup new "<instruction>" [--id x] [--force] [--depends-on ids] [--validate]` | 从一句粗略的指令生成场景；`--validate` 会运行并改进它，直到通过（≤3 次尝试） |
+| `windup record [id] [--url <start>] [--force] [--no-llm]` | 通过演示编写：驱动一个有头浏览器，用工具栏标记一个验证，完成 —— 写出场景 + 缓存录制的计划（$0 回放）。需要 TTY |
 | `windup run [scenario]` | 运行一个场景（命中缓存则回放，未命中则规划） |
 | `windup run --all` | 运行每个场景 —— CI 模式 |
 | `windup scan [--update] [--no-assist]` | 静态地把路由和交互元素索引进站点地图；`--update` 仅重新索引自上次扫描以来变更的文件（git diff）；`--no-assist` 跳过 LLM 层（零成本） |

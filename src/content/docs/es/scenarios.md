@@ -136,4 +136,14 @@ npx windup new "log in and create a cost center named Marketing" --validate
 
 **Las credenciales en la instrucción nunca llegan al archivo del escenario**: se registran automáticamente como una cuenta con nombre (valores en `.env.local`, mapeo en `windup.credentials.json`) y la tarea referencia la cuenta — consulta [Credenciales de prueba](/es/docs/credentials).
 
+## Autoría por demostración (`windup record`)
+
+Lo inverso de `windup new`: en vez de *describir* el flujo, **muéstralo**.
+
+```bash
+npx windup record --url http://localhost:3000
+```
+
+Windup abre un navegador **headful** en tu app. Recorre el flujo con clics; una toolbar flotante abajo — **◉ marcar verificación** (luego clic en el elemento a verificar — su visibilidad o texto; si no marcas nada, Windup verifica la URL final) y **■ finalizar** (Ctrl-C también guarda). Al finalizar escribe el **archivo de escenario** *y* **cachea el plan grabado**, así que `windup run <id>` lo repite al instante en **$0, sin LLM**; una invalidación posterior del cache se auto-repara re-planificando desde la tarea. Los selectores grabados siguen la prioridad del propio motor (`#id → [data-testid] → [name] → type → role/texto`) con una descripción accesible como fallback — un punto de partida editable. Una **contraseña tipeada nunca entra al plan** — se registra en `.env.local` (gitignored) y la acción guarda un `value_ref`. Es una herramienta de dev local (interactiva, headful): necesita un TTY, no CI. Banderas: `--url <start>` (por defecto `config.baseUrl`), `--id`, `--force`, `--no-llm`.
+
 Flags: `--id <id>`, `--force` (sobrescribir), `--depends-on <ids>`, `--llm <provider[:model]>`. La salida es un archivo para que **tú lo revises, edites y versiones** — la autoría es asistida, la prueba sigue siendo tuya. Una llamada al LLM (~$0.001), registrada en el libro mayor de `windup costs` bajo `authoring`.

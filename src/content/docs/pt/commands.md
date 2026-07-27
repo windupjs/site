@@ -9,6 +9,7 @@ description: A referência completa da CLI do Windup — cada comando, as flags 
 |---|---|
 | `windup init` | Cria `windup.config.ts`, `.windup/` (no gitignore) e um cenário de exemplo |
 | `windup new "<instruction>" [--id x] [--force] [--depends-on ids] [--validate]` | Gera um cenário a partir de uma instrução vaga; `--validate` roda e o refina até passar (≤3 tentativas) |
+| `windup record [id] [--url <start>] [--force] [--no-llm]` | Autoria por demonstração: dirige um navegador headful, marca uma verificação com a toolbar, finaliza — escreve o cenário + cacheia o plano gravado (replay $0). Precisa de um TTY |
 | `windup run [scenario]` | Roda um cenário (replay quando em cache, planeja em caso de miss) |
 | `windup run --all` | Roda todos os cenários — modo CI |
 | `windup scan [--update] [--no-assist]` | Indexa estaticamente rotas e elementos interativos no mapa do site; `--update` reindexa apenas arquivos alterados desde o último scan (git diff); `--no-assist` pula a camada de LLM (custo zero) |
