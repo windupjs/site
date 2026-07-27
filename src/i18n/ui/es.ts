@@ -9,7 +9,7 @@ const es = {
   },
 
   header: {
-    nav: { how: 'Cómo funciona', features: 'Características', docs: 'Docs', changelog: 'Changelog', start: 'Empezar' },
+    nav: { how: 'Cómo funciona', features: 'Características', record: 'Record', docs: 'Docs', changelog: 'Changelog', start: 'Empezar' },
     home: 'Inicio de Windup',
     npm: 'Windup en npm',
     github: 'Windup en GitHub',
@@ -275,6 +275,8 @@ const es = {
       'getting-started': 'Primeros pasos',
       'how-it-works': 'Cómo funciona',
       scenarios: 'Escenarios',
+      authoring: 'windup new',
+      record: 'windup record',
       credentials: 'Credenciales de prueba',
       environments: 'Entornos',
       'llm-providers': 'Proveedores de LLM',

@@ -13,7 +13,7 @@ const zh = {
   },
 
   header: {
-    nav: { how: '工作原理', features: '功能特性', docs: '文档', changelog: '更新日志', start: '快速开始' },
+    nav: { how: '工作原理', features: '功能特性', record: 'Record', docs: '文档', changelog: '更新日志', start: '快速开始' },
     home: 'Windup 主页',
     npm: 'npm 上的 Windup',
     github: 'GitHub 上的 Windup',
@@ -279,6 +279,8 @@ const zh = {
       'getting-started': '快速开始',
       'how-it-works': '工作原理',
       scenarios: '测试场景',
+      authoring: 'windup new',
+      record: 'windup record',
       credentials: '测试凭据',
       environments: '环境',
       'llm-providers': 'LLM 提供商',

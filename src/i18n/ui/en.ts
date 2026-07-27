@@ -11,7 +11,7 @@ const en = {
   },
 
   header: {
-    nav: { how: 'How it works', features: 'Features', docs: 'Docs', changelog: 'Changelog', start: 'Get started' },
+    nav: { how: 'How it works', features: 'Features', record: 'Record', docs: 'Docs', changelog: 'Changelog', start: 'Get started' },
     home: 'Windup home',
     npm: 'Windup on npm',
     github: 'Windup on GitHub',
@@ -277,6 +277,8 @@ const en = {
       'getting-started': 'Getting started',
       'how-it-works': 'How it works',
       scenarios: 'Scenarios',
+      authoring: 'windup new',
+      record: 'windup record',
       credentials: 'Test credentials',
       environments: 'Environments',
       'llm-providers': 'LLM providers',

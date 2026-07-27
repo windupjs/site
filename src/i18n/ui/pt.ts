@@ -13,7 +13,7 @@ const pt = {
   },
 
   header: {
-    nav: { how: 'Como funciona', features: 'Recursos', docs: 'Documentação', changelog: 'Changelog', start: 'Começar' },
+    nav: { how: 'Como funciona', features: 'Recursos', record: 'Record', docs: 'Documentação', changelog: 'Changelog', start: 'Começar' },
     home: 'Página inicial do Windup',
     npm: 'Windup no npm',
     github: 'Windup no GitHub',
@@ -279,6 +279,8 @@ const pt = {
       'getting-started': 'Primeiros passos',
       'how-it-works': 'Como funciona',
       scenarios: 'Cenários',
+      authoring: 'windup new',
+      record: 'windup record',
       credentials: 'Credenciais de teste',
       environments: 'Ambientes',
       'llm-providers': 'Provedores de LLM',

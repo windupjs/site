@@ -1,6 +1,6 @@
 ---
 title: Escenarios
-description: Un escenario es un archivo JSON que describe una prueba en lenguaje natural. Aprende el formato, las dependencias entre escenarios y la autoría asistida por LLM con windup new.
+description: Un escenario es un archivo JSON que describe un test en lenguaje simple. Aprende el formato y los campos — dependencias, reúso isomórfico, fixtures del lado del cliente, diálogos y más.
 ---
 
 # Escenarios
@@ -113,38 +113,9 @@ Un replay reejecuta el **mismo plan en caché con los mismos valores** — ideal
 `setup` se ejecuta antes del escenario y sus dependencias (un fallo hace fallar la ejecución); `teardown` se ejecuta después, **siempre** — pase o falle (un fallo es una advertencia). Son tus propios comandos de confianza (como el `beforeEach`/`afterEach` de una prueba), se ejecutan en la raíz del proyecto con el env del proceso, y nunca entran en el plan ni en la caché.
 
 Para el estado compartido por toda la suite (sembrar una base de datos de fixtures una vez, arrancar un stub), usa `suite.setup` / `suite.teardown` en la [configuración](/configuration/) — se ejecutan **una vez** alrededor de `run --all` (el análogo de `beforeAll`/`afterAll`), mientras que los hooks por escenario gestionan el estado por prueba.
+## No escribas escenarios a mano
 
-## Autoría con `windup new`
+Dos formas de crear un escenario sin escribir JSON:
 
-> **La tarea y su verificación final son la mejor conjetura del LLM** a partir de tu instrucción y el mapa del sitio — un LLM puede elegir un destino plausible pero equivocado. `windup new` orienta la verificación hacia el objetivo real de la instrucción (un elemento/texto visible en vez de una ruta adivinada) y recomienda confirmar con `--validate` (generar → ejecutar → autorrefinar hasta ponerse en verde) o una primera `windup run`.
-
-No tienes que escribir tareas detalladas a mano. Dale a `windup new` una instrucción imprecisa y el LLM actúa como autor de pruebas — la reescribe en un escenario preciso y verificable usando el **mapa del sitio** (pantallas, menús y elementos reales de `windup scan` y ejecuciones pasadas) y el **manifiesto del proyecto** (cuentas referenciadas por nombre, nunca credenciales literales):
-
-```bash
-npx windup new "log in with the qa user, add the backpack to the cart and check out"
-# → e2e/scenarios/purchase-backpack-qa.json — real screen names, concrete fake
-#   form data, account referenced as "the qa account", explicit final verification
-```
-
-Genera el `scenario_id`, elige el `start_url` entre las rutas conocidas (con `/` como respaldo — nunca inventa rutas) y añade sugerencias de selectores del mapa cuando ayudan. Añade **`--validate`** para que ejecute el escenario generado y, si falla, lo refine a partir del fallo y lo reintente (hasta 3 intentos) — recibes de vuelta un escenario que *ya pasó una vez*, con una caché caliente:
-
-```bash
-npx windup new "log in and create a cost center named Marketing" --validate
-#   attempt 1: FAIL — element button:has-text('Save') not visible
-#   attempt 2: PASSED
-#   ✓ validated in 2 attempts — the plan is cached
-```
-
-**Las credenciales en la instrucción nunca llegan al archivo del escenario**: se registran automáticamente como una cuenta con nombre (valores en `.env.local`, mapeo en `windup.credentials.json`) y la tarea referencia la cuenta — consulta [Credenciales de prueba](/es/docs/credentials).
-
-## Autoría por demostración (`windup record`)
-
-Lo inverso de `windup new`: en vez de *describir* el flujo, **muéstralo**.
-
-```bash
-npx windup record --url http://localhost:3000
-```
-
-Windup abre un navegador **headful** en tu app. Recorre el flujo con clics; una toolbar flotante abajo — **◉ marcar verificación** (luego clic en el elemento a verificar — su visibilidad o texto; si no marcas nada, Windup verifica la URL final) y **■ finalizar** (Ctrl-C también guarda). Al finalizar escribe el **archivo de escenario** *y* **cachea el plan grabado**, así que `windup run <id>` lo repite al instante en **$0, sin LLM**; una invalidación posterior del cache se auto-repara re-planificando desde la tarea. Los selectores grabados siguen la prioridad del propio motor (`#id → [data-testid] → [name] → type → role/texto`) con una descripción accesible como fallback — un punto de partida editable. Una **contraseña tipeada nunca entra al plan** — se registra en `.env.local` (gitignored) y la acción guarda un `value_ref`. Es una herramienta de dev local (interactiva, headful): necesita un TTY, no CI. Banderas: `--url <start>` (por defecto `config.baseUrl`), `--id`, `--force`, `--no-llm`.
-
-Flags: `--id <id>`, `--force` (sobrescribir), `--depends-on <ids>`, `--llm <provider[:model]>`. La salida es un archivo para que **tú lo revises, edites y versiones** — la autoría es asistida, la prueba sigue siendo tuya. Una llamada al LLM (~$0.001), registrada en el libro mayor de `windup costs` bajo `authoring`.
+- **[Autoría con `windup new`](/es/docs/authoring)** — da una instrucción imprecisa y el LLM escribe un escenario preciso y verificable desde las pantallas reales de tu app.
+- **[`windup record`](/es/docs/record)** — autoría por demostración: maneja un navegador headful, marca qué verificar, finaliza. Windup escribe el escenario y cachea el plan grabado para un replay $0.

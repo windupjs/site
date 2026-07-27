@@ -17,6 +17,7 @@ const npm = 'https://www.npmjs.com/package/windupjs';
     <nav class="nav" aria-label={c.header.primaryNav}>
       <a href={`${home}#how`}>{c.header.nav.how}</a>
       <a href={`${home}#features`}>{c.header.nav.features}</a>
+      <a class="nav-record" href={`${home}#record`}>{c.header.nav.record}</a>
       <a href={localizedPath(lang, '/docs')}>{c.header.nav.docs}</a>
       <a href="/changelog">{c.header.nav.changelog}</a>
       <a href={`${home}#start`}>{c.header.nav.start}</a>
@@ -63,6 +64,12 @@ const npm = 'https://www.npmjs.com/package/windupjs';
   .nav { display: flex; gap: 22px; margin-left: 8px; }
   .nav a { color: var(--muted); font-size: 14px; font-weight: 500; }
   .nav a:hover { color: var(--ink); text-decoration: none; }
+  .nav a.nav-record { color: var(--accent); font-weight: 600; }
+  .nav a.nav-record::before {
+    content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 5px;
+    border-radius: 50%; background: var(--accent); vertical-align: middle;
+  }
+  .nav a.nav-record:hover { color: var(--accent); opacity: .8; }
   .actions { display: flex; align-items: center; gap: 6px; margin-left: auto; }
   .icon-link {
     display: inline-flex; align-items: center; justify-content: center;

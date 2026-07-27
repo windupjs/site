@@ -1,6 +1,6 @@
 ---
 title: Scenarios
-description: A scenario is a JSON file describing a test in plain language. Learn the format, scenario dependencies, and LLM-assisted authoring with windup new.
+description: A scenario is a JSON file describing a test in plain language. Learn the format and fields — dependencies, isomorphic reuse, client-side fixtures, dialogs and more.
 ---
 
 # Scenarios
@@ -114,37 +114,9 @@ A replay re-runs the **same cached plan with the same values** — ideal for **i
 
 For state shared by the whole suite (seed a fixture database once, start a stub), use `suite.setup` / `suite.teardown` in the [configuration](/configuration/) — they run **once** around `run --all` (the `beforeAll`/`afterAll` analogue), while per-scenario hooks handle per-test state.
 
-## Authoring with `windup new`
+## Don't write scenarios by hand
 
-> **The task and its final verification are the LLM's best guess** from your instruction and the site map — an LLM can pick a plausible-but-wrong destination. `windup new` steers the verification toward the instruction's actual goal (a visible element/text over a guessed route) and recommends confirming with `--validate` (generate → run → self-refine until green) or a first `windup run`.
+Two ways to create a scenario without writing JSON:
 
-You don't have to write detailed tasks by hand. Give `windup new` a rough instruction and the LLM acts as a test author — it rewrites it into a precise, verifiable scenario using the **site map** (real screens, menus and elements from `windup scan` and past runs) and the **project manifest** (accounts referenced by name, never literal credentials):
-
-```bash
-npx windup new "log in with the qa user, add the backpack to the cart and check out"
-# → e2e/scenarios/purchase-backpack-qa.json — real screen names, concrete fake
-#   form data, account referenced as "the qa account", explicit final verification
-```
-
-It generates the `scenario_id`, picks the `start_url` from known routes (falling back to `/` — it never invents paths), and adds selector hints from the map when they help. Add **`--validate`** to have it run the generated scenario and, if it fails, refine it from the failure and retry (up to 3 attempts) — you get back a scenario that *already passed once*, with a warm cache:
-
-```bash
-npx windup new "log in and create a cost center named Marketing" --validate
-#   attempt 1: FAIL — element button:has-text('Save') not visible
-#   attempt 2: PASSED
-#   ✓ validated in 2 attempts — the plan is cached
-```
-
-**Credentials in the instruction never land in the scenario file**: they are auto-registered as a named account (values in `.env.local`, mapping in `windup.credentials.json`) and the task references the account — see [Test credentials](/docs/credentials).
-
-## Author by demonstration (`windup record`)
-
-The inverse of `windup new`: instead of *describing* the flow, **show it**.
-
-```bash
-npx windup record --url http://localhost:3000
-```
-
-Windup opens a **headful** browser at your app. Click through the flow; a floating toolbar sits at the bottom — **◉ mark verification** (then click the element the test should verify — its visibility or text; mark nothing and Windup verifies the final page's URL) and **■ finish** (Ctrl-C also saves). On finish it writes the **scenario file** *and* **caches the recorded plan**, so `windup run <id>` replays it immediately at **$0, no LLM**; a later cache invalidation self-heals by re-planning from the task. Recorded selectors follow the engine's own priority (`#id → [data-testid] → [name] → type → role/text`) with an accessible description as fallback — a starting point you can edit. A typed **password never enters the plan** — it's registered to `.env.local` (gitignored) and the action stores a `value_ref`. It's a local dev tool (interactive, headful): it needs a TTY, not CI. Flags: `--url <start>` (defaults to `config.baseUrl`), `--id`, `--force`, `--no-llm`.
-
-Flags: `--id <id>`, `--force` (overwrite), `--depends-on <ids>`, `--llm <provider[:model]>`. The output is a file for **you to review, edit and commit** — authoring is assisted, the test remains yours. One LLM call (~$0.001), recorded in the `windup costs` ledger under `authoring`.
+- **[Authoring with `windup new`](/docs/authoring)** — give a rough instruction and the LLM writes a precise, verifiable scenario from your app's real screens.
+- **[`windup record`](/docs/record)** — author by demonstration: drive a headful browser, mark what to verify, finish. Windup writes the scenario and caches the recorded plan for a $0 replay.

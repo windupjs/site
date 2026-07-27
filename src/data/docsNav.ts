@@ -8,7 +8,7 @@ export interface DocGroup {
 
 export const docsNav: DocGroup[] = [
   { key: 'start', items: ['getting-started', 'how-it-works'] },
-  { key: 'guides', items: ['scenarios', 'credentials', 'environments', 'llm-providers', 'ci-cd', 'configuration', 'api'] },
+  { key: 'guides', items: ['scenarios', 'authoring', 'record', 'credentials', 'environments', 'llm-providers', 'ci-cd', 'configuration', 'api'] },
   { key: 'reference', items: ['commands', 'architecture', 'techniques'] },
 ];
 

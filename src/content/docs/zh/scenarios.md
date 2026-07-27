@@ -1,6 +1,6 @@
 ---
 title: 测试场景
-description: 一个场景就是一个用纯自然语言描述测试的 JSON 文件。了解其格式、场景依赖，以及用 windup new 进行 LLM 辅助编写。
+description: 场景是一个用纯自然语言描述测试的 JSON 文件。了解格式与字段 —— 依赖、同构复用、客户端夹具、对话框等等。
 ---
 
 # 测试场景
@@ -113,38 +113,9 @@ description: 一个场景就是一个用纯自然语言描述测试的 JSON 文�
 `setup` 在场景及其依赖之前运行（失败会让本次运行失败）；`teardown` 在之后运行，**始终**运行 —— 无论通过还是失败（其失败只是一个警告）。它们是你自己的可信命令（就像测试的 `beforeEach`/`afterEach`），在项目根目录中以进程环境变量运行，且从不进入计划或缓存。
 
 对于整个套件共享的状态（一次性为夹具数据库播种、启动一个 stub），请使用[配置](/configuration/)中的 `suite.setup` / `suite.teardown` —— 它们围绕 `run --all` **只运行一次**（相当于 `beforeAll`/`afterAll`），而每个场景各自的钩子负责各测试的状态。
+## 不必手写场景
 
-## 用 `windup new` 编写
+两种无需写 JSON 就能创建场景的方式：
 
-> **任务及其最终验证是 LLM 根据你的指令和站点地图做出的最佳猜测** —— LLM 可能挑中一个貌似合理却错误的目的地。`windup new` 会把验证导向指令的实际目标（一个可见的元素/文本，而非一个猜测出来的路由），并建议用 `--validate`（生成 → 运行 → 自我改进直到通过）或第一次 `windup run` 来确认。
-
-你不必手写详尽的任务。给 `windup new` 一句粗略的指令，LLM 就充当测试编写者 —— 它会利用**站点地图**（来自 `windup scan` 和历史运行的真实页面、菜单和元素）以及**项目清单**（按名称引用的账户，从不写明字面凭据），把它改写成一个精确、可验证的场景：
-
-```bash
-npx windup new "log in with the qa user, add the backpack to the cart and check out"
-# → e2e/scenarios/purchase-backpack-qa.json — real screen names, concrete fake
-#   form data, account referenced as "the qa account", explicit final verification
-```
-
-它会生成 `scenario_id`，从已知路由中挑选 `start_url`（回退到 `/` —— 它从不凭空捏造路径），并在有帮助时从地图中加入选择器提示。加上 **`--validate`**，它就会运行所生成的场景，若失败则根据失败原因加以改进并重试（最多 3 次尝试）—— 你拿回的是一个*已经通过过一次*、缓存已预热的场景：
-
-```bash
-npx windup new "log in and create a cost center named Marketing" --validate
-#   attempt 1: FAIL — element button:has-text('Save') not visible
-#   attempt 2: PASSED
-#   ✓ validated in 2 attempts — the plan is cached
-```
-
-**指令中的凭据绝不会落入场景文件**：它们会被自动注册为一个具名账户（值存入 `.env.local`，映射存入 `windup.credentials.json`），任务引用的是该账户 —— 参见[测试凭据](/zh/docs/credentials)。
-
-## 通过演示编写（`windup record`）
-
-`windup new` 的反向操作：不是*描述*流程，而是**演示**它。
-
-```bash
-npx windup record --url http://localhost:3000
-```
-
-Windup 在你的应用上打开一个**有头**浏览器。点击走一遍流程；底部有一个浮动工具栏 —— **◉ 标记验证**（然后点击测试要验证的元素 —— 它的可见性或文本；若不标记任何东西，Windup 就验证最终页面的 URL）以及 **■ 完成**（Ctrl-C 也会保存）。完成时它会写出**场景文件***并*​**缓存录制的计划**，于是 `windup run <id>` 立即以 **$0、无 LLM** 回放；日后缓存失效会通过按任务重新规划来自愈。录制的选择器遵循引擎自身的优先级（`#id → [data-testid] → [name] → type → role/文本`），并以可访问的 description 作为回退 —— 一个可编辑的起点。**输入的密码绝不会进入计划** —— 它被注册到 `.env.local`（已 gitignore），动作里存的是一个 `value_ref`。这是一个本地开发工具（交互式、有头）：需要 TTY，而非 CI。参数：`--url <start>`（默认 `config.baseUrl`）、`--id`、`--force`、`--no-llm`。
-
-标志：`--id <id>`、`--force`（覆盖）、`--depends-on <ids>`、`--llm <provider[:model]>`。输出是一个**供你审阅、编辑并提交**的文件 —— 编写是被辅助的，测试仍归你所有。一次 LLM 调用（~$0.001），记录在 `windup costs` 账本的 `authoring` 项下。
+- **[用 `windup new` 编写](/zh/docs/authoring)** —— 给一句粗略指令，LLM 根据你应用的真实界面写出一个精确、可验证的场景。
+- **[`windup record`](/zh/docs/record)** —— 通过演示编写：驱动一个有头浏览器，标记要验证什么，完成。Windup 写出场景并缓存录制的计划，实现 $0 回放。
