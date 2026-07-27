@@ -43,6 +43,8 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `--no-prewarm` | Disable **browser prewarming**. By default a sequential `run --all` pre-creates the next scenario's fresh context+page off the critical path (~200 ms/scenario saved, isolation unchanged); this flag turns it off. Only sequential runs prewarm. |
 | `--fail-on-console` | Fail a scenario if the page logged a console error or threw an uncaught exception during the run (recorded either way; `config.network` stubs excluded). |
 | `--fail-on-5xx` | Fail a scenario if any request got a 5xx response during the run. Deliberate `config.network` 5xx stubs and `config.failOn.ignore` URLs are excluded. |
+| `--device <name>` | Emulate a Playwright device preset (e.g. `"iPhone 14"`, `"Pixel 7"`, `"iPad Pro 11"`) — viewport, user-agent, scale, mobile/touch. Cached plans are keyed per device (mobile and desktop are separate trajectories). Mobile emulation needs chromium. |
+| `--web-vitals` | Capture the final page's TTFB / FCP / LCP / DCL / load / CLS and report them (informational). Gate them with `config.budgets`. |
 | `--a11y` | After each scenario, run an [axe-core](https://github.com/dequelabs/axe-core) accessibility audit on the final page and report violations. Informational — never fails the run. Opt-in optional dependency: `npm i -D axe-core`. |
 | `--tag <names>` | With `--all`: run only scenarios carrying any of these tags (comma-separated, e.g. `smoke,checkout`). Composes with `--shard` and `--changed`. |
 | `--trace` | On a **failed** scenario, save a Playwright trace (`.windup/reports/traces/<id>.zip`, openable in the trace viewer) + a full-page screenshot; the HTML report links both. Captured only on failure. |

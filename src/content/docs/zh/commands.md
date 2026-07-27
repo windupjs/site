@@ -43,6 +43,8 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `--no-prewarm` | 关闭**浏览器预热**。默认情况下，顺序的 `run --all` 会在关键路径之外预先创建下一个场景所需的全新 context+page（每场景省下约 200 ms，隔离不变）；此开关将其关闭。只有顺序运行会预热。 |
 | `--fail-on-console` | 如果页面在运行期间记录了 console 错误或抛出未捕获异常，则该场景失败（无论如何都会记录；`config.network` 的桩会被排除）。 |
 | `--fail-on-5xx` | 如果运行期间有任何请求收到 5xx 响应，则该场景失败。`config.network` 刻意设置的 5xx 桩以及 `config.failOn.ignore` 中的 URL 会被排除。 |
+| `--device <name>` | 模拟一个 Playwright 设备预设（例如 `"iPhone 14"`、`"Pixel 7"`、`"iPad Pro 11"`）—— 视口、user-agent、缩放、移动/触摸。缓存计划按设备分键（移动端和桌面端是独立轨迹）。移动端模拟需要 chromium。 |
+| `--web-vitals` | 捕获最终页面的 TTFB / FCP / LCP / DCL / load / CLS 并报告（信息性）。用 `config.budgets` 给它们设门禁。 |
 | `--a11y` | 每个场景结束后，对最终页面运行一次 [axe-core](https://github.com/dequelabs/axe-core) 无障碍审计并报告违规项。仅供参考 —— 绝不使运行失败。需选择启用的可选依赖：`npm i -D axe-core`。 |
 | `--tag <names>` | 配合 `--all`：仅运行带有其中任一标签的场景（以逗号分隔，例如 `smoke,checkout`）。可与 `--shard` 和 `--changed` 组合。 |
 | `--trace` | 在**失败的**场景上，保存一份 Playwright 跟踪（`.windup/reports/traces/<id>.zip`，可在跟踪查看器中打开）+ 一张整页截图；HTML 报告会链接到两者。仅在失败时捕获。 |

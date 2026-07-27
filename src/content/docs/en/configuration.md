@@ -62,6 +62,10 @@ export default defineConfig({
   clock: { now: "2026-01-15T09:00:00Z", timezone: "America/Sao_Paulo" },
   // Runtime health gates: fail a scenario on a console error / 5xx seen during the run.
   failOn: { consoleErrors: true, http5xx: true, ignore: ["/analytics", "third-party.example"] },
+  // Device emulation: a Playwright preset applied to every run (viewport/UA/mobile). Cache is keyed per device.
+  device: "iPhone 14",
+  // Performance budgets: fail when the final page's metric exceeds the threshold (ms, or unitless for cls).
+  budgets: { lcp_ms: 2500, cls: 0.1, load_ms: 4000 },
 });
 ```
 
@@ -73,6 +77,8 @@ export default defineConfig({
 - **`network`** stubs HTTP requests deterministically — a list of rules matched against the request URL (a **substring** or a **glob**) plus an optional `method`, **first match wins**. Respond with `status` (default 200) + `body`/`json` (a `json` body sets `content-type` automatically) + optional `headers`/`contentType`, or `abort: true` to drop the request (a simulated network error). It lets a scenario reach a hard-to-seed state — a 500, an empty list, a failing third-party call — without touching the backend. Author-declared, applied on every run and **never part of the cached plan**.
 - **`clock`** pins the page's time. `now` (an ISO string or epoch ms) freezes `Date`/`Date.now()` to a fixed instant — injected before any page script, so `new Date()` in the app returns it — for scenarios that would otherwise drift ("orders from today", a countdown). `timezone` (an IANA name) sets the browser's zone natively. Frozen, not moving; applied every run, never cached.
 - **`failOn`** turns runtime health signals into failures. `consoleErrors: true` fails a scenario that logged a console error or threw an uncaught exception; `http5xx: true` fails one whose page got a 5xx. `ignore` is a list of URL/text substrings to silence known noise (analytics, a third-party 500 you don't own). Requests answered by `config.network` are always excluded — a deliberate stub is not a real failure. The CLI flags `--fail-on-console` / `--fail-on-5xx` force these on for a single run; either way the signals are recorded and shown in the reports.
+- **`device`** emulates a Playwright device preset (a name like `"iPhone 14"`, `"Pixel 7"`, `"iPad Pro 11"`) for every run — viewport, user-agent, device scale, mobile/touch. Also `--device <name>` (wins over config). Cached plans are **keyed per device** so mobile and desktop keep separate trajectories (running the same scenario at two viewports won't thrash one plan); with no device the cache is unchanged. Mobile emulation needs chromium; an unknown preset name fails fast with a hint.
+- **`budgets`** sets performance thresholds on the final page — `ttfb_ms`, `fcp_ms`, `lcp_ms`, `dcl_ms`, `load_ms` (milliseconds) and `cls` (unitless). Any breach fails the scenario (kind `budget`). Setting any budget turns on web-vitals capture; `--web-vitals` captures and reports without gating. Perf numbers are noisy, so set budgets with headroom (they catch regressions, not micro-jitter).
 - **`resolveFields`** binds a field to a resolver deterministically — recommended for CI. Keyed by a **selector substring** (`{ "[name=otp]": "otp_code" }`), any fill on a matching field is filled from that resolver, **overriding whatever the plan put there**. So the OTP flow no longer depends on the planner remembering to emit `value_ref` — even if it fills a literal or a differently-cased name, Windup still resolves the field (names like `OTP_CODE` / `otp-code` normalize to a declared `otp_code`).
 - **LLM-assist** (scan layer 3) reads files the static layers couldn't resolve (dynamically built routes, indirect components), capped by `maxCalls`. Results are remembered per file hash — unchanged files never cost again. Costs are recorded in the ledger and shown by `windup costs`.
 

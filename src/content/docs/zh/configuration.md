@@ -62,6 +62,10 @@ export default defineConfig({
   clock: { now: "2026-01-15T09:00:00Z", timezone: "America/Sao_Paulo" },
   // 运行时健康门禁：运行期间出现 console 错误 / 5xx 时让场景失败。
   failOn: { consoleErrors: true, http5xx: true, ignore: ["/analytics", "third-party.example"] },
+  // 设备模拟：应用于每次运行的 Playwright 预设（视口/UA/移动端）。缓存按设备分键。
+  device: "iPhone 14",
+  // 性能预算：当最终页面的指标超过阈值时失败（毫秒，或 cls 无单位）。
+  budgets: { lcp_ms: 2500, cls: 0.1, load_ms: 4000 },
 });
 ```
 
@@ -73,6 +77,8 @@ export default defineConfig({
 - **`network`** 以确定性方式为 HTTP 请求打桩 —— 一组规则按请求 URL（**子串**或 **glob**）加可选的 `method` 匹配，**首个匹配生效**。用 `status`（默认 200）+ `body`/`json`（`json` 体会自动设置 `content-type`）+ 可选的 `headers`/`contentType` 作出响应，或用 `abort: true` 丢弃请求（模拟网络错误）。它让一个场景无需触碰后端就能到达难以铺设的状态 —— 一个 500、一个空列表、一次失败的第三方调用。由作者声明，每次运行都应用，且**绝不进入缓存的计划**。
 - **`clock`** 固定页面的时间。`now`（一个 ISO 字符串或 epoch 毫秒）把 `Date`/`Date.now()` 冻结到一个固定时刻 —— 在任何页面脚本之前注入，因此应用里的 `new Date()` 会返回它 —— 用于那些否则会漂移的场景（"今天的订单"、倒计时）。`timezone`（一个 IANA 名称）原生设置浏览器的时区。冻结、不走动；每次运行都应用，绝不缓存。
 - **`failOn`** 把运行时健康信号变成失败。`consoleErrors: true` 让记录了 console 错误或抛出未捕获异常的场景失败；`http5xx: true` 让页面收到 5xx 的场景失败。`ignore` 是一组 URL/文本子串，用于静默已知噪声（分析统计、你不拥有的第三方 500）。由 `config.network` 应答的请求始终被排除 —— 刻意的桩不是真正的失败。CLI 标志 `--fail-on-console` / `--fail-on-5xx` 会为单次运行强制开启；无论哪种方式，信号都会被记录并在报告中显示。
+- **`device`** 为每次运行模拟一个 Playwright 设备预设（像 `"iPhone 14"`、`"Pixel 7"`、`"iPad Pro 11"` 这样的名称）—— 视口、user-agent、设备缩放、移动/触摸。也可用 `--device <name>`（优先于 config）。缓存计划**按设备分键**，因此移动端和桌面端保持独立轨迹（在两个视口上跑同一个场景不会互相覆盖某个计划）；没有设备时缓存不变。移动端模拟需要 chromium；未知的预设名会快速失败并给出提示。
+- **`budgets`** 为最终页面设置性能阈值 —— `ttfb_ms`、`fcp_ms`、`lcp_ms`、`dcl_ms`、`load_ms`（毫秒）以及 `cls`（无单位）。任何超标都会让场景失败（kind `budget`）。设置任一预算即开启 web-vitals 捕获；`--web-vitals` 捕获并报告但不设门禁。性能数字是有噪声的，因此预算要留出余量（用于抓回归，而非微抖动）。
 - **`resolveFields`** 以确定性方式把一个字段绑定到一个 resolver —— 推荐用于 CI。以**选择器子串**为键（`{ "[name=otp]": "otp_code" }`），匹配字段上的任何 fill 都从该 resolver 填充，**覆盖计划在那里放入的任何内容**。因此 OTP 流程不再依赖规划器记得发出 `value_ref` —— 即便它填入了一个字面量或一个大小写不同的名称，Windup 仍会解析该字段（像 `OTP_CODE` / `otp-code` 这样的名称会归一化为已声明的 `otp_code`）。
 - **LLM 辅助**（扫描的第 3 层）会读取静态层无法解析的文件（动态构建的路由、间接组件），并受 `maxCalls` 限额约束。结果按文件哈希记忆 —— 未变更的文件不会再次产生费用。费用记录在账本中，并由 `windup costs` 展示。
 
