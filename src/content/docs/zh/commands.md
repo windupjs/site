@@ -21,6 +21,7 @@ description: 完整的 Windup CLI 参考 —— 每条命令、run 的各个标�
 | `windup diff <scenario> [--json]` | 比较一个场景最近的两次运行 —— 结果翻转、缓存，以及 Δ 时间 / Δ 成本 / Δ 动作数（一次回归检查） |
 | `windup badge [--json] [--out <path>]` | 从每个场景最近一次运行生成套件状态徽章 —— 一个自包含的 SVG（`N/M passing · $0`）或一个 shields.io 端点 JSON |
 | `windup suggest-scenarios [--limit n] [--force] [--dry-run] [--llm p] [--json]` | 为尚无场景的已索引路由提议（写出）场景 —— 每条路由一次 LLM 调用，复用 `windup new`；生成草稿供你审阅。`--dry-run` 只列出而不调用 LLM |
+| `windup trends [scenario] [--last n] [--json]` | 从运行 ledger 得出每个场景的历史通过率、成本与耗时（通过率最差的排在最前）；给出场景 id 则显示该场景随时间的运行。无 LLM |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | 把缓存计划中的一段提升为可复用片段 |
 | `windup secret set <account> [--user u] [--password p]` | 注册测试凭据：值 → `.env.local`，映射 → `windup.credentials.json` |
 | `windup secret list` | 账户 + 每个 ENV 是否已设置（从不打印值） |

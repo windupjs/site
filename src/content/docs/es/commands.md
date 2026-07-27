@@ -21,6 +21,7 @@ description: La referencia completa de la CLI de Windup — cada comando, los fl
 | `windup diff <scenario> [--json]` | Compara los dos runs más recientes de un escenario — cambio de resultado, cache y Δ tiempo / Δ costo / Δ acciones (una verificación de regresión) |
 | `windup badge [--json] [--out <path>]` | Insignia de estado de la suite a partir del último run de cada escenario — un SVG autocontenido (`N/M passing · $0`) o un JSON de endpoint shields.io |
 | `windup suggest-scenarios [--limit n] [--force] [--dry-run] [--llm p] [--json]` | Propone (escribe) escenarios para las rutas indexadas que aún no tienen escenario — una llamada al LLM por ruta, reusando `windup new`; borradores para que revises. `--dry-run` las lista sin llamar al LLM |
+| `windup trends [scenario] [--last n] [--json]` | Historial de pass-rate, costo y duración por escenario desde el ledger (peor pass-rate primero); un id de escenario muestra sus runs a lo largo del tiempo. Sin LLM |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promueve una porción de un plan en caché a un fragmento reutilizable |
 | `windup secret set <account> [--user u] [--password p]` | Registra credenciales de prueba: valores → `.env.local`, mapeo → `windup.credentials.json` |
 | `windup secret list` | Cuentas + si cada ENV está definida (nunca imprime valores) |

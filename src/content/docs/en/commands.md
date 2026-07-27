@@ -21,6 +21,7 @@ description: The full Windup CLI reference — every command, the run flags, and
 | `windup diff <scenario> [--json]` | Compare a scenario's two most recent runs — result flip, cache, and Δ time / Δ cost / Δ actions (a regression check) |
 | `windup badge [--json] [--out <path>]` | Suite-status badge from each scenario's latest run — a self-contained SVG (`N/M passing · $0`) or a shields.io endpoint JSON |
 | `windup suggest-scenarios [--limit n] [--force] [--dry-run] [--llm p] [--json]` | Propose (write) scenarios for the indexed routes that have no scenario yet — one LLM call per route, reusing `windup new`; drafts for you to review. `--dry-run` lists them without calling the LLM |
+| `windup trends [scenario] [--last n] [--json]` | Historical pass-rate, cost and duration per scenario from the run ledger (worst pass-rate first); a scenario id shows its runs over time. No LLM |
 | `windup fragment extract <scenario> <a1..aN> --id <id> --description <text>` | Promote a slice of a cached plan to a reusable fragment |
 | `windup secret set <account> [--user u] [--password p]` | Register test credentials: values → `.env.local`, mapping → `windup.credentials.json` |
 | `windup secret list` | Accounts + whether each ENV is set (never prints values) |
