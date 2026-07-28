@@ -2,15 +2,19 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
+import cloudflare from "@astrojs/cloudflare";
+
 // https://astro.build
 export default defineConfig({
   site: 'https://windup.run',
   compressHTML: true,
+
   i18n: {
     defaultLocale: 'en',
     locales: ['en', 'pt', 'es', 'zh'],
     routing: { prefixDefaultLocale: false },
   },
+
   integrations: [
     sitemap({
       i18n: {
@@ -21,6 +25,7 @@ export default defineConfig({
       filter: (page) => !/\.(md|txt)$/.test(page),
     }),
   ],
+
   markdown: {
     // Shiki dual-theme syntax highlighting: each token carries a light color
     // and a `--shiki-dark` var; global.css swaps to the dark var when the page
@@ -31,4 +36,7 @@ export default defineConfig({
       wrap: true,
     },
   },
+
+  output: "hybrid",
+  adapter: cloudflare()
 });
