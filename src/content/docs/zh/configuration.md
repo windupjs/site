@@ -85,7 +85,7 @@ export default defineConfig({
 
 ## 运行时健康门禁
 
-- **`failOn`** 把运行时健康信号变成失败。`consoleErrors: true` 让出现 **JS** 错误——未捕获的异常、`console.error`、CSP 违规——的场景失败；`resourceErrors: true` 让某个**子资源**加载失败的场景失败（img/font/script/xhr 的 4xx——那类噪声，作为单独的门禁保留，以免 JS 健康被损坏的图片淹没）；`http5xx: true` 让收到 5xx 的场景失败。`ignore` 是一组子串，用于静默已知噪声（分析统计、一个 Gravatar `d=404`、你不拥有的第三方 500）——它同时匹配**消息和来源 URL**，因此一条 console 文本中不带 URL 的资源错误仍可按其主机静默。由 `config.network` 应答的请求始终被排除 —— 刻意的桩不是真正的失败。CLI 标志 `--fail-on-console` / `--fail-on-resource` / `--fail-on-5xx` 会为单次运行强制开启；无论哪种方式，信号都会被记录（每条 console 错误都带有其 `url` 以及 `js`/`resource` `kind`）并在报告中显示。
+- **`failOn`** 把运行时健康信号变成失败。`consoleErrors: true` 让出现 **JS** 错误——未捕获的异常、`console.error`、CSP 违规——的场景失败；`resourceErrors: true` 让某个**子资源**加载失败的场景失败（img/font/script/xhr 的 4xx——那类噪声，作为单独的门禁保留，以免 JS 健康被损坏的图片淹没）；`http5xx: true` 让收到 5xx 的场景失败。`ignore` 是一组子串，用于静默已知噪声（分析统计、一个 Gravatar `d=404`、你不拥有的第三方 500）——它同时匹配**消息和来源 URL**，因此一条 console 文本中不带 URL 的资源错误仍可按其主机静默。由 `config.network` 应答的请求始终被排除 —— 刻意的桩不是真正的失败，无论该桩是全局的还是**按场景的**（它产生的错误，无论是响应还是 console，都会按 URL 与本次运行的生效规则比对）。CLI 标志 `--fail-on-console` / `--fail-on-resource` / `--fail-on-5xx` 会为单次运行强制开启；无论哪种方式，信号都会被记录（每条 console 错误都带有其 `url`、`js`/`resource` `kind`，以及——对于资源错误——HTTP `status`）并在报告中显示。也可**按场景**设置（`Scenario.failOn`，合并到此全局配置之上——布尔值优先，`ignore` 拼接），从而开一个只作用于单个场景的例外，而无需套件级的 `ignore`。
 - **`budgets`** 为最终页面设置性能阈值 —— `ttfb_ms`、`fcp_ms`、`lcp_ms`、`dcl_ms`、`load_ms`（毫秒）以及 `cls`（无单位）。任何超标都会让场景失败（kind `budget`）。设置任一预算即开启 web-vitals 捕获；`--web-vitals` 捕获并报告但不设门禁。性能数字是有噪声的，因此预算要留出余量（用于抓回归，而非微抖动）。
 
 ## 就绪与安全
