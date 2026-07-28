@@ -34,7 +34,7 @@ npm i -D windupjs
 
 # 2. Initialize — 3 questions (base URL, model, scenarios dir)
 npx windup init
-#    → windup.config.ts + e2e/scenarios/ + .windup/ (gitignored)
+#    → windup.config.ts + e2e/scenarios/ + .windup/ (cache & map committed; state/runs/reports gitignored)
 
 # 3. Index your app from source — before anything ever runs
 npx windup scan
