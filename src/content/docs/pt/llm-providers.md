@@ -12,6 +12,7 @@ O planejador é agnóstico de provedor. Google Gemini e OpenAI são suportados; 
 llm: {
   provider: "google",                       // default for runs without --llm
   model: "gemini-3.1-flash-lite",
+  // apiKeyEnv: "GEMINI_API_KEY",           // já tem a chave com outro nome? aponte para ela
   providers: {
     openai: { model: "gpt-5-mini" },        // default model when --llm openai is used
     // openai: { apiKeyEnv: "MY_OPENAI_KEY", baseUrl: "https://my-proxy/v1" },
@@ -27,7 +28,8 @@ WINDUP_LLM=openai:gpt-5-mini npx windup run --all   # same thing via env (CI)
 ```
 
 - `--llm` funciona em `run`, `bench` (compara provedores no mesmo cenário) e `scan` (camada de LLM-assist).
-- Chaves de API: `GOOGLE_GENERATIVE_AI_API_KEY` / `OPENAI_API_KEY` por padrão; sobrescreva o nome da variável de ambiente com `apiKeyEnv`.
+- Chaves de API: `GOOGLE_GENERATIVE_AI_API_KEY` / `OPENAI_API_KEY` por padrão. Para reaproveitar uma chave que seu projeto já guarda com outro nome, aponte para ela com **`apiKeyEnv`** — seja no nível `llm` (`llm.apiKeyEnv: "GEMINI_API_KEY"`, que vale para o provedor que não tiver sobrescrita) ou por provedor (`llm.providers.openai.apiKeyEnv`, que tem prioridade). Não precisa duplicar o segredo. O `windup doctor` informa exatamente qual variável ele espera.
+- Um **nome de modelo errado** é tratado como erro de configuração, não como falha de teste: o 404 do provedor vira uma mensagem acionável listando os modelos conhecidos, a execução falha com `kind: config` (nunca repetida por `--retries`) e o `windup doctor` avisa de antemão quando o modelo configurado não está na tabela de modelos conhecidos.
 - `baseUrl` (apenas OpenAI) aponta para qualquer endpoint compatível com OpenAI — Azure, um proxy ou um servidor de modelo local.
 - Trocar de provedor nunca invalida o cache de planos: planos são dados, replays são livres de LLM independentemente de quem planejou.
 - `windup costs` detalha o gasto **por provedor e por modelo**, então alternar entre LLMs mantém o gasto por fornecedor visível.

@@ -12,6 +12,7 @@ description: 规划器与提供商无关。同时配置 Google Gemini 和 OpenAI
 llm: {
   provider: "google",                       // default for runs without --llm
   model: "gemini-3.1-flash-lite",
+  // apiKeyEnv: "GEMINI_API_KEY",           // 密钥已经用别的名字存在了？指向它即可
   providers: {
     openai: { model: "gpt-5-mini" },        // default model when --llm openai is used
     // openai: { apiKeyEnv: "MY_OPENAI_KEY", baseUrl: "https://my-proxy/v1" },
@@ -27,7 +28,8 @@ WINDUP_LLM=openai:gpt-5-mini npx windup run --all   # same thing via env (CI)
 ```
 
 - `--llm` 适用于 `run`、`bench`（在同一场景上对比多个提供商）和 `scan`（LLM 辅助层）。
-- API 密钥：默认为 `GOOGLE_GENERATIVE_AI_API_KEY` / `OPENAI_API_KEY`；用 `apiKeyEnv` 覆盖环境变量名。
+- API 密钥：默认为 `GOOGLE_GENERATIVE_AI_API_KEY` / `OPENAI_API_KEY`。如果你的项目已经把密钥存在别的名字下，想直接复用，就用 **`apiKeyEnv`** 指向它 —— 既可以放在 `llm` 这一层（`llm.apiKeyEnv: "GEMINI_API_KEY"`，作用于所有没有单独覆盖的提供商），也可以按提供商设置（`llm.providers.openai.apiKeyEnv`，它优先生效）。无需重复一份密钥。`windup doctor` 会报告它期望的确切变量名。
+- **写错模型名**会被当作配置错误捕获，而不是测试失败：提供商返回的 404 会变成一条可操作的消息并列出已知模型，该次运行以 `kind: config` 失败（`--retries` 绝不会重试它），而且当配置的模型不在已知模型表中时，`windup doctor` 会提前发出警告。
 - `baseUrl`（仅 OpenAI）指向任何兼容 OpenAI 的端点 —— Azure、代理，或本地模型服务器。
 - 切换提供商从不使计划缓存失效：计划是数据，无论由谁规划，回放都无需 LLM。
 - `windup costs` **按提供商和按模型**拆分花费，因此在多个 LLM 之间轮换时，各厂商的花费始终一目了然。
