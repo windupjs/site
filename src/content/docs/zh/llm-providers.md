@@ -63,11 +63,12 @@ npx windup claude status                   # → 确认这个项目消耗哪个�
 
 `--profile acme` 会给那个账户**自己的配置目录**（`~/.claude-acme` —— 一个独立会话），通过在 `.envrc` 中导出 `CLAUDE_CONFIG_DIR` 来**绑定本项目**，运行 `direnv allow`，然后才打开登录流程。从此以后，`cd` 进这个项目就会让那个账户成为负责规划的账户 —— 包括 Windup `spawn` 的 `claude` 进程，它会继承环境变量。换个名字在每个项目重复即可；你默认的 `~/.claude` 保持不变，作为无名配置档。
 
-你的 `.envrc` 绝不会被覆盖：已存在的文件会被**追加**（其他 export 保持不变），重复运行不做任何事，而绑定到*不同*配置档时会中止并把需要你编辑的那一行显示出来。没有 direnv？该命令会打印出你要放进 shell 的 `export`。
+你的 `.envrc` 绝不会被意外覆盖：已存在的文件会被**追加**（其他 export 保持不变），重复运行不做任何事，而绑定到*不同*配置档时会中止，并提示你用 `--force` 重新运行 —— 它只会重绑那一行，并打印出被替换的内容。没有 direnv？该命令会打印出你要放进 shell 的 `export`。
 
 ```bash
 npx windup claude status                 # 这里激活的是哪个账户（邮箱 + 套餐）—— 不消耗 token
 npx windup claude status --profile acme  # 检查某个具名配置档，而不切换到它
+npx windup claude login --profile acme --force  # 把本项目指向另一个配置档（重绑 .envrc）
 npx windup claude login --force          # 切换激活账户（先退出，并说明退出的是谁）
 ```
 

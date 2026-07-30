@@ -63,12 +63,13 @@ npx windup claude status                   # → confirma qué cuenta consume es
 
 `--profile acme` le da a esa cuenta su **propio directorio de config** (`~/.claude-acme` — una sesión independiente), **ata el proyecto** a él exportando `CLAUDE_CONFIG_DIR` en `.envrc`, ejecuta `direnv allow`, y solo entonces abre el login. A partir de ahí, hacer `cd` en el proyecto hace que esa cuenta sea la que planifica — incluido el proceso `claude` que Windup ejecuta, que hereda el entorno. Repite por proyecto con otro nombre; tu `~/.claude` por defecto queda intacto como el perfil sin nombre.
 
-Tu `.envrc` nunca se sobrescribe: a un archivo existente se le hace **append** (los demás exports intactos), volver a ejecutarlo no hace nada, y una atadura a un perfil *diferente* se detiene y te muestra la línea a editar. ¿Sin direnv? El comando imprime el `export` para poner en tu shell.
+Tu `.envrc` nunca se sobrescribe por accidente: a un archivo existente se le hace **append** (los demás exports intactos), volver a ejecutarlo no hace nada, y una atadura a un perfil *diferente* se detiene y te dice que vuelvas a ejecutar con `--force` — que reata esa línea e imprime lo que reemplazó. ¿Sin direnv? El comando imprime el `export` para poner en tu shell.
 
 ```bash
 npx windup claude status                 # qué cuenta está activa aquí (email + plan) — no gasta tokens
 npx windup claude status --profile acme  # comprueba un perfil con nombre sin cambiar a él
-npx windup claude login --force          # cambia la cuenta activa (cierra sesión primero, diciendo de quién)
+npx windup claude login --profile acme --force  # apunta este proyecto a otro perfil (reata el .envrc)
+npx windup claude login --force          # cambia la cuenta ACTIVA (cierra sesión primero, diciendo de quién)
 ```
 
 Dos cosas que vale saber: el `.claude/settings.json` de un proyecto **no** puede cambiar la cuenta (el directorio de config se resuelve antes de que esas settings carguen) — por eso la atadura vive en `.envrc`; y **los replays cacheados no llaman a ningún LLM**, así que con `.windup/cache/` versionado una suite corre a `$0` sin tocar ninguna cuenta.

@@ -63,12 +63,13 @@ npx windup claude status                   # → confirma qual conta este projet
 
 O `--profile acme` dá àquela conta o **seu próprio diretório de config** (`~/.claude-acme` — uma sessão independente), **amarra o projeto** a ele exportando `CLAUDE_CONFIG_DIR` no `.envrc`, roda `direnv allow`, e só então abre o login. A partir daí, dar `cd` no projeto faz daquela conta a que planeja — incluindo o processo `claude` que o Windup faz `spawn`, que herda o ambiente. Repita por projeto com outro nome; seu `~/.claude` padrão fica intocado como o perfil sem nome.
 
-Seu `.envrc` nunca é sobrescrito: um arquivo existente recebe um **append** (os outros exports intactos), rodar de novo não faz nada, e uma amarração a um perfil *diferente* interrompe e te mostra a linha para editar. Sem direnv? O comando imprime o `export` para você pôr no shell.
+Seu `.envrc` nunca é sobrescrito por acidente: um arquivo existente recebe um **append** (os outros exports intactos), rodar de novo não faz nada, e uma amarração a um perfil *diferente* interrompe e te diz para rodar de novo com `--force` — que religa aquela linha e imprime o que substituiu. Sem direnv? O comando imprime o `export` para você pôr no shell.
 
 ```bash
 npx windup claude status                 # qual conta está ativa aqui (email + plano) — não gasta tokens
 npx windup claude status --profile acme  # checa um perfil nomeado sem trocar para ele
-npx windup claude login --force          # troca a conta ativa (desloga primeiro, dizendo de quem)
+npx windup claude login --profile acme --force  # aponta este projeto para outro perfil (religa o .envrc)
+npx windup claude login --force          # troca a conta ATIVA (desloga primeiro, dizendo de quem)
 ```
 
 Duas coisas que vale saber: o `.claude/settings.json` de um projeto **não** consegue trocar a conta (o diretório de config é resolvido antes daquelas settings carregarem) — é por isso que a amarração vive no `.envrc`; e **replays cacheados não chamam LLM nenhum**, então com o `.windup/cache/` commitado a suíte roda a `$0` sem tocar em conta alguma.
