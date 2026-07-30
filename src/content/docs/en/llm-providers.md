@@ -70,7 +70,11 @@ npx windup claude status                 # which account is active here (email +
 npx windup claude status --profile acme  # check a named profile without switching to it
 npx windup claude login --profile acme --force  # point this project at another profile (rebinds .envrc)
 npx windup claude login --force          # switch the ACTIVE account (signs out first, saying whose)
+npx windup claude logout --profile acme  # sign that profile out (other profiles untouched)
+npx windup claude logout --profile acme --remove   # …and delete its config dir: profile retired
 ```
+
+Retiring a client? `npx windup claude logout --profile <name> --remove` clears that profile's credential and deletes its config dir — every other profile is untouched, and the default `~/.claude` can never be removed. If the status ever reads *account email not reported*, the config dir holds a valid token without account metadata: sign that profile out and in again to record which account it is.
 
 Two things worth knowing: a project's `.claude/settings.json` **cannot** switch the account (the config dir is resolved before those settings load) — that's why the binding lives in `.envrc`; and **cached replays call no LLM at all**, so with `.windup/cache/` committed a suite runs at `$0` without touching any account.
 

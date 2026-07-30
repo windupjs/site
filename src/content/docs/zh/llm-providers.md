@@ -70,7 +70,11 @@ npx windup claude status                 # 这里激活的是哪个账户（邮�
 npx windup claude status --profile acme  # 检查某个具名配置档，而不切换到它
 npx windup claude login --profile acme --force  # 把本项目指向另一个配置档（重绑 .envrc）
 npx windup claude login --force          # 切换激活账户（先退出，并说明退出的是谁）
+npx windup claude logout --profile acme  # 退出该配置档（其他配置档不受影响）
+npx windup claude logout --profile acme --remove   # …并删除它的配置目录：配置档就此退役
 ```
+
+客户合作结束了？`npx windup claude logout --profile <名称> --remove` 会清除该配置档的凭据并删除它的配置目录 —— 其他配置档不受任何影响，而默认的 `~/.claude` 永远不会被删除。如果状态里出现 *account email not reported*，说明该配置目录持有有效令牌但没有账户元数据：把那个配置档退出再登录一次，即可记录它到底是哪个账户。
 
 两点值得知道：项目的 `.claude/settings.json` **无法**切换账户（配置目录在那些 settings 加载之前就已解析）—— 这正是绑定要放在 `.envrc` 的原因；另外**缓存回放完全不调用 LLM**，因此只要 `.windup/cache/` 已提交，整个套件就能以 `$0` 运行，不触及任何账户。
 

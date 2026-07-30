@@ -70,7 +70,11 @@ npx windup claude status                 # qué cuenta está activa aquí (email
 npx windup claude status --profile acme  # comprueba un perfil con nombre sin cambiar a él
 npx windup claude login --profile acme --force  # apunta este proyecto a otro perfil (reata el .envrc)
 npx windup claude login --force          # cambia la cuenta ACTIVA (cierra sesión primero, diciendo de quién)
+npx windup claude logout --profile acme  # cierra la sesión de ese perfil (los demás intactos)
+npx windup claude logout --profile acme --remove   # …y borra su config dir: perfil retirado
 ```
+
+¿Cierras un cliente? `npx windup claude logout --profile <nombre> --remove` limpia la credencial de ese perfil y borra su config dir — todos los demás perfiles quedan intactos, y el `~/.claude` por defecto nunca se elimina. Si el status alguna vez dice *account email not reported*, el config dir tiene un token válido sin metadatos de cuenta: cierra e inicia sesión en ese perfil otra vez para registrar cuál es.
 
 Dos cosas que vale saber: el `.claude/settings.json` de un proyecto **no** puede cambiar la cuenta (el directorio de config se resuelve antes de que esas settings carguen) — por eso la atadura vive en `.envrc`; y **los replays cacheados no llaman a ningún LLM**, así que con `.windup/cache/` versionado una suite corre a `$0` sin tocar ninguna cuenta.
 
