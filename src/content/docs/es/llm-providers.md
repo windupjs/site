@@ -51,30 +51,27 @@ npx windup claude status   # cuando quieras: "claude CLI: ready — tu@ejemplo.c
 
 Eso es todo — sin wrapper, sin Python, sin servidor local. Windup ejecuta `claude` en modo no interactivo para cada plan (desde un directorio temporal aislado, así nunca toma el `CLAUDE.md` de un proyecto).
 
-### Cambiar de cuenta — y una cuenta por proyecto
+### Varias cuentas — una por proyecto (`--profile`)
 
-El login del CLI es **global**, no por proyecto: el token vive en un solo lugar (el Keychain de macOS / el directorio de config), así que todo proyecto planifica con la cuenta que inició sesión más recientemente. Para comprobar y cambiar:
-
-```bash
-npx windup claude status    # qué cuenta está activa ahora (email + plan) — no gasta tokens
-claude auth logout          # cierra la sesión de la cuenta actual
-npx windup claude login     # inicia sesión de nuevo (navegador) — ahora esta es la cuenta activa
-```
-
-Si manejas **varias cuentas** (una personal más una por cliente/empresa) y no quieres que un proyecto consuma el plan equivocado, no vayas alternando — dale a cada cuenta su **propio directorio de config** vía `CLAUDE_CONFIG_DIR` y ata cada proyecto a uno:
+El login del CLI es **global**: un token, en un solo directorio de config, así que todo proyecto planifica con la cuenta que inició sesión más recientemente. Si tienes un plan personal más uno por cliente, eso significa que el trabajo del cliente consume en silencio *tu* plan. Ata cada proyecto a su propia cuenta, una vez:
 
 ```bash
-# una vez por cuenta — cada directorio de config mantiene su propia sesión independiente
-CLAUDE_CONFIG_DIR=~/.claude-acme      claude auth login
-CLAUDE_CONFIG_DIR=~/.claude-globex    claude auth login
-# tu ~/.claude por defecto queda intacto
-
-# luego, en cada proyecto (con direnv):
-echo 'export CLAUDE_CONFIG_DIR=$HOME/.claude-acme' > .envrc && direnv allow
-npx windup claude status    # → confirma que la cuenta Acme es la que usa este proyecto
+cd ~/work/acme
+npx windup claude login --profile acme     # config dir propio + ata este proyecto + inicia sesión
+npx windup claude status                   # → confirma qué cuenta consume este proyecto
 ```
 
-Windup ejecuta el CLI `claude` heredando el entorno, así que el `CLAUDE_CONFIG_DIR` del proyecto es el que planifica un cache miss ahí — sin necesidad de ninguna config de Windup. Dos advertencias: el `.claude/settings.json` de un proyecto **no** puede cambiarlo (el directorio de config se resuelve antes de que esas settings carguen), así que usa el shell/direnv; y recuerda que **los replays cacheados no llaman a ningún LLM** — con `.windup/cache/` versionado, una suite corre a `$0` sin tocar ninguna cuenta.
+`--profile acme` le da a esa cuenta su **propio directorio de config** (`~/.claude-acme` — una sesión independiente), **ata el proyecto** a él exportando `CLAUDE_CONFIG_DIR` en `.envrc`, ejecuta `direnv allow`, y solo entonces abre el login. A partir de ahí, hacer `cd` en el proyecto hace que esa cuenta sea la que planifica — incluido el proceso `claude` que Windup ejecuta, que hereda el entorno. Repite por proyecto con otro nombre; tu `~/.claude` por defecto queda intacto como el perfil sin nombre.
+
+Tu `.envrc` nunca se sobrescribe: a un archivo existente se le hace **append** (los demás exports intactos), volver a ejecutarlo no hace nada, y una atadura a un perfil *diferente* se detiene y te muestra la línea a editar. ¿Sin direnv? El comando imprime el `export` para poner en tu shell.
+
+```bash
+npx windup claude status                 # qué cuenta está activa aquí (email + plan) — no gasta tokens
+npx windup claude status --profile acme  # comprueba un perfil con nombre sin cambiar a él
+npx windup claude login --force          # cambia la cuenta activa (cierra sesión primero, diciendo de quién)
+```
+
+Dos cosas que vale saber: el `.claude/settings.json` de un proyecto **no** puede cambiar la cuenta (el directorio de config se resuelve antes de que esas settings carguen) — por eso la atadura vive en `.envrc`; y **los replays cacheados no llaman a ningún LLM**, así que con `.windup/cache/` versionado una suite corre a `$0` sin tocar ninguna cuenta.
 
 ```bash
 npx windup run checkout --llm claude-code                 # modelo por defecto: claude-sonnet-4-6

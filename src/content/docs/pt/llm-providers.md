@@ -51,30 +51,27 @@ O `windup claude login` instala o Claude Code CLI (com a sua confirmação — n
 
 É só isso — sem wrapper, sem Python, sem servidor local. O Windup faz `spawn` do `claude` em modo não-interativo a cada plano (a partir de um diretório temporário isolado, então nunca pega o `CLAUDE.md` de um projeto).
 
-### Trocar de conta — e uma conta por projeto
+### Várias contas — uma por projeto (`--profile`)
 
-O login do CLI é **global**, não por projeto: o token fica num único lugar (o Keychain do macOS / o diretório de config), então todo projeto planeja na conta que logou por último. Para conferir e trocar:
-
-```bash
-npx windup claude status    # qual conta está ativa agora (email + plano) — não gasta tokens
-claude auth logout          # sai da conta atual
-npx windup claude login     # entra de novo (browser) — agora essa é a conta ativa
-```
-
-Se você lida com **várias contas** (uma pessoal e uma por cliente/empresa) e não quer que um projeto consuma o plano errado, não fique alternando — dê a cada conta o **seu próprio diretório de config** via `CLAUDE_CONFIG_DIR` e amarre cada projeto a um:
+O login do CLI é **global**: um token, num único diretório de config, então todo projeto planeja na conta que logou por último. Se você tem um plano pessoal mais um por cliente, isso significa que o trabalho do cliente consome silenciosamente o *seu* plano. Amarre cada projeto à sua própria conta, uma vez:
 
 ```bash
-# uma vez por conta — cada diretório de config mantém sua própria sessão independente
-CLAUDE_CONFIG_DIR=~/.claude-acme      claude auth login
-CLAUDE_CONFIG_DIR=~/.claude-globex    claude auth login
-# seu ~/.claude padrão fica intocado
-
-# depois, em cada projeto (com direnv):
-echo 'export CLAUDE_CONFIG_DIR=$HOME/.claude-acme' > .envrc && direnv allow
-npx windup claude status    # → confirma que a conta Acme é a que esse projeto usa
+cd ~/work/acme
+npx windup claude login --profile acme     # config dir próprio + amarra este projeto + faz login
+npx windup claude status                   # → confirma qual conta este projeto consome
 ```
 
-O Windup faz `spawn` do CLI `claude` herdando o ambiente, então é o `CLAUDE_CONFIG_DIR` do projeto que planeja um cache miss ali — sem precisar de nenhuma config do Windup. Duas ressalvas: o `.claude/settings.json` de um projeto **não** consegue trocar isso (o diretório de config é resolvido antes daquelas settings carregarem), então use o shell/direnv; e lembre que **replays cacheados não chamam LLM nenhum** — com o `.windup/cache/` commitado, a suíte roda a `$0` sem tocar em conta alguma.
+O `--profile acme` dá àquela conta o **seu próprio diretório de config** (`~/.claude-acme` — uma sessão independente), **amarra o projeto** a ele exportando `CLAUDE_CONFIG_DIR` no `.envrc`, roda `direnv allow`, e só então abre o login. A partir daí, dar `cd` no projeto faz daquela conta a que planeja — incluindo o processo `claude` que o Windup faz `spawn`, que herda o ambiente. Repita por projeto com outro nome; seu `~/.claude` padrão fica intocado como o perfil sem nome.
+
+Seu `.envrc` nunca é sobrescrito: um arquivo existente recebe um **append** (os outros exports intactos), rodar de novo não faz nada, e uma amarração a um perfil *diferente* interrompe e te mostra a linha para editar. Sem direnv? O comando imprime o `export` para você pôr no shell.
+
+```bash
+npx windup claude status                 # qual conta está ativa aqui (email + plano) — não gasta tokens
+npx windup claude status --profile acme  # checa um perfil nomeado sem trocar para ele
+npx windup claude login --force          # troca a conta ativa (desloga primeiro, dizendo de quem)
+```
+
+Duas coisas que vale saber: o `.claude/settings.json` de um projeto **não** consegue trocar a conta (o diretório de config é resolvido antes daquelas settings carregarem) — é por isso que a amarração vive no `.envrc`; e **replays cacheados não chamam LLM nenhum**, então com o `.windup/cache/` commitado a suíte roda a `$0` sem tocar em conta alguma.
 
 ```bash
 npx windup run checkout --llm claude-code                 # modelo padrão: claude-sonnet-4-6
