@@ -51,6 +51,31 @@ npx windup claude status   # cuando quieras: "claude CLI: ready — tu@ejemplo.c
 
 Eso es todo — sin wrapper, sin Python, sin servidor local. Windup ejecuta `claude` en modo no interactivo para cada plan (desde un directorio temporal aislado, así nunca toma el `CLAUDE.md` de un proyecto).
 
+### Cambiar de cuenta — y una cuenta por proyecto
+
+El login del CLI es **global**, no por proyecto: el token vive en un solo lugar (el Keychain de macOS / el directorio de config), así que todo proyecto planifica con la cuenta que inició sesión más recientemente. Para comprobar y cambiar:
+
+```bash
+npx windup claude status    # qué cuenta está activa ahora (email + plan) — no gasta tokens
+claude auth logout          # cierra la sesión de la cuenta actual
+npx windup claude login     # inicia sesión de nuevo (navegador) — ahora esta es la cuenta activa
+```
+
+Si manejas **varias cuentas** (una personal más una por cliente/empresa) y no quieres que un proyecto consuma el plan equivocado, no vayas alternando — dale a cada cuenta su **propio directorio de config** vía `CLAUDE_CONFIG_DIR` y ata cada proyecto a uno:
+
+```bash
+# una vez por cuenta — cada directorio de config mantiene su propia sesión independiente
+CLAUDE_CONFIG_DIR=~/.claude-acme      claude auth login
+CLAUDE_CONFIG_DIR=~/.claude-globex    claude auth login
+# tu ~/.claude por defecto queda intacto
+
+# luego, en cada proyecto (con direnv):
+echo 'export CLAUDE_CONFIG_DIR=$HOME/.claude-acme' > .envrc && direnv allow
+npx windup claude status    # → confirma que la cuenta Acme es la que usa este proyecto
+```
+
+Windup ejecuta el CLI `claude` heredando el entorno, así que el `CLAUDE_CONFIG_DIR` del proyecto es el que planifica un cache miss ahí — sin necesidad de ninguna config de Windup. Dos advertencias: el `.claude/settings.json` de un proyecto **no** puede cambiarlo (el directorio de config se resuelve antes de que esas settings carguen), así que usa el shell/direnv; y recuerda que **los replays cacheados no llaman a ningún LLM** — con `.windup/cache/` versionado, una suite corre a `$0` sin tocar ninguna cuenta.
+
 ```bash
 npx windup run checkout --llm claude-code                 # modelo por defecto: claude-sonnet-4-6
 npx windup run checkout --llm claude-code:claude-opus-4-6

@@ -51,6 +51,31 @@ npx windup claude status   # 随时查看："claude CLI: ready — you@example.c
 
 就这些 —— 没有 wrapper，没有 Python，没有本地服务器。Windup 会为每次规划以非交互模式 `spawn` 一个 `claude`（在隔离的临时目录中运行，因此绝不会读取某个项目的 `CLAUDE.md`）。
 
+### 切换账户 —— 以及每个项目一个账户
+
+CLI 的登录是**全局的**，并非按项目：令牌只存在一处（macOS Keychain / 配置目录），因此每个项目都会用最后登录的那个账户来规划。查看与切换：
+
+```bash
+npx windup claude status    # 当前激活的是哪个账户（邮箱 + 套餐）—— 不消耗 token
+claude auth logout          # 退出当前账户
+npx windup claude login     # 重新登录（浏览器）—— 现在这个账户成为激活账户
+```
+
+如果你要同时用**多个账户**（一个个人账户外加每个客户/公司一个），又不想让某个项目消耗错误的套餐，那就不要来回切换 —— 通过 `CLAUDE_CONFIG_DIR` 给每个账户**各自的配置目录**，然后把每个项目绑定到其中一个：
+
+```bash
+# 每个账户执行一次 —— 每个配置目录都保有自己独立的会话
+CLAUDE_CONFIG_DIR=~/.claude-acme      claude auth login
+CLAUDE_CONFIG_DIR=~/.claude-globex    claude auth login
+# 你默认的 ~/.claude 保持不变
+
+# 然后，在每个项目中（配合 direnv）：
+echo 'export CLAUDE_CONFIG_DIR=$HOME/.claude-acme' > .envrc && direnv allow
+npx windup claude status    # → 确认这个项目用的就是 Acme 账户
+```
+
+Windup 在 `spawn` `claude` CLI 时会继承环境变量，因此项目里的 `CLAUDE_CONFIG_DIR` 就是那里规划 cache miss 时所用的账户 —— 无需任何 Windup 配置。两点提醒：项目的 `.claude/settings.json` **无法**切换它（配置目录在那些 settings 加载之前就已解析），所以请用 shell/direnv；另外记住**缓存回放完全不调用 LLM** —— 只要 `.windup/cache/` 已提交，整个套件就能以 `$0` 运行，不触及任何账户。
+
 ```bash
 npx windup run checkout --llm claude-code                 # 默认模型：claude-sonnet-4-6
 npx windup run checkout --llm claude-code:claude-opus-4-6

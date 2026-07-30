@@ -51,6 +51,31 @@ O `windup claude login` instala o Claude Code CLI (com a sua confirmação — n
 
 É só isso — sem wrapper, sem Python, sem servidor local. O Windup faz `spawn` do `claude` em modo não-interativo a cada plano (a partir de um diretório temporário isolado, então nunca pega o `CLAUDE.md` de um projeto).
 
+### Trocar de conta — e uma conta por projeto
+
+O login do CLI é **global**, não por projeto: o token fica num único lugar (o Keychain do macOS / o diretório de config), então todo projeto planeja na conta que logou por último. Para conferir e trocar:
+
+```bash
+npx windup claude status    # qual conta está ativa agora (email + plano) — não gasta tokens
+claude auth logout          # sai da conta atual
+npx windup claude login     # entra de novo (browser) — agora essa é a conta ativa
+```
+
+Se você lida com **várias contas** (uma pessoal e uma por cliente/empresa) e não quer que um projeto consuma o plano errado, não fique alternando — dê a cada conta o **seu próprio diretório de config** via `CLAUDE_CONFIG_DIR` e amarre cada projeto a um:
+
+```bash
+# uma vez por conta — cada diretório de config mantém sua própria sessão independente
+CLAUDE_CONFIG_DIR=~/.claude-acme      claude auth login
+CLAUDE_CONFIG_DIR=~/.claude-globex    claude auth login
+# seu ~/.claude padrão fica intocado
+
+# depois, em cada projeto (com direnv):
+echo 'export CLAUDE_CONFIG_DIR=$HOME/.claude-acme' > .envrc && direnv allow
+npx windup claude status    # → confirma que a conta Acme é a que esse projeto usa
+```
+
+O Windup faz `spawn` do CLI `claude` herdando o ambiente, então é o `CLAUDE_CONFIG_DIR` do projeto que planeja um cache miss ali — sem precisar de nenhuma config do Windup. Duas ressalvas: o `.claude/settings.json` de um projeto **não** consegue trocar isso (o diretório de config é resolvido antes daquelas settings carregarem), então use o shell/direnv; e lembre que **replays cacheados não chamam LLM nenhum** — com o `.windup/cache/` commitado, a suíte roda a `$0` sem tocar em conta alguma.
+
 ```bash
 npx windup run checkout --llm claude-code                 # modelo padrão: claude-sonnet-4-6
 npx windup run checkout --llm claude-code:claude-opus-4-6
